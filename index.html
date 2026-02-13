@@ -4,257 +4,229 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Servyre | Inventario IT Pro</title>
+  <title>Servyre | IT Advanced Management</title>
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <link rel="stylesheet" href="/src/style.css">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Animate.css for quick premium transitions -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 </head>
 
-<body>
-  <div id="app" class="fade-in">
-    <header>
-      <h1>Inventario IT Servyre</h1>
-      <p class="subtitle">Gestión Homologada de Activos y Resguardos</p>
+<body class="bg-gradient">
+  <div id="app">
+    <header class="glass-header animate__animated animate__fadeInDown">
+      <div class="header-content">
+        <div class="logo-area">
+          <h1>Servyre <span>IT Pro</span></h1>
+          <p class="subtitle">Ecosistema de Gestión de Activos v2.0</p>
+        </div>
+        <div class="system-stats">
+          <div class="stat-item">
+            <span id="totalAssets">0</span>
+            <label>Activos</label>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span id="activeLocations">0</span>
+            <label>Sedes</label>
+          </div>
+        </div>
+      </div>
     </header>
 
-    <section class="header-actions">
-      <div class="search-bar">
+    <section class="header-actions animate__animated animate__fadeIn">
+      <div class="search-bar-container glass-container">
         <i data-lucide="search"></i>
-        <input type="text" id="searchInput" placeholder="Buscar por serie, usuario, ubicación...">
+        <input type="text" id="searchInput" placeholder="Buscar por serie, usuario, ubicación o cualquier campo...">
       </div>
-      <div class="btn-group">
-        <button id="addItemBtn" class="btn btn-primary">
-          <i data-lucide="plus"></i> Nuevo Registro
+      <div class="action-grid">
+        <button id="addItemBtn" class="premium-btn primary">
+          <i data-lucide="plus-circle"></i> <span>Nuevo Registro</span>
         </button>
-        <button id="manageCatalogsBtn" class="btn btn-secondary">
-          <i data-lucide="settings"></i> Catálogos
-        </button>
-        <button id="exportExcelBtn" class="btn btn-secondary">
-          <i data-lucide="file-spreadsheet"></i> Excel
-        </button>
-        <button id="exportPdfBtn" class="btn btn-secondary">
-          <i data-lucide="file-text"></i> PDF
-        </button>
+        <div class="btn-group-glass">
+          <button id="manageCatalogsBtn" class="glass-btn" title="Configuración">
+            <i data-lucide="settings"></i> <span>Ajustes</span>
+          </button>
+          <button id="importDataBtn" class="glass-btn" title="Importar JSON/Excel">
+            <i data-lucide="upload-cloud"></i> <span>Importar</span>
+          </button>
+          <button id="exportExcelBtn" class="glass-btn">
+            <i data-lucide="file-spreadsheet"></i> <span>Excel</span>
+          </button>
+          <button id="exportPdfBtn" class="glass-btn">
+            <i data-lucide="file-text"></i> <span>PDF</span>
+          </button>
+        </div>
       </div>
     </section>
 
-    <main class="table-container">
-      <div style="overflow-x: auto;">
+    <input type="file" id="importInput" style="display: none;" accept=".json,.xlsx,.xls">
+
+    <main class="table-card glass-table-container animate__animated animate__fadeInUp">
+      <div class="table-responsive">
         <table id="inventoryTable">
           <thead>
             <tr>
               <th>Ubicación</th>
               <th>Departamento</th>
               <th>Resguardo</th>
-              <th>Usuario / Puesto</th>
-              <th>Equipo</th>
+              <th>Asignado / Puesto</th>
+              <th>Hardware</th>
               <th>Marca / Modelo</th>
               <th>Serie</th>
               <th>Nombre PC</th>
               <th>Estado</th>
-              <th>Acciones</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="inventoryBody">
-            <!-- Inyectado por JS -->
+            <!-- Content Injected via JS -->
           </tbody>
         </table>
       </div>
     </main>
+
+    <footer class="system-footer">
+      <p>&copy; 2026 Servyre IT Management • Sistema Homologado</p>
+    </footer>
   </div>
 
-  <!-- Inventory Modal (Large Form) -->
-  <div id="modalOverlay" class="modal-overlay">
-    <div class="modal" style="max-width: 950px;">
+  <!-- MAIN FORM MODAL -->
+  <div id="modalOverlay" class="modal-overlay glass-blur">
+    <div class="modal premium-modal">
       <div class="modal-header">
-        <h2 id="modalTitle">Nuevo Registro</h2>
-        <button id="closeModal" class="btn btn-icon">&times;</button>
+        <h2 id="modalTitle">Nuevo Registro de IT</h2>
+        <button id="closeModal" class="close-btn">&times;</button>
       </div>
       <form id="inventoryForm">
-        <div class="modal-body" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="modal-body-premium">
           <input type="hidden" id="itemId">
 
-          <!-- Fila 1: Datos de Ubicación y Persona -->
-          <div class="form-group">
-            <label>Ubicación</label>
-            <select id="location" required></select>
-          </div>
-          <div class="form-group">
-            <label>Dirección</label>
-            <input type="text" id="address">
-          </div>
-          <div class="form-group">
-            <label>Departamento</label>
-            <input type="text" id="department" required>
-          </div>
-
-          <!-- Fila 2 -->
-          <div class="form-group">
-            <label>Puesto</label>
-            <input type="text" id="position">
-          </div>
-          <div class="form-group">
-            <label>Usuario (Nombre)</label>
-            <input type="text" id="fullName" required>
-          </div>
-          <div class="form-group">
-            <label>Correo</label>
-            <input type="email" id="email" required>
+          <div class="form-section">
+            <h3><i data-lucide="map-pin"></i> Ubicación / Personal</h3>
+            <div class="form-grid">
+              <div class="form-group"><label>Ubicación</label><select id="location" required></select></div>
+              <div class="form-group"><label>Dirección</label><input type="text" id="address"></div>
+              <div class="form-group"><label>Departamento</label><input type="text" id="department" required></div>
+              <div class="form-group"><label>Usuario</label><input type="text" id="fullName" required></div>
+              <div class="form-group"><label>Puesto</label><input type="text" id="position"></div>
+              <div class="form-group"><label>Correo</label><input type="email" id="email" required></div>
+              <div class="form-group"><label>Extensión</label><input type="text" id="extension"></div>
+              <div class="form-group"><label>N° Resguardo</label><input type="text" id="resguardo"></div>
+            </div>
           </div>
 
-          <!-- Fila 3 -->
-          <div class="form-group">
-            <label>Extensión</label>
-            <input type="text" id="extension">
-          </div>
-          <div class="form-group">
-            <label>Resguardo (N°)</label>
-            <input type="text" id="resguardo">
-          </div>
-          <div class="form-group">
-            <label>Tipo de Equipo</label>
-            <select id="deviceType" required>
-              <option value="Laptop">Laptop</option>
-              <option value="Desktop">Desktop</option>
-              <option value="Servidor">Servidor</option>
-            </select>
-          </div>
-
-          <!-- Fila 4: Hardware -->
-          <div class="form-group">
-            <label>Marca</label>
-            <select id="brand" required></select>
-          </div>
-          <div class="form-group">
-            <label>Modelo</label>
-            <select id="model" required disabled></select>
-          </div>
-          <div class="form-group">
-            <label>Número de Serie</label>
-            <input type="text" id="serialNumber" required>
-          </div>
-
-          <!-- Fila 5: Software/PC -->
-          <div class="form-group">
-            <label>Sistema Operativo</label>
-            <input type="text" id="os">
-          </div>
-          <div class="form-group">
-            <label>Nombre PC (Hostname)</label>
-            <input type="text" id="pcName">
-          </div>
-          <div class="form-group">
-            <label>Procesador</label>
-            <input type="text" id="processor">
+          <div class="form-section">
+            <h3><i data-lucide="cpu"></i> Especificaciones del Equipo</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Tipo de Equipo</label>
+                <select id="deviceType" required>
+                  <option value="Laptop">Laptop</option>
+                  <option value="Desktop">Desktop</option>
+                  <option value="Servidor">Servidor</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Marca</label><select id="brand" required></select></div>
+              <div class="form-group"><label>Modelo</label><select id="model" required disabled></select></div>
+              <div class="form-group"><label>Serie</label><input type="text" id="serialNumber" required></div>
+              <div class="form-group"><label>Sistema Operativo</label><input type="text" id="os"></div>
+              <div class="form-group"><label>Nombre PC</label><input type="text" id="pcName"></div>
+              <div class="form-group"><label>Procesador</label><input type="text" id="processor"></div>
+              <div class="form-group"><label>RAM (GB)</label><input type="number" id="ram" required></div>
+              <div class="form-group"><label>Disco (GB)</label><input type="number" id="storageCapacity" required></div>
+              <div class="form-group"><label>Estado</label><select id="status" required>
+                  <option value="Activo">Activo</option>
+                  <option value="Mantenimiento">Mantenimiento</option>
+                  <option value="Baja">Baja</option>
+                </select></div>
+              <div class="form-group check-row">
+                <input type="checkbox" id="mouseExternal">
+                <label for="mouseExternal" class="label-check">Mouse Externo</label>
+              </div>
+            </div>
           </div>
 
-          <!-- Fila 6: Specs Técnicas -->
-          <div class="form-group">
-            <label>RAM (GB)</label>
-            <input type="number" id="ram" required>
-          </div>
-          <div class="form-group">
-            <label>Capacidad Disco (GB)</label>
-            <input type="number" id="storageCapacity" required>
-          </div>
-          <div class="form-group">
-            <label>Estado</label>
-            <select id="status" required>
-              <option value="Activo">Activo</option>
-              <option value="Mantenimiento">Mantenimiento</option>
-              <option value="Baja">Baja</option>
-            </select>
-          </div>
-
-          <!-- Fila 7 -->
-          <div class="form-group checkbox-group" style="grid-column: span 1;">
-            <input type="checkbox" id="mouseExternal">
-            <label for="mouseExternal">Mouse Externo</label>
-          </div>
-          <div class="form-group full-width" style="grid-column: span 2;">
-            <label>Notas / Observaciones</label>
-            <textarea id="notes" rows="2"></textarea>
+          <div class="form-group full-width-area">
+            <label>Observaciones Adicionales</label>
+            <textarea id="notes" rows="3"
+              placeholder="Añadir notas internas, incidentes o detalles del resguardo..."></textarea>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" id="cancelBtn" class="btn btn-secondary">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar Registro</button>
+        <div class="modal-footer-premium">
+          <button type="button" id="cancelBtn" class="cancel-btn">Descartar</button>
+          <button type="submit" class="save-btn">Guardar Información</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Catalog Management Modal (Refined) -->
-  <div id="catalogModalOverlay" class="modal-overlay">
-    <div class="modal" style="max-width: 700px;">
+  <!-- SETTINGS MODAL (CATALOGS) -->
+  <div id="catalogModalOverlay" class="modal-overlay glass-blur">
+    <div class="modal glass-modal settings-modal">
       <div class="modal-header">
-        <h2>Catálogos Maestros</h2>
-        <button id="closeCatalogModal" class="btn btn-icon">&times;</button>
+        <h2><i data-lucide="settings"></i> Configuración de Sistema</h2>
+        <button id="closeCatalogModal" class="close-btn">&times;</button>
       </div>
-      <div class="modal-body" style="display: block; max-height: 60vh;">
-        <!-- Tab Controls -->
-        <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border);">
-          <button class="btn btn-secondary catalog-tab active-tab" onclick="switchCat('brands')">Marcas y
-            Modelos</button>
-          <button class="btn btn-secondary catalog-tab" onclick="switchCat('locations')">Ubicaciones</button>
-        </div>
-
-        <!-- Section: Brands/Models -->
-        <div id="cat-brands" class="cat-section">
-          <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem;">
-            <div>
-              <label>Marcas</label>
-              <div style="display: flex; gap: 0.5rem; margin: 0.5rem 0;">
-                <input type="text" id="newBrandInput" placeholder="Marca...">
-                <button id="addBrandBtn" class="btn btn-primary btn-icon">+</button>
-              </div>
-              <ul id="brandList" class="catalog-list"></ul>
-            </div>
-            <div>
-              <label>Modelos p/ Marca</label>
-              <select id="catalogBrandSelect" style="width: 100%; margin-top: 0.5rem;">
-                <option value="">Seleccione marca...</option>
-              </select>
-              <div id="modelManagementSection" style="display: none; margin-top: 1rem;">
-                <div style="display: flex; gap: 0.5rem;">
-                  <input type="text" id="newModelInput" placeholder="Modelo...">
-                  <button id="addModelBtn" class="btn btn-primary btn-icon">+</button>
+      <div class="settings-layout">
+        <nav class="settings-nav">
+          <button class="nav-item active" onclick="switchCat('brands')">Marcas y Modelos</button>
+          <button class="nav-item" onclick="switchCat('locations')">Ubicaciones</button>
+        </nav>
+        <div class="settings-content">
+          <div id="cat-brands" class="cat-section">
+            <div class="catalog-grid">
+              <div class="catalog-card">
+                <h3>Gestión de Marcas</h3>
+                <div class="add-group">
+                  <input type="text" id="newBrandInput" placeholder="Ej: Microsoft">
+                  <button id="addBrandBtn" class="add-btn"><i data-lucide="plus"></i></button>
                 </div>
-                <ul id="modelList" class="catalog-list" style="margin-top: 1rem;"></ul>
+                <ul id="brandList" class="styled-list"></ul>
+              </div>
+              <div class="catalog-card">
+                <h3>Modelos Asociados</h3>
+                <select id="catalogBrandSelect"></select>
+                <div id="modelManagementSection" style="display: none;">
+                  <div class="add-group">
+                    <input type="text" id="newModelInput" placeholder="Ej: Surface Pro 9">
+                    <button id="addModelBtn" class="add-btn"><i data-lucide="plus"></i></button>
+                  </div>
+                  <ul id="modelList" class="styled-list"></ul>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Section: Locations -->
-        <div id="cat-locations" class="cat-section" style="display: none;">
-          <label>Gestionar Ubicaciones</label>
-          <div style="display: flex; gap: 0.5rem; margin: 1rem 0;">
-            <input type="text" id="newLocationInput" placeholder="Nueva ubicación..." style="flex:1">
-            <button id="addLocationBtn" class="btn btn-primary">Añadir</button>
+          <div id="cat-locations" class="cat-section" style="display: none;">
+            <div class="catalog-card">
+              <h3>Gestión de Sedes / Ubicaciones</h3>
+              <div class="add-group">
+                <input type="text" id="newLocationInput" placeholder="Ej: Nueva Oficina Sede Sur">
+                <button id="addLocationBtn" class="add-btn"><i data-lucide="plus"></i></button>
+              </div>
+              <ul id="locationList" class="styled-list"></ul>
+            </div>
           </div>
-          <ul id="locationList" class="catalog-list"></ul>
         </div>
       </div>
-      <div class="modal-footer">
-        <button id="finishCatalogBtn" class="btn btn-primary">Cerrar</button>
+      <div class="modal-footer-premium">
+        <button id="finishCatalogBtn" class="save-btn">Cerrar Ajustes</button>
       </div>
     </div>
   </div>
 
-  <!-- Detail Modal (Asset Passport Update) -->
-  <div id="detailModalOverlay" class="modal-overlay">
-    <div class="modal" style="max-width: 900px;">
-      <div class="modal-header">
-        <h2>Ficha de Activo Servyre</h2>
-        <button id="closeDetailModal" class="btn btn-icon">&times;</button>
+  <!-- DETAIL VIEW (PASSPORT) -->
+  <div id="detailModalOverlay" class="modal-overlay glass-blur">
+    <div class="modal detail-modal">
+      <div class="modal-header no-border">
+        <button id="closeDetailModal" class="close-btn">&times;</button>
       </div>
-      <div class="modal-body" id="detailModalBody" style="display: block;">
-        <!-- Content injected via JS -->
+      <div class="modal-body-detail" id="detailModalBody">
+        <!-- Data injected by JS -->
       </div>
-      <div class="modal-footer">
-        <button id="printDetailBtn" class="btn btn-secondary"><i data-lucide="printer"></i> Imprimir</button>
-        <button id="editFromDetailBtn" class="btn btn-primary"><i data-lucide="edit"></i> Editar</button>
+      <div class="modal-footer-detail">
+        <button id="printDetailBtn" class="action-btn"><i data-lucide="printer"></i> Ficha PDF</button>
+        <button id="editFromDetailBtn" class="action-btn primary"><i data-lucide="edit-3"></i> Editar Datos</button>
       </div>
     </div>
   </div>
