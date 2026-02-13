@@ -356,6 +356,38 @@ document.getElementById('exportBackupBtn').onclick = () => {
     URL.revokeObjectURL(url);
 };
 
+// Function to generate and download a Template Excel
+window.downloadTemplate = () => {
+    const templateData = [
+        {
+            "Ubicación": "Corporativo",
+            "Dirección": "Av. Reforma 123",
+            "Departamento": "Sistemas",
+            "Puesto": "Gerente IT",
+            "Usuario": "Juan Perez",
+            "Correo": "juan.perez@servyre.com",
+            "Extensión": "101",
+            "Resguardo": "RES-001",
+            "Equipo": "Laptop",
+            "Marca": "Dell",
+            "Modelo": "Latitude 5430",
+            "Serie": "ABC123XYZ",
+            "Mouse Externo": "SI",
+            "Sistema Operativo": "Windows 11",
+            "Nombre PC": "SERVYRE-IT-01",
+            "Procesador": "Intel i7",
+            "RAM": 16,
+            "Disco": 512,
+            "Estado": "Activo",
+            "Notas": "Comentario de prueba"
+        }
+    ];
+    const ws = XLSX.utils.json_to_sheet(templateData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Inventario");
+    XLSX.writeFile(wb, "Plantilla_Carga_Masiva_Servyre.xlsx");
+};
+
 document.getElementById('importDataBtn').onclick = () => importInput.click();
 
 importInput.onchange = (e) => {
@@ -378,7 +410,7 @@ importInput.onchange = (e) => {
         };
         reader.readAsText(file);
     } else {
-        // Excel Import
+        // Advanced Excel Import
         const reader = new FileReader();
         reader.onload = (event) => {
             const data = new Uint8Array(event.target.result);
@@ -386,27 +418,43 @@ importInput.onchange = (e) => {
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
             const json = XLSX.utils.sheet_to_json(sheet);
 
-            if (confirm(`¿Desea importar ${json.length} registros desde Excel?`)) {
+            if (confirm(`Se han detectado ${json.length} registros. ¿Desea importarlos al inventario actual?`)) {
+                let importedCount = 0;
                 json.forEach(row => {
-                    inventory.unshift({
-                        id: Date.now().toString() + Math.random(),
+                    const newItem = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                         location: row['Ubicación'] || 'Corporativo',
+                        address: row['Dirección'] || '',
                         department: row['Departamento'] || 'General',
+                        position: row['Puesto'] || '',
                         fullName: row['Usuario'] || 'N/A',
-                        serialNumber: row['Serie'] || 'N/A',
+                        email: row['Correo'] || '',
+                        extension: row['Extensión'] || '',
+                        resguardo: row['Resguardo'] || '',
+                        deviceType: row['Equipo'] || 'Laptop',
                         brand: row['Marca'] || '',
                         model: row['Modelo'] || '',
-                        deviceType: row['Equipo'] || 'Laptop',
+                        serialNumber: row['Serie'] || 'SIN-SERIE-' + Date.now(),
+                        os: row['Sistema Operativo'] || '',
+                        pcName: row['Nombre PC'] || '',
+                        processor: row['Procesador'] || '',
                         ram: parseInt(row['RAM']) || 8,
                         storageCapacity: parseInt(row['Disco']) || 256,
-                        status: 'Activo'
-                    });
+                        status: row['Estado'] || 'Activo',
+                        mouseExternal: (row['Mouse Externo'] || '').toString().toUpperCase() === 'SI',
+                        notes: row['Notas'] || ''
+                    };
+                    inventory.push(newItem);
+                    importedCount++;
                 });
-                saveToStorage(); renderTable();
+                saveToStorage();
+                renderTable();
+                alert(`¡Éxito! Se importaron ${importedCount} registros correctamente.`);
             }
         };
         reader.readAsArrayBuffer(file);
     }
+    e.target.value = '';
 };
 
 // --- EVENTS ---
