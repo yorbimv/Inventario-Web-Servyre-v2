@@ -286,6 +286,24 @@ h1 span {
   background: var(--card-bg);
 }
 
+.pdf-filter-select {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  min-width: 120px;
+}
+
+[data-theme="light"] .pdf-filter-select {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #1A1A1E;
+}
+
 /* Table */
 .glass-table-container {
   background: var(--surface);

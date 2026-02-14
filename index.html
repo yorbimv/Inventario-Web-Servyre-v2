@@ -57,6 +57,12 @@
           <button id="exportBackupBtn" class="glass-btn" title="Descargar Respaldo JSON">
             <i data-lucide="database"></i> <span>Respaldo</span>
           </button>
+          <select id="pdfFilter" class="pdf-filter-select">
+            <option value="todos">Todos</option>
+            <option value="Activo">Activos</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Baja">Bajas</option>
+          </select>
           <button id="exportExcelBtn" class="glass-btn">
             <i data-lucide="file-spreadsheet"></i> <span>Excel</span>
           </button>
@@ -74,14 +80,13 @@
         <table id="inventoryTable">
           <thead>
             <tr>
-              <th>Ubicación</th>
-              <th>Departamento</th>
               <th>Resguardo</th>
-              <th>Asignado / Puesto</th>
-              <th>Hardware</th>
+              <th>Usuario</th>
+              <th>Equipo</th>
               <th>Marca / Modelo</th>
-              <th>Serie</th>
               <th>Nombre PC</th>
+              <th>Serie</th>
+              <th>Ubicación</th>
               <th>Estado</th>
               <th></th>
             </tr>

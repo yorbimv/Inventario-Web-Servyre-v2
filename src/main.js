@@ -91,20 +91,19 @@ const renderTable = (data = inventory) => {
         const sc = item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : 'badge-danger';
 
         tr.innerHTML = `
-            <td><span class="badge badge-blue">${sanitize(item.location)}</span></td>
-            <td>${sanitize(item.department)}</td>
             <td><code>${sanitize(item.resguardo || '-')}</code></td>
             <td>
                 <div style="font-weight: 700; color: var(--text);">${sanitize(item.fullName)}</div>
-                <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">${sanitize(item.position)}</div>
+                <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">${sanitize(item.position || '-')}</div>
             </td>
             <td><span style="font-weight: 500;">${sanitize(item.deviceType)}</span></td>
             <td>
                 <div style="font-weight: 600;">${sanitize(item.brand)}</div>
-                <div style="font-size: 0.75rem; color: var(--text-dim);">${sanitize(item.model)}</div>
+                <div style="font-size: 0.75rem; color: var(--text-dim);">${sanitize(item.model || '-')}</div>
             </td>
-            <td><code>${sanitize(item.serialNumber)}</code></td>
             <td>${sanitize(item.pcName || '-')}</td>
+            <td><code>${sanitize(item.serialNumber)}</code></td>
+            <td><span class="badge badge-blue">${sanitize(item.location)}</span></td>
             <td><span class="badge ${sc}">${sanitize(item.status)}</span></td>
             <td>
                 <div class="btn-group-glass">
@@ -401,6 +400,171 @@ document.getElementById('exportBackupBtn').onclick = () => {
     link.download = `Resguardo_IT_Backup_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
+};
+
+// Export Excel - All fields in executive format
+document.getElementById('exportExcelBtn').onclick = () => {
+    if (inventory.length === 0) {
+        alert('No hay registros para exportar.');
+        return;
+    }
+
+    const headers = [
+        "Resguardo", "Usuario", "Puesto", "Correo", "Extensión", "Departamento",
+        "Dirección", "Ubicación", "Tipo Equipo", "Marca", "Modelo", "Serie",
+        "Nombre PC", "Sistema Operativo", "Procesador", "RAM", "Disco",
+        "Estado", "Precio", "Fecha Compra", "Marca Periférico", "Modelo Periférico",
+        "Serie Periférico", "Mouse Externo", "Último Mtto", "Próximo Mtto",
+        "Condiciones", "Incidentes", "Notas", "Fotos"
+    ];
+
+    const rows = inventory.map(item => [
+        item.resguardo || '', item.fullName || '', item.position || '', item.email || '',
+        item.extension || '', item.department || '', item.address || '', item.location || '',
+        item.deviceType || '', item.brand || '', item.model || '', item.serialNumber || '',
+        item.pcName || '', item.os || '', item.processor || '', item.ram || '', item.storageCapacity || '',
+        item.status || '', item.price || '', item.purchaseDate || '',
+        item.periphBrand || '', item.periphModel || '', item.periphSerial || '',
+        item.mouseExternal || '', item.lastMtto || '', item.nextMtto || '',
+        item.conditions || '', item.incidentReport || '', item.notes || '', item.photos || ''
+    ]);
+
+    const wsData = [headers, ...rows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    
+    ws['!cols'] = headers.map(() => ({ wch: 18 }));
+    ws['!rows'] = [{ hpt: 20 }];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Inventario IT");
+
+    XLSX.writeFile(wb, `Inventario_IT_Completo_${new Date().toISOString().split('T')[0]}.xlsx`);
+};
+
+// Export PDF - With filter option
+document.getElementById('exportPdfBtn').onclick = () => {
+    const filter = document.getElementById('pdfFilter').value;
+    
+    let filteredData = inventory;
+    if (filter !== 'todos') {
+        filteredData = inventory.filter(item => item.status === filter);
+    }
+
+    if (filteredData.length === 0) {
+        alert('No hay registros para exportar con el filtro seleccionado.');
+        return;
+    }
+
+    const doc = new jsPDF('l', 'mm', 'a4');
+    
+    // Header
+    doc.setFillColor(212, 160, 23);
+    doc.rect(0, 0, 297, 25, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SERVYRE IT', 14, 12);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Reporte de Inventario - ${filter === 'todos' ? 'Todos los Activos' : filter}`, 14, 20);
+    
+    // Date
+    doc.setFontSize(9);
+    doc.text(`Fecha: ${new Date().toLocaleDateString('es-MX')}`, 270, 12, { align: 'right' });
+    doc.text(`Total Registros: ${filteredData.length}`, 270, 18, { align: 'right' });
+
+    // Table data
+    const tableHeaders = [['#', 'Resguardo', 'Usuario', 'Equipo', 'Marca', 'Modelo', 'Serie', 'PC', 'Ubicación', 'Estado']];
+    const tableData = filteredData.map((item, index) => [
+        index + 1,
+        item.resguardo || '-',
+        (item.fullName || '-').substring(0, 20),
+        item.deviceType || '-',
+        item.brand || '-',
+        (item.model || '-').substring(0, 15),
+        (item.serialNumber || '-').substring(0, 15),
+        (item.pcName || '-').substring(0, 12),
+        item.location || '-',
+        item.status || '-'
+    ]);
+
+    doc.autoTable({
+        head: tableHeaders,
+        body: tableData,
+        startY: 30,
+        theme: 'grid',
+        headStyles: {
+            fillStyle: '#D4A017',
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            fontSize: 9
+        },
+        bodyStyles: {
+            fontSize: 8
+        },
+        alternateRowStyles: {
+            fillStyle: [250, 250, 250]
+        },
+        columnStyles: {
+            0: { cellWidth: 10 },
+            1: { cellWidth: 22 },
+            2: { cellWidth: 30 },
+            3: { cellWidth: 18 },
+            4: { cellWidth: 18 },
+            5: { cellWidth: 22 },
+            6: { cellWidth: 28 },
+            7: { cellWidth: 20 },
+            8: { cellWidth: 22 },
+            9: { cellWidth: 18 }
+        },
+        margin: { left: 10, right: 10 }
+    });
+
+    // Summary
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Resumen Ejecutivo', 14, finalY);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    
+    // Count by status
+    const counts = { Activo: 0, Mantenimiento: 0, Baja: 0 };
+    inventory.forEach(item => {
+        if (counts[item.status] !== undefined) counts[item.status]++;
+    });
+    
+    doc.text(`• Activos: ${counts.Activo}`, 14, finalY + 7);
+    doc.text(`• En Mantenimiento: ${counts.Mantenimiento}`, 60, finalY + 7);
+    doc.text(`• Bajas: ${counts.Baja}`, 120, finalY + 7);
+
+    // Count by location
+    const locations = {};
+    inventory.forEach(item => {
+        const loc = item.location || 'Sin asignar';
+        locations[loc] = (locations[loc] || 0) + 1;
+    });
+    
+    let locY = finalY + 15;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Por Ubicación:', 14, locY);
+    doc.setFont('helvetica', 'normal');
+    
+    let col = 14;
+    let row = locY + 6;
+    Object.entries(locations).slice(0, 6).forEach(([loc, count], i) => {
+        if (i === 3) { col = 100; row = locY + 6; }
+        doc.text(`• ${loc}: ${count}`, col, row);
+        row += 5;
+    });
+
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(128, 128, 128);
+    doc.text('Sistema de Gestión de Activos IT - Servyre', 148, 200, { align: 'center' });
+
+    doc.save(`Inventario_IT_${filter}_${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
 // Function to generate and download a Template Excel
