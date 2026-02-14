@@ -2,10 +2,12 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import CryptoJS from 'crypto-js';
+import { CONFIG } from './config.js';
+import { sanitize } from './utils.js';
 
 // --- CONFIGURATION & STATE ---
-const MASTER_KEY = 'Servyre2026';
-const STORAGE_KEY = 'servyre_v2_core_db'; // New robust storage key
+const MASTER_KEY = CONFIG.MASTER_KEY;
+const STORAGE_KEY = CONFIG.STORAGE_KEY;
 
 let inventory = [];
 let catalogs = {
@@ -89,21 +91,21 @@ const renderTable = (data = inventory) => {
         const sc = item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : 'badge-danger';
 
         tr.innerHTML = `
-            <td><span class="badge badge-blue">${item.location}</span></td>
-            <td>${item.department}</td>
-            <td><code>${item.resguardo || '-'}</code></td>
+            <td><span class="badge badge-blue">${sanitize(item.location)}</span></td>
+            <td>${sanitize(item.department)}</td>
+            <td><code>${sanitize(item.resguardo || '-')}</code></td>
             <td>
-                <div style="font-weight: 700; color: var(--text);">${item.fullName}</div>
-                <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">${item.position}</div>
+                <div style="font-weight: 700; color: var(--text);">${sanitize(item.fullName)}</div>
+                <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">${sanitize(item.position)}</div>
             </td>
-            <td><span style="font-weight: 500;">${item.deviceType}</span></td>
+            <td><span style="font-weight: 500;">${sanitize(item.deviceType)}</span></td>
             <td>
-                <div style="font-weight: 600;">${item.brand}</div>
-                <div style="font-size: 0.75rem; color: var(--text-dim);">${item.model}</div>
+                <div style="font-weight: 600;">${sanitize(item.brand)}</div>
+                <div style="font-size: 0.75rem; color: var(--text-dim);">${sanitize(item.model)}</div>
             </td>
-            <td><code>${item.serialNumber}</code></td>
-            <td>${item.pcName || '-'}</td>
-            <td><span class="badge ${sc}">${item.status}</span></td>
+            <td><code>${sanitize(item.serialNumber)}</code></td>
+            <td>${sanitize(item.pcName || '-')}</td>
+            <td><span class="badge ${sc}">${sanitize(item.status)}</span></td>
             <td>
                 <div class="btn-group-glass">
                     <button class="glass-btn btn-row-edit" title="Editar"><i data-lucide="edit-2" style="width:14px"></i></button>
@@ -143,66 +145,66 @@ const viewAssetDetail = (id) => {
         <div class="asset-passport-premium animate__animated animate__zoomIn">
             <div class="user-profile-card">
                 <div class="user-avatar-premium">${initials}</div>
-                <h2 style="font-size: 1.8rem;">${item.fullName}</h2>
-                <p style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${item.position}</p>
+                <h2 style="font-size: 1.8rem;">${sanitize(item.fullName)}</h2>
+                <p style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${sanitize(item.position)}</p>
                 <div style="margin-top: 1.5rem;">
-                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : 'badge-orange'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${item.status}</span>
+                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : 'badge-orange'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${sanitize(item.status)}</span>
                 </div>
                 <div style="margin-top: 2rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; font-size: 0.9rem;">
                     <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
                         <span style="color:var(--text-dim)">Ubicación / Sede</span>
-                        <span style="font-weight:600">${item.location}</span>
+                        <span style="font-weight:600">${sanitize(item.location)}</span>
                     </div>
                     <div style="display:flex; justify-content:space-between;">
                         <span style="color:var(--text-dim)">División / Dirección</span>
-                        <span style="font-weight:600">${item.address || '-'}</span>
+                        <span style="font-weight:600">${sanitize(item.address || '-')}</span>
                     </div>
                 </div>
             </div>
             
             <div class="detail-grid-v2" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
                 <!-- Main Specs -->
-                <div class="info-card"><label>S/N Serial</label><div class="value">${item.serialNumber}</div></div>
-                <div class="info-card"><label>Resguardo N°</label><div class="value">${item.resguardo || 'Pendiente'}</div></div>
+                <div class="info-card"><label>S/N Serial</label><div class="value">${sanitize(item.serialNumber)}</div></div>
+                <div class="info-card"><label>Resguardo N°</label><div class="value">${sanitize(item.resguardo || 'Pendiente')}</div></div>
                 
                 <div class="info-card" style="grid-column: span 2;">
                     <label>Equipo Principal</label>
                     <div class="value" style="display: flex; gap: 0.5rem; align-items: center;">
-                        <span style="color: var(--primary)">${item.deviceType}</span>
-                        <span>${item.brand} ${item.model}</span>
+                        <span style="color: var(--primary)">${sanitize(item.deviceType)}</span>
+                        <span>${sanitize(item.brand)} ${sanitize(item.model)}</span>
                     </div>
                 </div>
 
-                <div class="info-card"><label>Hardware Specs</label><div class="value" style="font-size:0.8rem">${item.processor || 'CPU'} / RAM ${item.ram} / ${item.storageCapacity}</div></div>
-                <div class="info-card"><label>Mouse (Serie)</label><div class="value">${item.mouseExternal || '-'}</div></div>
+                <div class="info-card"><label>Hardware Specs</label><div class="value" style="font-size:0.8rem">${sanitize(item.processor || 'CPU')} / RAM ${sanitize(item.ram)} / ${sanitize(item.storageCapacity)}</div></div>
+                <div class="info-card"><label>Mouse (Serie)</label><div class="value">${sanitize(item.mouseExternal || '-')}</div></div>
 
                 <!-- Peripherals -->
                 <div class="info-card" style="grid-column: span 2; border-left: 3px solid var(--secondary);">
                     <label>Monitor / Accesorio</label>
                     <div class="value" style="font-size: 0.85rem;">
-                        ${item.periphBrand || ''} ${item.periphModel || ''} <code style="margin-left:5px">${item.periphSerial || '-'}</code>
+                        ${sanitize(item.periphBrand || '')} ${sanitize(item.periphModel || '')} <code style="margin-left:5px">${sanitize(item.periphSerial || '-')}</code>
                     </div>
                 </div>
 
                 <!-- Maintenance & Costs -->
-                <div class="info-card"><label>Costo (Precio U.)</label><div class="value">${item.price || '$0.00'}</div></div>
-                <div class="info-card"><label>Fecha Compra</label><div class="value">${item.purchaseDate || '-'}</div></div>
+                <div class="info-card"><label>Costo (Precio U.)</label><div class="value">${sanitize(item.price || '$0.00')}</div></div>
+                <div class="info-card"><label>Fecha Compra</label><div class="value">${sanitize(item.purchaseDate || '-')}</div></div>
                 
-                <div class="info-card"><label>Último Manto.</label><div class="value">${item.lastMtto || '-'}</div></div>
-                <div class="info-card"><label>Próximo Manto.</label><div class="value" style="color:var(--primary)">${item.nextMtto || '-'}</div></div>
+                <div class="info-card"><label>Último Manto.</label><div class="value">${sanitize(item.lastMtto || '-')}</div></div>
+                <div class="info-card"><label>Próximo Manto.</label><div class="value" style="color:var(--primary)">${sanitize(item.nextMtto || '-')}</div></div>
 
                 <div class="info-card" style="grid-column: span 2;">
                     <label>Reporte de Incidentes / Condiciones</label>
                     <div class="value" style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.4;">
-                        <strong>Condiciones:</strong> ${item.conditions || 'Sin reporte'}<br>
-                        <strong>Incidentes:</strong> ${item.incidentReport || 'Sin reporte'}
+                        <strong>Condiciones:</strong> ${sanitize(item.conditions || 'Sin reporte')}<br>
+                        <strong>Incidentes:</strong> ${sanitize(item.incidentReport || 'Sin reporte')}
                     </div>
                 </div>
 
                 <div class="info-card" style="grid-column: span 2;">
                     <label>Observaciones / Fotos</label>
-                    <div class="value" style="font-size: 0.8rem; color: var(--text-dim);">${item.notes || '-'}</div>
-                    ${item.photos ? `<div style="font-size:0.7rem; color:var(--primary); margin-top:5px; overflow:hidden; text-overflow:ellipsis;">LINK: ${item.photos}</div>` : ''}
+                    <div class="value" style="font-size: 0.8rem; color: var(--text-dim);">${sanitize(item.notes || '-')}</div>
+                    ${item.photos ? `<div style="font-size:0.7rem; color:var(--primary); margin-top:5px; overflow:hidden; text-overflow:ellipsis;">LINK: ${sanitize(item.photos)}</div>` : ''}
                 </div>
             </div>
         </div>
@@ -338,7 +340,7 @@ const renderCatalogItems = () => {
     brandList.innerHTML = '';
     catalogs.brands.forEach(b => {
         const li = document.createElement('li');
-        li.innerHTML = `<span>${b}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" onclick="window.delCatItem('brands', '${b}')">&times;</button>`;
+        li.innerHTML = `<span>${sanitize(b)}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" data-type="brands" data-val="${sanitize(b)}">&times;</button>`;
         brandList.appendChild(li);
     });
 
@@ -346,7 +348,7 @@ const renderCatalogItems = () => {
     locationList.innerHTML = '';
     catalogs.locations.forEach(l => {
         const li = document.createElement('li');
-        li.innerHTML = `<span>${l}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" onclick="window.delCatItem('locations', '${l}')">&times;</button>`;
+        li.innerHTML = `<span>${sanitize(l)}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" data-type="locations" data-val="${sanitize(l)}">&times;</button>`;
         locationList.appendChild(li);
     });
 
@@ -357,12 +359,23 @@ const renderCatalogItems = () => {
         modelList.innerHTML = '';
         (catalogs.modelsByBrand[selB] || []).forEach(m => {
             const li = document.createElement('li');
-            li.innerHTML = `<span>${m}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" onclick="window.delCatItem('models', '${m}', '${selB}')">&times;</button>`;
+            li.innerHTML = `<span>${sanitize(m)}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" data-type="models" data-val="${sanitize(m)}" data-parent="${sanitize(selB)}">&times;</button>`;
             modelList.appendChild(li);
         });
     } else {
         modelManagementSection.style.display = 'none';
     }
+
+    // Attach event listeners
+    brandList.querySelectorAll('.close-btn').forEach(btn => {
+        btn.onclick = () => delCatItem(btn.dataset.type, btn.dataset.val);
+    });
+    locationList.querySelectorAll('.close-btn').forEach(btn => {
+        btn.onclick = () => delCatItem(btn.dataset.type, btn.dataset.val);
+    });
+    modelList.querySelectorAll('.close-btn').forEach(btn => {
+        btn.onclick = () => delCatItem(btn.dataset.type, btn.dataset.val, btn.dataset.parent);
+    });
 };
 
 window.delCatItem = (type, val, parent = null) => {
@@ -624,6 +637,18 @@ document.getElementById('addLocationBtn').onclick = () => {
         saveToStorage(); syncFormSelects();
     }
 };
+
+// --- THEME TOGGLE ---
+const themeToggle = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('servyre-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
+themeToggle?.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('servyre-theme', next);
+});
 
 window.switchCat = (id) => {
     document.querySelectorAll('.cat-section').forEach(s => s.style.display = 'none');

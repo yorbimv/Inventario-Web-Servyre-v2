@@ -13,6 +13,10 @@
 </head>
 
 <body class="bg-gradient">
+  <button class="theme-toggle" id="themeToggle" title="Cambiar tema">
+    <span class="theme-toggle-icon moon">🌙</span>
+    <span class="theme-toggle-icon sun">☀️</span>
+  </button>
   <div id="app">
     <header class="glass-header animate__animated animate__fadeInDown">
       <div class="header-content">
@@ -107,7 +111,7 @@
 
           <div class="form-section">
             <h3><i data-lucide="map-pin"></i> Ubicación / Personal</h3>
-            <div class="form-grid">
+            <div class="form-grid form-grid-2">
               <div class="form-group"><label>Ubicación</label><select id="location" required></select></div>
               <div class="form-group"><label>Dirección</label><input type="text" id="address"></div>
               <div class="form-group"><label>Departamento</label><input type="text" id="department" required></div>
@@ -121,13 +125,16 @@
 
           <div class="form-section">
             <h3><i data-lucide="cpu"></i> Especificaciones del Equipo</h3>
-            <div class="form-grid">
+            <div class="form-grid form-grid-2">
               <div class="form-group">
                 <label>Tipo de Equipo</label>
                 <select id="deviceType" required>
                   <option value="Laptop">Laptop</option>
                   <option value="Desktop">Desktop</option>
                   <option value="Servidor">Servidor</option>
+                  <option value="Monitor">Monitor</option>
+                  <option value="Impresora">Impresora</option>
+                  <option value="Otro">Otro</option>
                 </select>
               </div>
               <div class="form-group"><label>Marca</label><select id="brand" required></select></div>
@@ -136,24 +143,68 @@
               <div class="form-group"><label>Sistema Operativo</label><input type="text" id="os"></div>
               <div class="form-group"><label>Nombre PC</label><input type="text" id="pcName"></div>
               <div class="form-group"><label>Procesador</label><input type="text" id="processor"></div>
-              <div class="form-group"><label>RAM (GB)</label><input type="number" id="ram" required></div>
-              <div class="form-group"><label>Disco (GB)</label><input type="number" id="storageCapacity" required></div>
+              <div class="form-group"><label>RAM (GB)</label><input type="text" id="ram" placeholder="ej: 16 GB"></div>
+              <div class="form-group"><label>Disco (GB)</label><input type="text" id="storageCapacity" placeholder="ej: 512 GB SSD"></div>
               <div class="form-group"><label>Estado</label><select id="status" required>
                   <option value="Activo">Activo</option>
                   <option value="Mantenimiento">Mantenimiento</option>
                   <option value="Baja">Baja</option>
                 </select></div>
-              <div class="form-group check-row">
-                <input type="checkbox" id="mouseExternal">
-                <label for="mouseExternal" class="label-check">Mouse Externo</label>
+              <div class="form-group"><label>Mouse Externo</label><input type="text" id="mouseExternal" placeholder="Serie del mouse"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3><i data-lucide="dollar-sign"></i> Costos y Compras</h3>
+            <div class="form-grid form-grid-2">
+              <div class="form-group"><label>Precio Unitario</label><input type="text" id="price" placeholder="ej: $15,000.00"></div>
+              <div class="form-group"><label>Fecha de Compra</label><input type="date" id="purchaseDate"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3><i data-lucide="monitor"></i> Periféricos / Accesorios</h3>
+            <div class="form-grid form-grid-2">
+              <div class="form-group"><label>Marca (Monitor/Accesorio)</label><input type="text" id="periphBrand"></div>
+              <div class="form-group"><label>Modelo (Monitor/Accesorio)</label><input type="text" id="periphModel"></div>
+              <div class="form-group"><label>Serie (Monitor/Accesorio)</label><input type="text" id="periphSerial"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3><i data-lucide="tool"></i> Mantenimiento</h3>
+            <div class="form-grid form-grid-2">
+              <div class="form-group"><label>Último Mantenimiento</label><input type="date" id="lastMtto"></div>
+              <div class="form-group"><label>Próximo Mantenimiento</label><input type="date" id="nextMtto"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3><i data-lucide="alert-triangle"></i> Condiciones e Incidentes</h3>
+            <div class="form-grid form-grid-2">
+              <div class="form-group">
+                <label>Condiciones del Equipo</label>
+                <textarea id="conditions" rows="2" placeholder="Estado físico, reparaciones realizadas..."></textarea>
+              </div>
+              <div class="form-group">
+                <label>Reporte de Incidentes</label>
+                <textarea id="incidentReport" rows="2" placeholder="Fallas, golpes, robos, etc."></textarea>
               </div>
             </div>
           </div>
 
-          <div class="form-group full-width-area">
-            <label>Observaciones Adicionales</label>
-            <textarea id="notes" rows="3"
-              placeholder="Añadir notas internas, incidentes o detalles del resguardo..."></textarea>
+          <div class="form-section">
+            <h3><i data-lucide="link"></i> Documentación</h3>
+            <div class="form-grid form-grid-2">
+              <div class="form-group full-width">
+                <label>Links / Fotos</label>
+                <input type="url" id="photos" placeholder="https://...">
+              </div>
+              <div class="form-group full-width">
+                <label>Observaciones Adicionales</label>
+                <textarea id="notes" rows="3" placeholder="Notas internas, detalles del resguardo..."></textarea>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer-premium">
