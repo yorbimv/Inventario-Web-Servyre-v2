@@ -291,6 +291,91 @@
     </div>
   </div>
 
+  <!-- PDF COLUMN SELECTOR MODAL -->
+  <div id="pdfColumnModal" class="modal-overlay glass-blur">
+    <div class="modal pdf-column-modal">
+      <div class="modal-header">
+        <h2><i data-lucide="columns"></i> Configurar Reporte PDF</h2>
+        <button id="closePdfColumnModal" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body-premium">
+        <p class="pdf-column-desc">Selecciona las columnas que deseas incluir en el reporte:</p>
+        
+        <div class="pdf-column-grid" id="pdfColumnGrid">
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="resguardo" checked> <span>N° Resguardo</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="fullName" checked> <span>Usuario</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="position" checked> <span>Puesto</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="department" checked> <span>Departamento</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="location" checked> <span>Ubicación</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="deviceType" checked> <span>Tipo Equipo</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="brand" checked> <span>Marca</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="model" checked> <span>Modelo</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="serialNumber" checked> <span>Serie</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="pcName" checked> <span>Nombre PC</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="os"> <span>Sistema Operativo</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="processor"> <span>Procesador</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="ram"> <span>RAM</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="storageCapacity"> <span>Disco</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="email"> <span>Correo</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="extension"> <span>Extensión</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="status" checked> <span>Estado</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="price"> <span>Precio</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="purchaseDate"> <span>Fecha Compra</span>
+          </label>
+          <label class="pdf-column-checkbox">
+            <input type="checkbox" value="mouseExternal"> <span>Mouse</span>
+          </label>
+        </div>
+
+        <div class="pdf-column-actions">
+          <button id="selectAllColumns" class="glass-btn">Seleccionar Todo</button>
+          <button id="deselectAllColumns" class="glass-btn">Deseleccionar Todo</button>
+        </div>
+      </div>
+      <div class="modal-footer-premium">
+        <button id="cancelPdfBtn" class="cancel-btn">Cancelar</button>
+        <button id="generatePdfBtn" class="save-btn">Generar PDF</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="/src/main.js"></script>
 </body>
 

@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import CryptoJS from 'crypto-js';
 import { CONFIG } from './config.js';
 import { sanitize } from './utils.js';
@@ -91,20 +91,19 @@ const renderTable = (data = inventory) => {
         const sc = item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : 'badge-danger';
 
         tr.innerHTML = `
-            <td><span class="badge badge-blue">${sanitize(item.location)}</span></td>
-            <td>${sanitize(item.department)}</td>
             <td><code>${sanitize(item.resguardo || '-')}</code></td>
             <td>
                 <div style="font-weight: 700; color: var(--text);">${sanitize(item.fullName)}</div>
-                <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">${sanitize(item.position)}</div>
+                <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">${sanitize(item.position || '-')}</div>
             </td>
             <td><span style="font-weight: 500;">${sanitize(item.deviceType)}</span></td>
             <td>
                 <div style="font-weight: 600;">${sanitize(item.brand)}</div>
-                <div style="font-size: 0.75rem; color: var(--text-dim);">${sanitize(item.model)}</div>
+                <div style="font-size: 0.75rem; color: var(--text-dim);">${sanitize(item.model || '-')}</div>
             </td>
-            <td><code>${sanitize(item.serialNumber)}</code></td>
             <td>${sanitize(item.pcName || '-')}</td>
+            <td><code>${sanitize(item.serialNumber)}</code></td>
+            <td><span class="badge badge-blue">${sanitize(item.location)}</span></td>
             <td><span class="badge ${sc}">${sanitize(item.status)}</span></td>
             <td>
                 <div class="btn-group-glass">
@@ -148,7 +147,7 @@ const viewAssetDetail = (id) => {
                 <h2 style="font-size: 1.8rem;">${sanitize(item.fullName)}</h2>
                 <p style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${sanitize(item.position)}</p>
                 <div style="margin-top: 1.5rem;">
-                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : 'badge-orange'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${sanitize(item.status)}</span>
+                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Baja' ? 'badge-danger' : 'badge-orange'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${sanitize(item.status)}</span>
                 </div>
                 <div style="margin-top: 2rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; font-size: 0.9rem;">
                     <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
@@ -220,28 +219,84 @@ const viewAssetDetail = (id) => {
 
     document.getElementById('printDetailBtn').onclick = () => {
         const doc = new jsPDF('p', 'mm', 'a4');
-        doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 40, 'F');
-        doc.setTextColor(255, 255, 255); doc.setFontSize(22); doc.text("FICHA DE RESGUARDO IT", 15, 25);
+        
+        // Header - Executive blue
+        doc.setFillColor(30, 58, 138);
+        doc.rect(0, 0, 210, 35, 'F');
+        doc.setFillColor(37, 99, 235);
+        doc.rect(0, 35, 210, 4, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('FICHA DE RESGUARDO IT', 14, 18);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(item.fullName || 'Usuario', 14, 28);
 
-        const dataRows = [
-            ["ID Interno", item.id], ["Ubicación", item.location], ["Dirección", item.address || "N/A"],
-            ["Departamento", item.department], ["Puesto", item.position], ["Usuario Asignado", item.fullName],
-            ["Correo Electrónico", item.email], ["Número de Resguardo", item.resguardo || "No Asignado"],
-            ["Tipo de Equipo", item.deviceType], ["Marca", item.brand], ["Modelo", item.model],
-            ["Número de Serie", item.serialNumber], ["RAM", item.ram + " GB"], ["Capacidad Disco", item.storageCapacity + " GB"],
-            ["Nombre del PC", item.pcName || "N/A"], ["Sistema Operativo", item.os || "N/A"], ["Procesador", item.processor || "N/A"]
-        ];
+        // User info section
+        doc.setTextColor(30, 58, 138);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Información del Activo', 14, 50);
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60, 60, 60);
+        
+        const infoY = 58;
+        const leftCol = 14;
+        const rightCol = 110;
+        
+        doc.text(`Resguardo: ${item.resguardo || 'Pendiente'}`, leftCol, infoY);
+        doc.text(`Serie: ${item.serialNumber || '-'}`, rightCol, infoY);
+        doc.text(`Equipo: ${item.deviceType || '-'}`, leftCol, infoY + 7);
+        doc.text(`Marca: ${item.brand || '-'}`, rightCol, infoY + 7);
+        doc.text(`Modelo: ${item.model || '-'}`, leftCol, infoY + 14);
+        doc.text(`Nombre PC: ${item.pcName || '-'}`, rightCol, infoY + 14);
+        doc.text(`Ubicación: ${item.location || '-'}`, leftCol, infoY + 21);
+        doc.text(`Estado: ${item.status || '-'}`, rightCol, infoY + 21);
+        doc.text(`Usuario: ${item.fullName || '-'}`, leftCol, infoY + 28);
+        doc.text(`Puesto: ${item.position || '-'}`, rightCol, infoY + 28);
 
-        doc.autoTable({
-            startY: 50,
-            head: [['Concepto', 'Descripción de Activo']],
-            body: dataRows,
-            theme: 'grid',
-            headStyles: { fillStyle: '#6366f1' },
-            styles: { fontSize: 9 }
-        });
+        // Technical specs
+        doc.setTextColor(30, 58, 138);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('Especificaciones Técnicas', 14, infoY + 42);
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(60, 60, 60);
+        
+        const specY = infoY + 50;
+        doc.text(`Procesador: ${item.processor || 'N/A'}`, leftCol, specY);
+        doc.text(`RAM: ${item.ram || 'N/A'}`, rightCol, specY);
+        doc.text(`Almacenamiento: ${item.storageCapacity || 'N/A'}`, leftCol, specY + 7);
+        doc.text(`Sistema Operativo: ${item.os || 'N/A'}`, rightCol, specY + 7);
 
-        doc.save(`Ficha_IT_${item.serialNumber}.pdf`);
+        // Additional info
+        doc.setTextColor(30, 58, 138);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('Información Adicional', 14, specY + 22);
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(60, 60, 60);
+        
+        const addY = specY + 30;
+        doc.text(`Correo: ${item.email || 'N/A'}`, leftCol, addY);
+        doc.text(`Extensión: ${item.extension || 'N/A'}`, rightCol, addY);
+        doc.text(`Departamento: ${item.department || 'N/A'}`, leftCol, addY + 7);
+        doc.text(`Dirección: ${item.address || 'N/A'}`, rightCol, addY + 7);
+
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text('Sistema de Gestión de Activos IT - Servyre', 105, 285, { align: 'center' });
+
+        doc.save(`Ficha_Resguardo_${item.serialNumber || 'IT'}.pdf`);
     };
 };
 
@@ -402,6 +457,266 @@ document.getElementById('exportBackupBtn').onclick = () => {
     link.click();
     URL.revokeObjectURL(url);
 };
+
+// Export Excel - All fields in executive format
+document.getElementById('exportExcelBtn').onclick = () => {
+    if (inventory.length === 0) {
+        alert('No hay registros para exportar.');
+        return;
+    }
+
+    const headers = [
+        "Resguardo", "Usuario", "Puesto", "Correo", "Extensión", "Departamento",
+        "Dirección", "Ubicación", "Tipo Equipo", "Marca", "Modelo", "Serie",
+        "Nombre PC", "Sistema Operativo", "Procesador", "RAM", "Disco",
+        "Estado", "Precio", "Fecha Compra", "Marca Periférico", "Modelo Periférico",
+        "Serie Periférico", "Mouse Externo", "Último Mtto", "Próximo Mtto",
+        "Condiciones", "Incidentes", "Notas", "Fotos"
+    ];
+
+    const rows = inventory.map(item => [
+        item.resguardo || '', item.fullName || '', item.position || '', item.email || '',
+        item.extension || '', item.department || '', item.address || '', item.location || '',
+        item.deviceType || '', item.brand || '', item.model || '', item.serialNumber || '',
+        item.pcName || '', item.os || '', item.processor || '', item.ram || '', item.storageCapacity || '',
+        item.status || '', item.price || '', item.purchaseDate || '',
+        item.periphBrand || '', item.periphModel || '', item.periphSerial || '',
+        item.mouseExternal || '', item.lastMtto || '', item.nextMtto || '',
+        item.conditions || '', item.incidentReport || '', item.notes || '', item.photos || ''
+    ]);
+
+    const wsData = [headers, ...rows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    
+    ws['!cols'] = headers.map(() => ({ wch: 18 }));
+    ws['!rows'] = [{ hpt: 20 }];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Inventario IT");
+
+    XLSX.writeFile(wb, `Inventario_IT_Completo_${new Date().toISOString().split('T')[0]}.xlsx`);
+};
+
+// PDF Column Modal Elements
+const pdfColumnModal = document.getElementById('pdfColumnModal');
+const closePdfColumnModal = document.getElementById('closePdfColumnModal');
+const cancelPdfBtn = document.getElementById('cancelPdfBtn');
+const generatePdfBtn = document.getElementById('generatePdfBtn');
+const selectAllColumns = document.getElementById('selectAllColumns');
+const deselectAllColumns = document.getElementById('deselectAllColumns');
+
+let currentPdfFilter = 'todos';
+
+// Column labels mapping
+const columnLabels = {
+    resguardo: 'Resguardo',
+    fullName: 'Usuario',
+    position: 'Puesto',
+    department: 'Departamento',
+    location: 'Ubicación',
+    deviceType: 'Equipo',
+    brand: 'Marca',
+    model: 'Modelo',
+    serialNumber: 'Serie',
+    pcName: 'Nombre PC',
+    os: 'Sistema Operativo',
+    processor: 'Procesador',
+    ram: 'RAM',
+    storageCapacity: 'Disco',
+    email: 'Correo',
+    extension: 'Extensión',
+    status: 'Estado',
+    price: 'Precio',
+    purchaseDate: 'Fecha Compra',
+    mouseExternal: 'Mouse'
+};
+
+// Export PDF - Show column selector first
+document.getElementById('exportPdfBtn').onclick = () => {
+    currentPdfFilter = document.getElementById('pdfFilter').value;
+    
+    if (inventory.length === 0) {
+        alert('No hay registros para exportar.');
+        return;
+    }
+    
+    pdfColumnModal.classList.add('active');
+};
+
+// Close modal handlers
+closePdfColumnModal?.addEventListener('click', () => pdfColumnModal.classList.remove('active'));
+cancelPdfBtn?.addEventListener('click', () => pdfColumnModal.classList.remove('active'));
+
+// Select/Deselect all
+selectAllColumns?.addEventListener('click', () => {
+    document.querySelectorAll('.pdf-column-checkbox input').forEach(cb => cb.checked = true);
+});
+
+deselectAllColumns?.addEventListener('click', () => {
+    document.querySelectorAll('.pdf-column-checkbox input').forEach(cb => cb.checked = false);
+});
+
+// Generate PDF with selected columns
+generatePdfBtn?.addEventListener('click', () => {
+    try {
+        const selectedColumns = Array.from(document.querySelectorAll('.pdf-column-checkbox input:checked')).map(cb => cb.value);
+        
+        if (selectedColumns.length === 0) {
+            alert('Selecciona al menos una columna.');
+            return;
+        }
+        
+        let filteredData = inventory;
+        if (currentPdfFilter !== 'todos') {
+            filteredData = inventory.filter(item => item.status === currentPdfFilter);
+        }
+
+        if (filteredData.length === 0) {
+            alert('No hay registros para exportar.');
+            return;
+        }
+
+        pdfColumnModal.classList.remove('active');
+
+        const doc = new jsPDF('l', 'mm', 'legal');
+        
+        // Executive header - Professional blue palette
+        doc.setFillColor(30, 58, 138);
+        doc.rect(0, 0, 356, 28, 'F');
+        doc.setFillColor(37, 99, 235);
+        doc.rect(0, 28, 356, 4, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.text('SERVYRE IT', 14, 14);
+        
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        const filterLabel = currentPdfFilter === 'todos' ? 'Reporte General' : currentPdfFilter;
+        doc.text(`Inventario de Activos - ${filterLabel}`, 14, 22);
+        
+        // Date and count
+        doc.setFontSize(9);
+        doc.text(`Fecha: ${new Date().toLocaleDateString('es-MX')}`, 330, 10, { align: 'right' });
+        doc.text(`Total: ${filteredData.length} registros`, 330, 18, { align: 'right' });
+
+        // Build table headers and data based on selected columns
+        const headers = ['#', ...selectedColumns.map(col => columnLabels[col] || col)];
+        
+        const getCellValue = (item, col) => {
+            const val = item[col];
+            if (val === undefined || val === null || val === '') return '-';
+            return String(val);
+        };
+        
+        const tableData = filteredData.map((item, index) => [
+            index + 1,
+            ...selectedColumns.map(col => getCellValue(item, col))
+        ]);
+
+        // Calculate column widths - wider columns for full names
+        const colCount = selectedColumns.length + 1;
+        const minColWidth = 22;
+        const maxColWidth = 55;
+        const pageWidth = 336;
+        const rowNumWidth = 12;
+        const availableWidth = pageWidth - rowNumWidth;
+        
+        let baseWidth = Math.floor(availableWidth / colCount);
+        if (baseWidth > maxColWidth) baseWidth = maxColWidth;
+        if (baseWidth < minColWidth) baseWidth = minColWidth;
+        
+        const columnStyles = { 0: { cellWidth: rowNumWidth, fontStyle: 'bold' } };
+        selectedColumns.forEach((_, i) => {
+            columnStyles[i + 1] = { cellWidth: baseWidth };
+        });
+
+        autoTable(doc, {
+            head: [headers],
+            body: tableData,
+            startY: 38,
+            theme: 'striped',
+            headStyles: {
+                fillStyle: [30, 58, 138],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 9,
+                cellPadding: 3
+            },
+            bodyStyles: {
+                fontSize: 8,
+                textColor: [50, 50, 50],
+                cellPadding: 2
+            },
+            alternateRowStyles: {
+                fillStyle: [248, 250, 252]
+            },
+            columnStyles: columnStyles,
+            margin: { left: 10, right: 10 },
+            styles: {
+                overflow: 'linebreak',
+                cellWidth: 'wrap'
+            }
+        });
+
+        // Executive Summary
+        const finalY = doc.lastAutoTable.finalY + 12;
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(10, finalY - 4, 336, 45, 3, 3, 'F');
+        
+        doc.setFontSize(11);
+        doc.setTextColor(30, 58, 138);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Resumen Ejecutivo', 16, finalY + 4);
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(70, 70, 70);
+        
+        // Status counts
+        const counts = { Activo: 0, Mantenimiento: 0, Baja: 0 };
+        inventory.forEach(item => {
+            if (counts[item.status] !== undefined) counts[item.status]++;
+        });
+        
+        doc.text(`Activos: ${counts.Activo}`, 16, finalY + 12);
+        doc.text(`En Mantenimiento: ${counts.Mantenimiento}`, 70, finalY + 12);
+        doc.text(`Bajas: ${counts.Baja}`, 140, finalY + 12);
+        
+        // Location breakdown
+        const locations = {};
+        inventory.forEach(item => {
+            const loc = item.location || 'Sin asignar';
+            locations[loc] = (locations[loc] || 0) + 1;
+        });
+        
+        const locEntries = Object.entries(locations).slice(0, 4);
+        let locY = finalY + 20;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Por Ubicación:', 16, locY);
+        doc.setFont('helvetica', 'normal');
+        
+        let colX = 16;
+        locEntries.forEach(([loc, count], i) => {
+            if (i === 2) { colX = 100; locY = finalY + 26; }
+            doc.text(`• ${loc}: ${count}`, colX, locY);
+            colX += 70;
+        });
+
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text('Sistema de Gestión de Activos IT - Servyre', 178, 330, { align: 'center' });
+
+        const filename = `Inventario_Servyre_${currentPdfFilter}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(filename);
+        
+    } catch (error) {
+        console.error('Error generando PDF:', error);
+        alert('Error al generar PDF: ' + error.message);
+    }
+});
 
 // Function to generate and download a Template Excel
 window.downloadTemplate = () => {
