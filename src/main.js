@@ -106,10 +106,7 @@ const renderTable = (data = inventory) => {
             </td>
             <td>${sanitize(item.pcName || '-')}</td>
             <td><code>${sanitize(item.serialNumber)}</code></td>
-            <td><span class="badge badge-blue" style="text-align: left; padding: 0.5rem 0.75rem;">
-                <div style="font-weight: 600;">${sanitize(item.location || '-')}</div>
-                <div style="font-size: 0.65rem; opacity: 0.8;">${sanitize(item.address || '-')}</div>
-            </span></td>
+            <td><span class="badge badge-blue">${sanitize(item.location || '-')}</span></td>
             <td><span class="badge ${sc}">${sanitize(item.status)}</span></td>
             <td>
                 <div class="btn-group-glass">
@@ -373,14 +370,36 @@ const updateModelsDropdown = () => {
 };
 
 const syncFormSelects = () => {
-    // Locations - combine both categories
-    locationInput.innerHTML = '<option value="">Sel. Ubicación...</option>';
-    const allLocations = [...(catalogs.locations.sedes || []), ...(catalogs.locations.externo || [])];
-    allLocations.forEach(l => {
-        const opt = document.createElement('option');
-        opt.value = opt.textContent = l;
-        locationInput.appendChild(opt);
-    });
+    // Locations - combine both categories with separator
+    locationInput.innerHTML = '<option value="">Seleccionar...</option>';
+    const sedes = catalogs.locations.sedes || [];
+    const externo = catalogs.locations.externo || [];
+    const allLocations = [...sedes, ...externo];
+    
+    // Add group headers
+    if (sedes.length > 0) {
+        const optGroup = document.createElement('optgroup');
+        optGroup.label = 'SEDES';
+        sedes.forEach(l => {
+            const opt = document.createElement('option');
+            opt.value = l;
+            opt.textContent = l;
+            optGroup.appendChild(opt);
+        });
+        locationInput.appendChild(optGroup);
+    }
+    
+    if (externo.length > 0) {
+        const optGroup = document.createElement('optgroup');
+        optGroup.label = 'EXTERNO';
+        externo.forEach(l => {
+            const opt = document.createElement('option');
+            opt.value = l;
+            opt.textContent = l;
+            optGroup.appendChild(opt);
+        });
+        locationInput.appendChild(optGroup);
+    }
 
     // Brands
     const currentB = brandInput.value;
