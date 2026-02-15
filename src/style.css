@@ -339,7 +339,7 @@ tr:hover td {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 2rem;
+  padding: 1rem;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
@@ -391,6 +391,15 @@ tr:hover td {
 .modal-header h2 {
   font-size: 1.4rem;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-header h2 i {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
 }
 
 .close-btn {
@@ -514,18 +523,22 @@ textarea {
 }
 
 .modal-footer-premium {
-  padding: 1.25rem 2rem;
-  border-top: 1px solid var(--border);
+  padding: 1rem 2rem;
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  background: var(--card-bg);
+  background: var(--surface-opaque) !important;
   flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  margin-top: auto;
+  border: none;
 }
 
 [data-theme="light"] .modal-footer-premium {
-  background: #F8F9FA;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background: #FFFFFF !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
 }
 
 .save-btn {
@@ -607,12 +620,26 @@ textarea {
 /* Settings Modal */
 .settings-modal {
   max-width: 1000px;
+  max-height: 90vh;
+  background: var(--surface-opaque);
+  display: flex;
+  flex-direction: column;
+}
+
+[data-theme="light"] .settings-modal {
+  background: #FFFFFF;
 }
 
 .settings-layout {
   display: grid;
   grid-template-columns: 220px 1fr;
   min-height: 500px;
+  background: var(--surface-opaque);
+  border: none;
+}
+
+[data-theme="light"] .settings-layout {
+  background: #FFFFFF;
 }
 
 .settings-nav {
@@ -622,6 +649,10 @@ textarea {
   flex-direction: column;
   gap: 0.5rem;
   background: var(--card-bg);
+}
+
+[data-theme="light"] .settings-nav {
+  background: #F8F9FA;
 }
 
 .nav-item {
@@ -650,18 +681,45 @@ textarea {
 .settings-content {
   padding: 2rem;
   overflow-y: auto;
+  background: var(--surface-opaque);
+  flex: 1;
+  min-height: 0;
+}
+
+[data-theme="light"] .settings-content {
+  background: #FFFFFF;
 }
 
 .catalog-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
   gap: 2rem;
+  flex: 1;
+  min-height: 450px;
+}
+
+.catalog-card {
+  display: flex !important;
+  flex-direction: column;
+  min-height: 430px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.catalog-card > *:last-child {
+  flex: 1;
+  min-height: 200px;
 }
 
 .catalog-card h3 {
   font-size: 1rem;
+  font-weight: 600;
   margin-bottom: 1rem;
   color: var(--text);
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid var(--primary);
 }
 
 .add-group {
@@ -698,7 +756,8 @@ textarea {
   background: var(--card-bg);
   border-radius: 14px;
   border: 1px solid var(--border);
-  max-height: 350px;
+  min-height: 200px;
+  flex: 1;
   overflow-y: auto;
 }
 
@@ -712,6 +771,168 @@ textarea {
 
 .styled-list li:last-child {
   border-bottom: none;
+}
+
+/* All Settings Sections - Same Size */
+.cat-section {
+  min-height: 500px;
+  height: 100%;
+  display: none;
+  flex-direction: column;
+}
+
+.cat-section:not([style*="display: none"]) {
+  display: flex;
+}
+
+#cat-brands {
+  display: flex;
+}
+
+.cat-section > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#cat-locations {
+  justify-content: center;
+  align-items: stretch;
+  width: 100%;
+}
+
+#cat-locations .catalog-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 2rem;
+  width: 100%;
+}
+
+#cat-locations .catalog-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 430px;
+  flex: 1;
+  display: flex !important;
+  flex-direction: column;
+}
+
+#cat-locations .styled-list {
+  flex: 1;
+}
+
+.cat-section > div {
+  flex: 1;
+}
+
+/* Plantilla Excel Section */
+.plantilla-section {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 450px;
+}
+
+.plantilla-info {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+  flex: 1;
+  min-height: 350px;
+}
+
+[data-theme="light"] .plantilla-info {
+  background: #F8F9FA;
+}
+
+.plantilla-info h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid var(--primary);
+}
+
+.plantilla-info p {
+  color: var(--text-dim);
+  margin-bottom: 1rem;
+}
+
+.plantilla-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--text);
+}
+
+.plantilla-steps li {
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.plantilla-steps li strong {
+  color: var(--primary);
+}
+
+.plantilla-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+[data-theme="light"] .plantilla-note {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.plantilla-note i {
+  color: #3B82F6;
+  flex-shrink: 0;
+}
+
+.plantilla-download {
+  text-align: center;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.excel-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #217346, #185C37);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(33, 115, 70, 0.3);
+  transition: all 0.2s ease;
+}
+
+.excel-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(33, 115, 70, 0.4);
+}
+
+.excel-btn i {
+  width: 28px;
+  height: 28px;
 }
 
 /* Detail Modal */
@@ -966,9 +1187,15 @@ textarea {
     border-right: none;
     border-bottom: 1px solid var(--border);
     padding: 0.75rem;
+    flex-shrink: 0;
+  }
+  .settings-content {
+    padding: 1rem;
+    min-height: 350px;
   }
   .nav-item { padding: 0.6rem 1rem; white-space: nowrap; font-size: 0.8rem; }
   .catalog-grid { grid-template-columns: 1fr; }
+  .cat-section { min-height: 300px; }
   
   .modal-body-detail { padding: 1.25rem; }
   .detail-grid-v2 { grid-template-columns: 1fr; }

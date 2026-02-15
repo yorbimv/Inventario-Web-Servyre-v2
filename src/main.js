@@ -19,7 +19,10 @@ let catalogs = {
         'Apple': ['MacBook Pro M2', 'MacBook Air M3', 'iMac 24"'],
         'Microsoft': ['Surface Pro 9', 'Surface Laptop 5']
     },
-    locations: ['Corporativo', 'Naucalpan', 'Campo', 'Sede Sur', 'Guadalajara']
+    locations: {
+        sedes: ['Corporativo', 'Naucalpan'],
+        externo: ['Campo']
+    }
 };
 
 // --- DOM ELEMENTS ---
@@ -77,7 +80,7 @@ const loadData = () => {
 
 const updateStats = () => {
     totalAssetsEl.textContent = inventory.length;
-    activeLocationsEl.textContent = catalogs.locations.length;
+    activeLocationsEl.textContent = (catalogs.locations.sedes?.length || 0) + (catalogs.locations.externo?.length || 0);
 };
 
 // --- CORE UI RENDERING ---
@@ -367,9 +370,10 @@ const updateModelsDropdown = () => {
 };
 
 const syncFormSelects = () => {
-    // Locations
+    // Locations - combine both categories
     locationInput.innerHTML = '<option value="">Sel. Ubicación...</option>';
-    catalogs.locations.forEach(l => {
+    const allLocations = [...(catalogs.locations.sedes || []), ...(catalogs.locations.externo || [])];
+    allLocations.forEach(l => {
         const opt = document.createElement('option');
         opt.value = opt.textContent = l;
         locationInput.appendChild(opt);
@@ -399,12 +403,23 @@ const renderCatalogItems = () => {
         brandList.appendChild(li);
     });
 
-    // Location List
+    // Location List - Sedes
+    const locationList = document.getElementById('locationList');
+    const locationList2 = document.getElementById('locationList2');
+    
     locationList.innerHTML = '';
-    catalogs.locations.forEach(l => {
+    (catalogs.locations.sedes || []).forEach(l => {
         const li = document.createElement('li');
-        li.innerHTML = `<span>${sanitize(l)}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" data-type="locations" data-val="${sanitize(l)}">&times;</button>`;
+        li.innerHTML = `<span>${sanitize(l)}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" data-type="locations" data-cat="sedes" data-val="${sanitize(l)}">&times;</button>`;
         locationList.appendChild(li);
+    });
+
+    // Location List - Externo
+    locationList2.innerHTML = '';
+    (catalogs.locations.externo || []).forEach(l => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${sanitize(l)}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" data-type="locations" data-cat="externo" data-val="${sanitize(l)}">&times;</button>`;
+        locationList2.appendChild(li);
     });
 
     // Models
@@ -426,7 +441,10 @@ const renderCatalogItems = () => {
         btn.onclick = () => delCatItem(btn.dataset.type, btn.dataset.val);
     });
     locationList.querySelectorAll('.close-btn').forEach(btn => {
-        btn.onclick = () => delCatItem(btn.dataset.type, btn.dataset.val);
+        btn.onclick = () => delCatItem(btn.dataset.type, btn.dataset.val, btn.dataset.cat);
+    });
+    locationList2?.querySelectorAll('.close-btn').forEach(btn => {
+        btn.onclick = () => delCatItem(btn.dataset.type, btn.dataset.val, btn.dataset.cat);
     });
     modelList.querySelectorAll('.close-btn').forEach(btn => {
         btn.onclick = () => delCatItem(btn.dataset.type, btn.dataset.val, btn.dataset.parent);
@@ -438,8 +456,8 @@ window.delCatItem = (type, val, parent = null) => {
     if (type === 'brands') {
         catalogs.brands = catalogs.brands.filter(x => x !== val);
         delete catalogs.modelsByBrand[val];
-    } else if (type === 'locations') {
-        catalogs.locations = catalogs.locations.filter(x => x !== val);
+    } else if (type === 'locations' && parent) {
+        catalogs.locations[parent] = (catalogs.locations[parent] || []).filter(x => x !== val);
     } else if (type === 'models' && parent) {
         catalogs.modelsByBrand[parent] = catalogs.modelsByBrand[parent].filter(x => x !== val);
     }
@@ -946,12 +964,23 @@ document.getElementById('addModelBtn').onclick = () => {
 
 document.getElementById('addLocationBtn').onclick = () => {
     const v = document.getElementById('newLocationInput').value.trim();
-    if (v && !catalogs.locations.includes(v)) {
-        catalogs.locations.push(v);
+    if (v && !(catalogs.locations.sedes || []).includes(v)) {
+        if (!catalogs.locations.sedes) catalogs.locations.sedes = [];
+        catalogs.locations.sedes.push(v);
         document.getElementById('newLocationInput').value = '';
         saveToStorage(); syncFormSelects();
     }
 };
+
+document.getElementById('addLocationBtn2')?.addEventListener('click', () => {
+    const v = document.getElementById('newLocationInput2').value.trim();
+    if (v && !(catalogs.locations.externo || []).includes(v)) {
+        if (!catalogs.locations.externo) catalogs.locations.externo = [];
+        catalogs.locations.externo.push(v);
+        document.getElementById('newLocationInput2').value = '';
+        saveToStorage(); syncFormSelects();
+    }
+});
 
 // --- THEME TOGGLE ---
 const themeToggle = document.getElementById('themeToggle');

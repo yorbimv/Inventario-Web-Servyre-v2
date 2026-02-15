@@ -218,19 +218,14 @@
   <div id="catalogModalOverlay" class="modal-overlay glass-blur">
     <div class="modal glass-modal settings-modal">
       <div class="modal-header">
-        <h2><i data-lucide="settings"></i> Configuración de Sistema</h2>
+        <h2><i data-lucide="settings"></i> Ajustes</h2>
         <button id="closeCatalogModal" class="close-btn">&times;</button>
       </div>
       <div class="settings-layout">
         <nav class="settings-nav">
           <button class="nav-item active" onclick="switchCat('brands')">Marcas y Modelos</button>
           <button class="nav-item" onclick="switchCat('locations')">Ubicaciones</button>
-          <div style="margin-top: auto; padding: 1rem;">
-            <button class="glass-btn" onclick="window.downloadTemplate()"
-              style="width: 100%; border: 1px dashed var(--primary); font-size: 0.8rem;">
-              <i data-lucide="download" style="width:14px"></i> <span>Plantilla Excel</span>
-            </button>
-          </div>
+          <button class="nav-item" onclick="switchCat('plantilla')">Plantilla Excel</button>
         </nav>
         <div class="settings-content">
           <div id="cat-brands" class="cat-section">
@@ -257,13 +252,46 @@
             </div>
           </div>
           <div id="cat-locations" class="cat-section" style="display: none;">
-            <div class="catalog-card">
-              <h3>Gestión de Sedes / Ubicaciones</h3>
-              <div class="add-group">
-                <input type="text" id="newLocationInput" placeholder="Ej: Nueva Oficina Sede Sur">
-                <button id="addLocationBtn" class="add-btn"><i data-lucide="plus"></i></button>
+            <div class="catalog-grid">
+              <div class="catalog-card">
+                <h3>Sedes</h3>
+                <div class="add-group">
+                  <input type="text" id="newLocationInput" placeholder="Ej: Corporativo">
+                  <button id="addLocationBtn" class="add-btn"><i data-lucide="plus"></i></button>
+                </div>
+                <ul id="locationList" class="styled-list"></ul>
               </div>
-              <ul id="locationList" class="styled-list"></ul>
+              <div class="catalog-card">
+                <h3>Externo</h3>
+                <div class="add-group">
+                  <input type="text" id="newLocationInput2" placeholder="Ej: Campo">
+                  <button id="addLocationBtn2" class="add-btn"><i data-lucide="plus"></i></button>
+                </div>
+                <ul id="locationList2" class="styled-list"></ul>
+              </div>
+            </div>
+          </div>
+          <div id="cat-plantilla" class="cat-section" style="display: none;">
+            <div class="plantilla-section">
+              <div class="plantilla-info">
+                <h3><i data-lucide="file-spreadsheet"></i> Importar Registros desde Excel</h3>
+                <p>Sigue estos pasos para importar tus registros:</p>
+                <ol class="plantilla-steps">
+                  <li><strong>Descarga la plantilla:</strong> Haz clic en el botón "Descargar Plantilla" abajo.</li>
+                  <li><strong>Llena los datos:</strong> Abre el archivo Excel y completa la información de cada activo.</li>
+                  <li><strong>Importa los datos:</strong> En la pantalla principal, haz clic en "Importar" y selecciona tu archivo.</li>
+                </ol>
+                <div class="plantilla-note">
+                  <i data-lucide="info"></i>
+                  <span>Los registros se agregarán a tu inventario existente.</span>
+                </div>
+              </div>
+              <div class="plantilla-download">
+                <button class="excel-btn" onclick="window.downloadTemplate()">
+                  <i data-lucide="file-spreadsheet"></i>
+                </button>
+                <span style="font-size: 0.8rem; color: var(--text-dim);">Descargar Plantilla</span>
+              </div>
             </div>
           </div>
         </div>
