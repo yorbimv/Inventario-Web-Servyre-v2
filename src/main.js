@@ -106,7 +106,10 @@ const renderTable = (data = inventory) => {
             </td>
             <td>${sanitize(item.pcName || '-')}</td>
             <td><code>${sanitize(item.serialNumber)}</code></td>
-            <td><span class="badge badge-blue">${sanitize(item.location)}</span></td>
+            <td><span class="badge badge-blue" style="text-align: left; padding: 0.5rem 0.75rem;">
+                <div style="font-weight: 600;">${sanitize(item.location || '-')}</div>
+                <div style="font-size: 0.65rem; opacity: 0.8;">${sanitize(item.address || '-')}</div>
+            </span></td>
             <td><span class="badge ${sc}">${sanitize(item.status)}</span></td>
             <td>
                 <div class="btn-group-glass">
@@ -901,6 +904,7 @@ inventoryForm.onsubmit = (e) => {
         // Added fields
         price: document.getElementById('price').value,
         purchaseDate: document.getElementById('purchaseDate').value,
+        warranty: document.getElementById('warranty').value,
         periphBrand: document.getElementById('periphBrand').value,
         periphModel: document.getElementById('periphModel').value,
         periphSerial: document.getElementById('periphSerial').value,
