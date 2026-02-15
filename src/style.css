@@ -309,20 +309,21 @@ table {
 
 th {
   background: var(--card-bg);
-  padding: 1.25rem 1.5rem;
-  text-align: left;
+  padding: 1rem 1.25rem;
+  text-align: center;
   font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  color: var(--text);
   border-bottom: 1px solid var(--border);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 td {
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--border-light);
   font-size: 0.9rem;
+  text-align: center;
 }
 
 tr:hover td {

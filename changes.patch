@@ -1,0 +1,1413 @@
+From 559d96c3964d933be709e9812d02a3ca8a3180a7 Mon Sep 17 00:00:00 2001
+From: Servyre Dev <dev@servyre.com>
+Date: Sat, 14 Feb 2026 15:55:03 +0000
+Subject: [PATCH] Feat: Light/dark theme toggle with Apple glassmorphism,
+ yellow Servyre branding
+
+- Add theme toggle with localStorage persistence (dark default)
+- Light mode with soft cream yellow (#D4A017) and white tones
+- Dark mode with golden yellow (#FCD34D)
+- Fix modal scroll and improve form layout with all 28 fields
+- Add XSS sanitization and move MASTER_KEY to config
+- Improve responsive design and accessibility
+---
+ index.html    |  73 +++++-
+ src/config.js |   4 +
+ src/main.js   |  97 ++++---
+ src/style.css | 706 ++++++++++++++++++++++++++++++++++++++------------
+ src/utils.js  |  10 +
+ 5 files changed, 675 insertions(+), 215 deletions(-)
+ create mode 100644 src/config.js
+ create mode 100644 src/utils.js
+
+diff --git a/index.html b/index.html
+index daa721c..8d7b6f7 100644
+--- a/index.html
++++ b/index.html
+@@ -13,6 +13,10 @@
+ </head>
+ 
+ <body class="bg-gradient">
++  <button class="theme-toggle" id="themeToggle" title="Cambiar tema">
++    <span class="theme-toggle-icon moon">🌙</span>
++    <span class="theme-toggle-icon sun">☀️</span>
++  </button>
+   <div id="app">
+     <header class="glass-header animate__animated animate__fadeInDown">
+       <div class="header-content">
+@@ -107,7 +111,7 @@
+ 
+           <div class="form-section">
+             <h3><i data-lucide="map-pin"></i> Ubicación / Personal</h3>
+-            <div class="form-grid">
++            <div class="form-grid form-grid-2">
+               <div class="form-group"><label>Ubicación</label><select id="location" required></select></div>
+               <div class="form-group"><label>Dirección</label><input type="text" id="address"></div>
+               <div class="form-group"><label>Departamento</label><input type="text" id="department" required></div>
+@@ -121,13 +125,16 @@
+ 
+           <div class="form-section">
+             <h3><i data-lucide="cpu"></i> Especificaciones del Equipo</h3>
+-            <div class="form-grid">
++            <div class="form-grid form-grid-2">
+               <div class="form-group">
+                 <label>Tipo de Equipo</label>
+                 <select id="deviceType" required>
+                   <option value="Laptop">Laptop</option>
+                   <option value="Desktop">Desktop</option>
+                   <option value="Servidor">Servidor</option>
++                  <option value="Monitor">Monitor</option>
++                  <option value="Impresora">Impresora</option>
++                  <option value="Otro">Otro</option>
+                 </select>
+               </div>
+               <div class="form-group"><label>Marca</label><select id="brand" required></select></div>
+@@ -136,24 +143,68 @@
+               <div class="form-group"><label>Sistema Operativo</label><input type="text" id="os"></div>
+               <div class="form-group"><label>Nombre PC</label><input type="text" id="pcName"></div>
+               <div class="form-group"><label>Procesador</label><input type="text" id="processor"></div>
+-              <div class="form-group"><label>RAM (GB)</label><input type="number" id="ram" required></div>
+-              <div class="form-group"><label>Disco (GB)</label><input type="number" id="storageCapacity" required></div>
++              <div class="form-group"><label>RAM (GB)</label><input type="text" id="ram" placeholder="ej: 16 GB"></div>
++              <div class="form-group"><label>Disco (GB)</label><input type="text" id="storageCapacity" placeholder="ej: 512 GB SSD"></div>
+               <div class="form-group"><label>Estado</label><select id="status" required>
+                   <option value="Activo">Activo</option>
+                   <option value="Mantenimiento">Mantenimiento</option>
+                   <option value="Baja">Baja</option>
+                 </select></div>
+-              <div class="form-group check-row">
+-                <input type="checkbox" id="mouseExternal">
+-                <label for="mouseExternal" class="label-check">Mouse Externo</label>
++              <div class="form-group"><label>Mouse Externo</label><input type="text" id="mouseExternal" placeholder="Serie del mouse"></div>
++            </div>
++          </div>
++
++          <div class="form-section">
++            <h3><i data-lucide="dollar-sign"></i> Costos y Compras</h3>
++            <div class="form-grid form-grid-2">
++              <div class="form-group"><label>Precio Unitario</label><input type="text" id="price" placeholder="ej: $15,000.00"></div>
++              <div class="form-group"><label>Fecha de Compra</label><input type="date" id="purchaseDate"></div>
++            </div>
++          </div>
++
++          <div class="form-section">
++            <h3><i data-lucide="monitor"></i> Periféricos / Accesorios</h3>
++            <div class="form-grid form-grid-2">
++              <div class="form-group"><label>Marca (Monitor/Accesorio)</label><input type="text" id="periphBrand"></div>
++              <div class="form-group"><label>Modelo (Monitor/Accesorio)</label><input type="text" id="periphModel"></div>
++              <div class="form-group"><label>Serie (Monitor/Accesorio)</label><input type="text" id="periphSerial"></div>
++            </div>
++          </div>
++
++          <div class="form-section">
++            <h3><i data-lucide="tool"></i> Mantenimiento</h3>
++            <div class="form-grid form-grid-2">
++              <div class="form-group"><label>Último Mantenimiento</label><input type="date" id="lastMtto"></div>
++              <div class="form-group"><label>Próximo Mantenimiento</label><input type="date" id="nextMtto"></div>
++            </div>
++          </div>
++
++          <div class="form-section">
++            <h3><i data-lucide="alert-triangle"></i> Condiciones e Incidentes</h3>
++            <div class="form-grid form-grid-2">
++              <div class="form-group">
++                <label>Condiciones del Equipo</label>
++                <textarea id="conditions" rows="2" placeholder="Estado físico, reparaciones realizadas..."></textarea>
++              </div>
++              <div class="form-group">
++                <label>Reporte de Incidentes</label>
++                <textarea id="incidentReport" rows="2" placeholder="Fallas, golpes, robos, etc."></textarea>
+               </div>
+             </div>
+           </div>
+ 
+-          <div class="form-group full-width-area">
+-            <label>Observaciones Adicionales</label>
+-            <textarea id="notes" rows="3"
+-              placeholder="Añadir notas internas, incidentes o detalles del resguardo..."></textarea>
++          <div class="form-section">
++            <h3><i data-lucide="link"></i> Documentación</h3>
++            <div class="form-grid form-grid-2">
++              <div class="form-group full-width">
++                <label>Links / Fotos</label>
++                <input type="url" id="photos" placeholder="https://...">
++              </div>
++              <div class="form-group full-width">
++                <label>Observaciones Adicionales</label>
++                <textarea id="notes" rows="3" placeholder="Notas internas, detalles del resguardo..."></textarea>
++              </div>
++            </div>
+           </div>
+         </div>
+         <div class="modal-footer-premium">
+diff --git a/src/config.js b/src/config.js
+new file mode 100644
+index 0000000..9ed1a44
+--- /dev/null
++++ b/src/config.js
+@@ -0,0 +1,4 @@
++export const CONFIG = {
++    MASTER_KEY: import.meta.env?.VITE_MASTER_KEY || 'Servyre2026',
++    STORAGE_KEY: 'servyre_v2_core_db'
++};
+diff --git a/src/main.js b/src/main.js
+index d18754c..6e8cd4b 100644
+--- a/src/main.js
++++ b/src/main.js
+@@ -2,10 +2,12 @@ import * as XLSX from 'xlsx';
+ import { jsPDF } from 'jspdf';
+ import 'jspdf-autotable';
+ import CryptoJS from 'crypto-js';
++import { CONFIG } from './config.js';
++import { sanitize } from './utils.js';
+ 
+ // --- CONFIGURATION & STATE ---
+-const MASTER_KEY = 'Servyre2026';
+-const STORAGE_KEY = 'servyre_v2_core_db'; // New robust storage key
++const MASTER_KEY = CONFIG.MASTER_KEY;
++const STORAGE_KEY = CONFIG.STORAGE_KEY;
+ 
+ let inventory = [];
+ let catalogs = {
+@@ -89,21 +91,21 @@ const renderTable = (data = inventory) => {
+         const sc = item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : 'badge-danger';
+ 
+         tr.innerHTML = `
+-            <td><span class="badge badge-blue">${item.location}</span></td>
+-            <td>${item.department}</td>
+-            <td><code>${item.resguardo || '-'}</code></td>
++            <td><span class="badge badge-blue">${sanitize(item.location)}</span></td>
++            <td>${sanitize(item.department)}</td>
++            <td><code>${sanitize(item.resguardo || '-')}</code></td>
+             <td>
+-                <div style="font-weight: 700; color: var(--text);">${item.fullName}</div>
+-                <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">${item.position}</div>
++                <div style="font-weight: 700; color: var(--text);">${sanitize(item.fullName)}</div>
++                <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">${sanitize(item.position)}</div>
+             </td>
+-            <td><span style="font-weight: 500;">${item.deviceType}</span></td>
++            <td><span style="font-weight: 500;">${sanitize(item.deviceType)}</span></td>
+             <td>
+-                <div style="font-weight: 600;">${item.brand}</div>
+-                <div style="font-size: 0.75rem; color: var(--text-dim);">${item.model}</div>
++                <div style="font-weight: 600;">${sanitize(item.brand)}</div>
++                <div style="font-size: 0.75rem; color: var(--text-dim);">${sanitize(item.model)}</div>
+             </td>
+-            <td><code>${item.serialNumber}</code></td>
+-            <td>${item.pcName || '-'}</td>
+-            <td><span class="badge ${sc}">${item.status}</span></td>
++            <td><code>${sanitize(item.serialNumber)}</code></td>
++            <td>${sanitize(item.pcName || '-')}</td>
++            <td><span class="badge ${sc}">${sanitize(item.status)}</span></td>
+             <td>
+                 <div class="btn-group-glass">
+                     <button class="glass-btn btn-row-edit" title="Editar"><i data-lucide="edit-2" style="width:14px"></i></button>
+@@ -143,66 +145,66 @@ const viewAssetDetail = (id) => {
+         <div class="asset-passport-premium animate__animated animate__zoomIn">
+             <div class="user-profile-card">
+                 <div class="user-avatar-premium">${initials}</div>
+-                <h2 style="font-size: 1.8rem;">${item.fullName}</h2>
+-                <p style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${item.position}</p>
++                <h2 style="font-size: 1.8rem;">${sanitize(item.fullName)}</h2>
++                <p style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${sanitize(item.position)}</p>
+                 <div style="margin-top: 1.5rem;">
+-                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : 'badge-orange'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${item.status}</span>
++                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : 'badge-orange'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${sanitize(item.status)}</span>
+                 </div>
+                 <div style="margin-top: 2rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; font-size: 0.9rem;">
+                     <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                         <span style="color:var(--text-dim)">Ubicación / Sede</span>
+-                        <span style="font-weight:600">${item.location}</span>
++                        <span style="font-weight:600">${sanitize(item.location)}</span>
+                     </div>
+                     <div style="display:flex; justify-content:space-between;">
+                         <span style="color:var(--text-dim)">División / Dirección</span>
+-                        <span style="font-weight:600">${item.address || '-'}</span>
++                        <span style="font-weight:600">${sanitize(item.address || '-')}</span>
+                     </div>
+                 </div>
+             </div>
+             
+             <div class="detail-grid-v2" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                 <!-- Main Specs -->
+-                <div class="info-card"><label>S/N Serial</label><div class="value">${item.serialNumber}</div></div>
+-                <div class="info-card"><label>Resguardo N°</label><div class="value">${item.resguardo || 'Pendiente'}</div></div>
++                <div class="info-card"><label>S/N Serial</label><div class="value">${sanitize(item.serialNumber)}</div></div>
++                <div class="info-card"><label>Resguardo N°</label><div class="value">${sanitize(item.resguardo || 'Pendiente')}</div></div>
+                 
+                 <div class="info-card" style="grid-column: span 2;">
+                     <label>Equipo Principal</label>
+                     <div class="value" style="display: flex; gap: 0.5rem; align-items: center;">
+-                        <span style="color: var(--primary)">${item.deviceType}</span>
+-                        <span>${item.brand} ${item.model}</span>
++                        <span style="color: var(--primary)">${sanitize(item.deviceType)}</span>
++                        <span>${sanitize(item.brand)} ${sanitize(item.model)}</span>
+                     </div>
+                 </div>
+ 
+-                <div class="info-card"><label>Hardware Specs</label><div class="value" style="font-size:0.8rem">${item.processor || 'CPU'} / RAM ${item.ram} / ${item.storageCapacity}</div></div>
+-                <div class="info-card"><label>Mouse (Serie)</label><div class="value">${item.mouseExternal || '-'}</div></div>
++                <div class="info-card"><label>Hardware Specs</label><div class="value" style="font-size:0.8rem">${sanitize(item.processor || 'CPU')} / RAM ${sanitize(item.ram)} / ${sanitize(item.storageCapacity)}</div></div>
++                <div class="info-card"><label>Mouse (Serie)</label><div class="value">${sanitize(item.mouseExternal || '-')}</div></div>
+ 
+                 <!-- Peripherals -->
+                 <div class="info-card" style="grid-column: span 2; border-left: 3px solid var(--secondary);">
+                     <label>Monitor / Accesorio</label>
+                     <div class="value" style="font-size: 0.85rem;">
+-                        ${item.periphBrand || ''} ${item.periphModel || ''} <code style="margin-left:5px">${item.periphSerial || '-'}</code>
++                        ${sanitize(item.periphBrand || '')} ${sanitize(item.periphModel || '')} <code style="margin-left:5px">${sanitize(item.periphSerial || '-')}</code>
+                     </div>
+                 </div>
+ 
+                 <!-- Maintenance & Costs -->
+-                <div class="info-card"><label>Costo (Precio U.)</label><div class="value">${item.price || '$0.00'}</div></div>
+-                <div class="info-card"><label>Fecha Compra</label><div class="value">${item.purchaseDate || '-'}</div></div>
++                <div class="info-card"><label>Costo (Precio U.)</label><div class="value">${sanitize(item.price || '$0.00')}</div></div>
++                <div class="info-card"><label>Fecha Compra</label><div class="value">${sanitize(item.purchaseDate || '-')}</div></div>
+                 
+-                <div class="info-card"><label>Último Manto.</label><div class="value">${item.lastMtto || '-'}</div></div>
+-                <div class="info-card"><label>Próximo Manto.</label><div class="value" style="color:var(--primary)">${item.nextMtto || '-'}</div></div>
++                <div class="info-card"><label>Último Manto.</label><div class="value">${sanitize(item.lastMtto || '-')}</div></div>
++                <div class="info-card"><label>Próximo Manto.</label><div class="value" style="color:var(--primary)">${sanitize(item.nextMtto || '-')}</div></div>
+ 
+                 <div class="info-card" style="grid-column: span 2;">
+                     <label>Reporte de Incidentes / Condiciones</label>
+                     <div class="value" style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.4;">
+-                        <strong>Condiciones:</strong> ${item.conditions || 'Sin reporte'}<br>
+-                        <strong>Incidentes:</strong> ${item.incidentReport || 'Sin reporte'}
++                        <strong>Condiciones:</strong> ${sanitize(item.conditions || 'Sin reporte')}<br>
++                        <strong>Incidentes:</strong> ${sanitize(item.incidentReport || 'Sin reporte')}
+                     </div>
+                 </div>
+ 
+                 <div class="info-card" style="grid-column: span 2;">
+                     <label>Observaciones / Fotos</label>
+-                    <div class="value" style="font-size: 0.8rem; color: var(--text-dim);">${item.notes || '-'}</div>
+-                    ${item.photos ? `<div style="font-size:0.7rem; color:var(--primary); margin-top:5px; overflow:hidden; text-overflow:ellipsis;">LINK: ${item.photos}</div>` : ''}
++                    <div class="value" style="font-size: 0.8rem; color: var(--text-dim);">${sanitize(item.notes || '-')}</div>
++                    ${item.photos ? `<div style="font-size:0.7rem; color:var(--primary); margin-top:5px; overflow:hidden; text-overflow:ellipsis;">LINK: ${sanitize(item.photos)}</div>` : ''}
+                 </div>
+             </div>
+         </div>
+@@ -338,7 +340,7 @@ const renderCatalogItems = () => {
+     brandList.innerHTML = '';
+     catalogs.brands.forEach(b => {
+         const li = document.createElement('li');
+-        li.innerHTML = `<span>${b}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" onclick="window.delCatItem('brands', '${b}')">&times;</button>`;
++        li.innerHTML = `<span>${sanitize(b)}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" data-type="brands" data-val="${sanitize(b)}">&times;</button>`;
+         brandList.appendChild(li);
+     });
+ 
+@@ -346,7 +348,7 @@ const renderCatalogItems = () => {
+     locationList.innerHTML = '';
+     catalogs.locations.forEach(l => {
+         const li = document.createElement('li');
+-        li.innerHTML = `<span>${l}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" onclick="window.delCatItem('locations', '${l}')">&times;</button>`;
++        li.innerHTML = `<span>${sanitize(l)}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" data-type="locations" data-val="${sanitize(l)}">&times;</button>`;
+         locationList.appendChild(li);
+     });
+ 
+@@ -357,12 +359,23 @@ const renderCatalogItems = () => {
+         modelList.innerHTML = '';
+         (catalogs.modelsByBrand[selB] || []).forEach(m => {
+             const li = document.createElement('li');
+-            li.innerHTML = `<span>${m}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" onclick="window.delCatItem('models', '${m}', '${selB}')">&times;</button>`;
++            li.innerHTML = `<span>${sanitize(m)}</span> <button class="close-btn" style="font-size:1.2rem; color:var(--danger)" data-type="models" data-val="${sanitize(m)}" data-parent="${sanitize(selB)}">&times;</button>`;
+             modelList.appendChild(li);
+         });
+     } else {
+         modelManagementSection.style.display = 'none';
+     }
++
++    // Attach event listeners
++    brandList.querySelectorAll('.close-btn').forEach(btn => {
++        btn.onclick = () => delCatItem(btn.dataset.type, btn.dataset.val);
++    });
++    locationList.querySelectorAll('.close-btn').forEach(btn => {
++        btn.onclick = () => delCatItem(btn.dataset.type, btn.dataset.val);
++    });
++    modelList.querySelectorAll('.close-btn').forEach(btn => {
++        btn.onclick = () => delCatItem(btn.dataset.type, btn.dataset.val, btn.dataset.parent);
++    });
+ };
+ 
+ window.delCatItem = (type, val, parent = null) => {
+@@ -625,6 +638,18 @@ document.getElementById('addLocationBtn').onclick = () => {
+     }
+ };
+ 
++// --- THEME TOGGLE ---
++const themeToggle = document.getElementById('themeToggle');
++const savedTheme = localStorage.getItem('servyre-theme') || 'dark';
++document.documentElement.setAttribute('data-theme', savedTheme);
++
++themeToggle?.addEventListener('click', () => {
++    const current = document.documentElement.getAttribute('data-theme');
++    const next = current === 'dark' ? 'light' : 'dark';
++    document.documentElement.setAttribute('data-theme', next);
++    localStorage.setItem('servyre-theme', next);
++});
++
+ window.switchCat = (id) => {
+     document.querySelectorAll('.cat-section').forEach(s => s.style.display = 'none');
+     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+diff --git a/src/style.css b/src/style.css
+index bfe5246..4838e21 100644
+--- a/src/style.css
++++ b/src/style.css
+@@ -1,20 +1,52 @@
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+ 
+ :root {
+-  --primary: #6366f1;
+-  --primary-glow: rgba(99, 102, 241, 0.4);
+-  --secondary: #8b5cf6;
+-  --accent: #f43f5e;
+-  --bg: #0f172a;
+-  --surface: rgba(30, 41, 59, 0.6);
+-  --surface-opaque: #1e293b;
+-  --text: #f8fafc;
+-  --text-dim: #94a3b8;
++  /* Dark Mode (Default) */
++  --primary: #FCD34D;
++  --primary-dark: #F59E0B;
++  --primary-glow: rgba(252, 211, 77, 0.3);
++  --secondary: #F59E0B;
++  --accent: #EF4444;
++  --bg: #0F0F0F;
++  --bg-gradient: radial-gradient(circle at top right, #1A1A1A, #0F0F0F);
++  --surface: rgba(30, 30, 30, 0.7);
++  --surface-opaque: #1C1C1E;
++  --surface-glass: rgba(30, 30, 30, 0.6);
++  --text: #F5F5F7;
++  --text-dim: #98989D;
+   --border: rgba(255, 255, 255, 0.1);
+-  --success: #10b981;
+-  --warning: #f59e0b;
+-  --danger: #ef4444;
+-  --radius: 16px;
++  --border-light: rgba(255, 255, 255, 0.06);
++  --success: #34C759;
++  --warning: #FF9F0A;
++  --danger: #FF453A;
++  --radius: 20px;
++  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
++  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
++  --card-bg: rgba(255, 255, 255, 0.05);
++}
++
++[data-theme="light"] {
++  --primary: #D4A017;
++  --primary-dark: #B8860B;
++  --primary-glow: rgba(212, 160, 23, 0.25);
++  --secondary: #B8860B;
++  --accent: #DC2626;
++  --bg: #F0F1F3;
++  --bg-gradient: linear-gradient(180deg, #E8E9EB 0%, #F0F1F3 100%);
++  --surface: rgba(255, 255, 255, 0.95);
++  --surface-opaque: #FFFFFF;
++  --surface-glass: rgba(255, 255, 255, 0.88);
++  --text: #1A1A1E;
++  --text-dim: #5C5C66;
++  --border: rgba(0, 0, 0, 0.1);
++  --border-light: rgba(0, 0, 0, 0.05);
++  --success: #16A34A;
++  --warning: #D97706;
++  --danger: #DC2626;
++  --radius: 20px;
++  --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
++  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
++  --card-bg: rgba(0, 0, 0, 0.03);
+ }
+ 
+ * {
+@@ -24,13 +56,14 @@
+ }
+ 
+ body {
+-  font-family: 'Inter', sans-serif;
++  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+   background-color: var(--bg);
+-  background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
++  background: var(--bg-gradient);
+   color: var(--text);
+   min-height: 100vh;
+   padding: 0;
+   overflow-x: hidden;
++  transition: background-color 0.4s ease, color 0.4s ease;
+ }
+ 
+ #app {
+@@ -39,39 +72,44 @@ body {
+   padding: 2rem;
+ }
+ 
+-/* Header Aesthetics */
++/* Header */
+ .glass-header {
+-  backdrop-filter: blur(12px);
+-  background: rgba(255, 255, 255, 0.03);
++  backdrop-filter: blur(20px);
++  -webkit-backdrop-filter: blur(20px);
++  background: var(--surface-glass);
+   border: 1px solid var(--border);
+   border-radius: 24px;
+   padding: 2rem 3rem;
+-  margin-bottom: 2.5rem;
+-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
++  margin-bottom: 2rem;
++  box-shadow: var(--shadow);
++  transition: all 0.4s ease;
+ }
+ 
+ .header-content {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
++  gap: 2rem;
+ }
+ 
+ h1 {
+-  font-size: 2.8rem;
+-  font-weight: 800;
+-  letter-spacing: -1px;
++  font-size: 2.5rem;
++  font-weight: 700;
++  letter-spacing: -0.5px;
+ }
+ 
+ h1 span {
+-  background: linear-gradient(to right, #818cf8, #c084fc);
++  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
++  background-clip: text;
+ }
+ 
+ .subtitle {
+   color: var(--text-dim);
+   font-weight: 500;
+-  font-size: 1rem;
++  font-size: 0.95rem;
++  margin-top: 0.25rem;
+ }
+ 
+ .system-stats {
+@@ -87,7 +125,7 @@ h1 span {
+ .stat-item span {
+   display: block;
+   font-size: 2rem;
+-  font-weight: 800;
++  font-weight: 700;
+   color: var(--primary);
+ }
+ 
+@@ -104,35 +142,83 @@ h1 span {
+   background: var(--border);
+ }
+ 
++/* Theme Toggle */
++.theme-toggle {
++  position: fixed;
++  top: 1.5rem;
++  right: 1.5rem;
++  z-index: 1000;
++  background: var(--surface-glass);
++  backdrop-filter: blur(12px);
++  -webkit-backdrop-filter: blur(12px);
++  border: 1px solid var(--border);
++  border-radius: 50px;
++  padding: 0.5rem;
++  cursor: pointer;
++  display: flex;
++  align-items: center;
++  gap: 0.5rem;
++  box-shadow: var(--shadow-sm);
++  transition: all 0.3s ease;
++}
++
++.theme-toggle:hover {
++  transform: scale(1.05);
++  box-shadow: var(--shadow);
++}
++
++.theme-toggle-icon {
++  width: 36px;
++  height: 36px;
++  border-radius: 50%;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  font-size: 1.2rem;
++  transition: all 0.3s ease;
++}
++
++.theme-toggle .sun { display: none; }
++.theme-toggle .moon { display: block; }
++
++[data-theme="light"] .theme-toggle .sun { display: block; }
++[data-theme="light"] .theme-toggle .moon { display: none; }
++
+ /* Actions Bar */
+ .header-actions {
+   display: grid;
+   grid-template-columns: 1fr auto;
+   gap: 2rem;
+-  margin-bottom: 2.5rem;
++  margin-bottom: 2rem;
+   align-items: center;
+ }
+ 
+ .glass-container {
+   background: var(--surface);
+-  backdrop-filter: blur(10px);
++  backdrop-filter: blur(12px);
++  -webkit-backdrop-filter: blur(12px);
+   border: 1px solid var(--border);
+   border-radius: var(--radius);
+   padding: 0.75rem 1.5rem;
+   display: flex;
+   align-items: center;
+   gap: 1rem;
+-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
++  box-shadow: var(--shadow-sm);
++  transition: all 0.3s ease;
+ }
+ 
+ .search-bar-container input {
+   background: transparent;
+   border: none;
+-  color: white;
++  color: var(--text);
+   width: 100%;
+   font-size: 1rem;
+ }
+ 
++.search-bar-container input::placeholder {
++  color: var(--text-dim);
++}
++
+ .search-bar-container input:focus {
+   outline: none;
+ }
+@@ -144,67 +230,72 @@ h1 span {
+ .action-grid {
+   display: flex;
+   gap: 1rem;
++  flex-wrap: wrap;
+ }
+ 
+-/* Premium Buttons */
++/* Buttons */
+ .premium-btn {
+-  padding: 0.8rem 1.5rem;
++  padding: 0.75rem 1.5rem;
+   border-radius: var(--radius);
+-  font-weight: 700;
++  font-weight: 600;
+   cursor: pointer;
+   border: none;
+   display: flex;
+   align-items: center;
+-  gap: 0.75rem;
+-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
++  gap: 0.5rem;
++  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
++  font-size: 0.9rem;
+ }
+ 
+ .premium-btn.primary {
+-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+-  color: white;
+-  box-shadow: 0 4px 15px var(--primary-glow);
++  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
++  color: #000;
++  box-shadow: 0 4px 16px var(--primary-glow);
+ }
+ 
+-.premium-btn:hover {
+-  transform: translateY(-4px) scale(1.02);
+-  filter: brightness(1.1);
++.premium-btn.primary:hover {
++  transform: translateY(-2px);
++  box-shadow: 0 8px 24px var(--primary-glow);
+ }
+ 
+ .btn-group-glass {
+   display: flex;
+-  background: rgba(255, 255, 255, 0.05);
++  background: var(--card-bg);
+   border: 1px solid var(--border);
+   border-radius: var(--radius);
+-  padding: 0.4rem;
+-  gap: 0.5rem;
++  padding: 0.35rem;
++  gap: 0.25rem;
+ }
+ 
+ .glass-btn {
+   background: transparent;
+   border: none;
+   color: var(--text);
+-  padding: 0.6rem 1.2rem;
+-  border-radius: 12px;
++  padding: 0.6rem 1rem;
++  border-radius: 14px;
+   cursor: pointer;
+-  font-weight: 600;
++  font-weight: 500;
+   display: flex;
+   align-items: center;
+-  gap: 0.5rem;
+-  transition: all 0.2s;
++  gap: 0.4rem;
++  transition: all 0.2s ease;
++  font-size: 0.85rem;
+ }
+ 
+ .glass-btn:hover {
+-  background: rgba(255, 255, 255, 0.1);
++  background: var(--card-bg);
+ }
+ 
+-/* Table Area */
++/* Table */
+ .glass-table-container {
+   background: var(--surface);
+-  backdrop-filter: blur(12px);
++  backdrop-filter: blur(16px);
++  -webkit-backdrop-filter: blur(16px);
+   border: 1px solid var(--border);
+   border-radius: 24px;
+   overflow: hidden;
+-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
++  box-shadow: var(--shadow);
++  transition: all 0.4s ease;
+ }
+ 
+ .table-responsive {
+@@ -217,234 +308,319 @@ table {
+ }
+ 
+ th {
+-  background: rgba(255, 255, 255, 0.03);
++  background: var(--card-bg);
+   padding: 1.25rem 1.5rem;
+   text-align: left;
+-  font-size: 0.75rem;
++  font-size: 0.7rem;
+   text-transform: uppercase;
+   letter-spacing: 0.1em;
+   color: var(--text-dim);
+   border-bottom: 1px solid var(--border);
++  font-weight: 600;
+ }
+ 
+ td {
+   padding: 1.25rem 1.5rem;
+-  border-bottom: 1px solid var(--border);
++  border-bottom: 1px solid var(--border-light);
+   font-size: 0.9rem;
+ }
+ 
+ tr:hover td {
+-  background: rgba(255, 255, 255, 0.05);
++  background: var(--card-bg);
+ }
+ 
+-/* Modal Premium */
++/* Modal */
+ .modal-overlay {
+   position: fixed;
+   inset: 0;
+-  background: rgba(0, 0, 0, 0.8);
++  background: rgba(0, 0, 0, 0.5);
+   display: none;
+   justify-content: center;
+   align-items: center;
+   z-index: 1000;
+   padding: 2rem;
++  backdrop-filter: blur(8px);
++  -webkit-backdrop-filter: blur(8px);
+ }
+ 
+-.modal-overlay.active {
+-  display: flex;
++[data-theme="light"] .modal-overlay {
++  background: rgba(0, 0, 0, 0.4);
+ }
+ 
+-.glass-blur {
+-  backdrop-filter: blur(8px);
++.modal-overlay.active {
++  display: flex;
+ }
+ 
+ .premium-modal {
+   background: var(--surface-opaque);
+   width: 100%;
++  max-width: 900px;
+   max-height: 90vh;
+-  border-radius: 32px;
++  border-radius: 24px;
+   border: 1px solid var(--border);
+-  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
++  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.3);
+   display: flex;
+   flex-direction: column;
+-  overflow: hidden;
++  overflow: auto;
++  transition: all 0.3s ease;
++}
++
++[data-theme="light"] .premium-modal {
++  background: #FFFFFF;
++  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.15);
+ }
+ 
+ .modal-header {
+-  padding: 2rem 2.5rem;
++  padding: 1.5rem 2rem;
+   border-bottom: 1px solid var(--border);
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
++  background: var(--card-bg);
++  position: sticky;
++  top: 0;
++  z-index: 10;
++}
++
++[data-theme="light"] .modal-header {
++  background: #F8F9FA;
++  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+ }
+ 
+ .modal-header h2 {
+-  font-size: 1.5rem;
+-  font-weight: 700;
++  font-size: 1.4rem;
++  font-weight: 600;
+ }
+ 
+ .close-btn {
+   background: none;
+   border: none;
+   color: var(--text-dim);
+-  font-size: 2rem;
++  font-size: 1.75rem;
+   cursor: pointer;
+   line-height: 1;
++  padding: 0.25rem;
++  border-radius: 50%;
++  transition: all 0.2s ease;
++}
++
++.close-btn:hover {
++  background: var(--card-bg);
++  color: var(--text);
+ }
+ 
+ .modal-body-premium {
+-  padding: 2.5rem;
++  padding: 2rem;
+   overflow-y: auto;
++  flex: 1;
+ }
+ 
+ .form-section {
+-  margin-bottom: 3rem;
++  margin-bottom: 2rem;
+ }
+ 
+ .form-section h3 {
+-  font-size: 0.9rem;
++  font-size: 0.85rem;
+   text-transform: uppercase;
+-  letter-spacing: 0.1em;
+-  color: var(--primary);
+-  margin-bottom: 1.5rem;
++  letter-spacing: 0.08em;
++  color: var(--primary-dark);
++  margin-bottom: 1.25rem;
+   display: flex;
+   align-items: center;
+-  gap: 0.75rem;
++  gap: 0.5rem;
++  font-weight: 600;
+ }
+ 
+ .form-grid {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+-  gap: 1.5rem;
++  gap: 1.25rem;
++}
++
++.form-grid-2 {
++  display: grid;
++  grid-template-columns: repeat(2, 1fr);
++  gap: 1rem;
++}
++
++.form-group {
++  display: flex;
++  flex-direction: column;
+ }
+ 
+ .form-group label {
+-  display: block;
+   font-size: 0.75rem;
+-  font-weight: 700;
++  font-weight: 600;
+   color: var(--text-dim);
+-  margin-bottom: 0.5rem;
++  margin-bottom: 0.4rem;
+   text-transform: uppercase;
++  letter-spacing: 0.03em;
+ }
+ 
+-input,
+-select,
+-textarea {
++.form-group.full-width {
++  grid-column: span 2;
++}
++
++input, select, textarea {
+   width: 100%;
+-  background: rgba(0, 0, 0, 0.2);
++  background: var(--card-bg);
+   border: 1px solid var(--border);
+   border-radius: 12px;
+-  padding: 0.8rem 1rem;
+-  color: white;
++  padding: 0.75rem 1rem;
++  color: var(--text);
+   font-family: inherit;
+-  font-size: 0.95rem;
+-  transition: all 0.2s;
++  font-size: 0.9rem;
++  transition: all 0.2s ease;
++}
++
++[data-theme="light"] input, 
++[data-theme="light"] select, 
++[data-theme="light"] textarea {
++  background: #FFFFFF;
++  border: 1px solid rgba(0, 0, 0, 0.12);
++  color: #1A1A1E;
++}
++
++[data-theme="light"] input::placeholder, 
++[data-theme="light"] textarea::placeholder {
++  color: #9CA3AF;
++}
++
++input::placeholder, textarea::placeholder {
++  color: var(--text-dim);
++  opacity: 0.6;
+ }
+ 
+-input:focus,
+-select:focus {
++input:focus, select:focus, textarea:focus {
+   border-color: var(--primary);
+-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
++  box-shadow: 0 0 0 4px var(--primary-glow);
+   outline: none;
++  background: var(--surface);
++}
++
++select {
++  cursor: pointer;
++  appearance: none;
++  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2398989D' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
++  background-repeat: no-repeat;
++  background-position: right 1rem center;
++  padding-right: 2.5rem;
++}
++
++textarea {
++  resize: vertical;
++  min-height: 60px;
+ }
+ 
+ .modal-footer-premium {
+-  padding: 1.5rem 2.5rem;
++  padding: 1.25rem 2rem;
+   border-top: 1px solid var(--border);
+   display: flex;
+   justify-content: flex-end;
+-  gap: 1.5rem;
+-  background: rgba(0, 0, 0, 0.1);
++  gap: 1rem;
++  background: var(--card-bg);
++  flex-shrink: 0;
+ }
+ 
+-.save-btn {
+-  background: var(--primary);
+-  color: white;
+-  padding: 1rem 2.5rem;
+-  border-radius: 14px;
+-  border: none;
+-  font-weight: 700;
+-  cursor: pointer;
+-  transition: all 0.2s;
++[data-theme="light"] .modal-footer-premium {
++  background: #F8F9FA;
++  border-top: 1px solid rgba(0, 0, 0, 0.08);
+ }
+ 
+-.cancel-btn {
+-  background: transparent;
+-  color: var(--text-dim);
++.save-btn {
++  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
++  color: #000;
++  padding: 0.85rem 2rem;
++  border-radius: 12px;
+   border: none;
+   font-weight: 600;
+   cursor: pointer;
++  transition: all 0.2s ease;
+ }
+ 
+-/* Detail Modal */
+-.modal-body-detail {
+-  padding: 3rem;
+-}
+-
+-.asset-passport-premium {
+-  display: grid;
+-  grid-template-columns: 300px 1fr;
+-  gap: 4rem;
++.save-btn:hover {
++  transform: translateY(-1px);
++  box-shadow: 0 4px 12px var(--primary-glow);
+ }
+ 
+-.user-profile-card {
+-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+-  border-radius: 24px;
+-  padding: 3rem 2rem;
+-  text-align: center;
++.cancel-btn {
++  background: transparent;
++  color: var(--text-dim);
+   border: 1px solid var(--border);
++  padding: 0.85rem 1.5rem;
++  border-radius: 12px;
++  font-weight: 500;
++  cursor: pointer;
++  transition: all 0.2s ease;
+ }
+ 
+-.user-avatar-premium {
+-  width: 120px;
+-  height: 120px;
+-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+-  border-radius: 50%;
+-  margin: 0 auto 2rem;
+-  display: flex;
+-  justify-content: center;
+-  align-items: center;
+-  font-size: 4rem;
+-  font-weight: 800;
+-  box-shadow: 0 20px 30px -10px var(--primary-glow);
++.cancel-btn:hover {
++  background: var(--card-bg);
++  color: var(--text);
+ }
+ 
+ /* Badges */
+ .badge {
+-  padding: 0.4rem 0.8rem;
+-  border-radius: 10px;
+-  font-size: 0.75rem;
+-  font-weight: 700;
+-  letter-spacing: 0.05em;
++  padding: 0.35rem 0.75rem;
++  border-radius: 8px;
++  font-size: 0.7rem;
++  font-weight: 600;
++  letter-spacing: 0.03em;
+ }
+ 
+ .badge-blue {
+   background: rgba(59, 130, 246, 0.15);
+-  color: #60a5fa;
++  color: #60A5FA;
++}
++
++[data-theme="light"] .badge-blue {
++  background: rgba(59, 130, 246, 0.12);
++  color: #2563EB;
+ }
+ 
+ .badge-green {
+-  background: rgba(16, 185, 129, 0.15);
+-  color: #34d399;
++  background: rgba(52, 199, 89, 0.15);
++  color: #34C759;
++}
++
++[data-theme="light"] .badge-green {
++  background: rgba(52, 199, 89, 0.12);
++  color: #059669;
+ }
+ 
+ .badge-orange {
+-  background: rgba(245, 158, 11, 0.15);
+-  color: #fbbf24;
++  background: rgba(255, 159, 10, 0.15);
++  color: #FF9F0A;
++}
++
++[data-theme="light"] .badge-orange {
++  background: rgba(245, 158, 11, 0.12);
++  color: #D97706;
++}
++
++.badge-danger {
++  background: rgba(255, 69, 58, 0.15);
++  color: #FF453A;
++}
++
++/* Settings Modal */
++.settings-modal {
++  max-width: 1000px;
+ }
+ 
+-/* Settings Layout */
+ .settings-layout {
+   display: grid;
+-  grid-template-columns: 200px 1fr;
+-  height: 60vh;
++  grid-template-columns: 220px 1fr;
++  min-height: 500px;
+ }
+ 
+ .settings-nav {
+   border-right: 1px solid var(--border);
+-  padding: 2rem 1rem;
++  padding: 1.5rem 1rem;
+   display: flex;
+   flex-direction: column;
+   gap: 0.5rem;
++  background: var(--card-bg);
+ }
+ 
+ .nav-item {
+@@ -452,65 +628,82 @@ select:focus {
+   border: none;
+   color: var(--text-dim);
+   text-align: left;
+-  padding: 1rem 1.5rem;
+-  border-radius: 12px;
++  padding: 0.85rem 1.25rem;
++  border-radius: 10px;
+   cursor: pointer;
+-  font-weight: 600;
+-  transition: all 0.2s;
++  font-weight: 500;
++  transition: all 0.2s ease;
++  font-size: 0.9rem;
+ }
+ 
+ .nav-item.active {
+   background: var(--primary);
+-  color: white;
++  color: #000;
++}
++
++.nav-item:hover:not(.active) {
++  background: var(--card-bg);
++  color: var(--text);
+ }
+ 
+ .settings-content {
+-  padding: 3rem;
++  padding: 2rem;
+   overflow-y: auto;
+ }
+ 
+ .catalog-grid {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+-  gap: 3rem;
++  gap: 2rem;
+ }
+ 
+ .catalog-card h3 {
+-  margin-bottom: 1.5rem;
+-  font-size: 1.1rem;
++  font-size: 1rem;
++  margin-bottom: 1rem;
++  color: var(--text);
+ }
+ 
+ .add-group {
+   display: flex;
+   gap: 0.5rem;
+-  margin-bottom: 1.5rem;
++  margin-bottom: 1rem;
++}
++
++.add-group input {
++  flex: 1;
+ }
+ 
+ .add-btn {
+   background: var(--primary);
+   border: none;
+-  color: white;
+-  width: 44px;
+-  height: 44px;
++  color: #000;
++  width: 42px;
++  height: 42px;
+   border-radius: 10px;
+   cursor: pointer;
+   display: flex;
+   justify-content: center;
+   align-items: center;
++  font-size: 1.2rem;
++  transition: all 0.2s ease;
++}
++
++.add-btn:hover {
++  transform: scale(1.05);
+ }
+ 
+ .styled-list {
+   list-style: none;
+-  background: rgba(0, 0, 0, 0.2);
+-  border-radius: 16px;
++  background: var(--card-bg);
++  border-radius: 14px;
+   border: 1px solid var(--border);
+-  max-height: 400px;
++  max-height: 350px;
+   overflow-y: auto;
+ }
+ 
+ .styled-list li {
+-  padding: 1rem 1.5rem;
+-  border-bottom: 1px solid var(--border);
++  padding: 0.85rem 1.25rem;
++  border-bottom: 1px solid var(--border-light);
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+@@ -520,9 +713,186 @@ select:focus {
+   border-bottom: none;
+ }
+ 
++/* Detail Modal */
++.detail-modal {
++  max-width: 1000px;
++  background: var(--surface-opaque);
++}
++
++[data-theme="light"] .detail-modal {
++  background: #FFFFFF;
++  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
++}
++
++.modal-body-detail {
++  padding: 2.5rem;
++  background: var(--surface-opaque);
++}
++
++[data-theme="light"] .modal-body-detail {
++  background: #FFFFFF;
++}
++
++.asset-passport-premium {
++  display: grid;
++  grid-template-columns: 280px 1fr;
++  gap: 3rem;
++}
++
++.user-profile-card {
++  background: linear-gradient(135deg, var(--card-bg), var(--surface));
++  border-radius: 20px;
++  padding: 2rem;
++  text-align: center;
++  border: 1px solid var(--border);
++}
++
++[data-theme="light"] .user-profile-card {
++  background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
++  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
++}
++
++.user-avatar-premium {
++  width: 100px;
++  height: 100px;
++  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
++  border-radius: 50%;
++  margin: 0 auto 1.5rem;
++  display: flex;
++  justify-content: center;
++  align-items: center;
++  font-size: 2.5rem;
++  font-weight: 700;
++  box-shadow: 0 12px 24px var(--primary-glow);
++  color: #000;
++}
++
++.detail-grid-v2 {
++  display: grid;
++  grid-template-columns: repeat(2, 1fr);
++  gap: 1rem;
++}
++
++.info-card {
++  background: var(--card-bg);
++  border-radius: 12px;
++  padding: 1rem 1.25rem;
++  border: 1px solid var(--border-light);
++}
++
++[data-theme="light"] .info-card {
++  background: #FFFFFF;
++  border: 1px solid rgba(0, 0, 0, 0.08);
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
++}
++
++.info-card label {
++  display: block;
++  font-size: 0.7rem;
++  text-transform: uppercase;
++  letter-spacing: 0.05em;
++  color: var(--text-dim);
++  margin-bottom: 0.35rem;
++}
++
++.info-card .value {
++  font-size: 0.9rem;
++  font-weight: 500;
++  color: var(--text);
++}
++
++.info-card[style*="grid-column"] {
++  border-left: 3px solid var(--primary);
++  padding-left: 1rem;
++}
++
++/* Footer */
+ .system-footer {
+   text-align: center;
+-  padding: 4rem 0;
++  padding: 3rem 0 1rem;
+   color: var(--text-dim);
+-  font-size: 0.85rem;
+-}
+\ No newline at end of file
++  font-size: 0.8rem;
++}
++
++/* Responsive */
++@media (max-width: 1200px) {
++  #app { padding: 1.5rem; }
++  .glass-header { padding: 1.5rem 2rem; }
++  h1 { font-size: 2rem; }
++  .header-content { flex-direction: column; text-align: center; }
++  .form-grid { grid-template-columns: repeat(2, 1fr); }
++  .asset-passport-premium { grid-template-columns: 1fr; gap: 2rem; }
++}
++
++@media (max-width: 768px) {
++  #app { padding: 1rem; }
++  .glass-header { 
++    padding: 1.25rem 1.5rem; 
++    border-radius: 18px;
++  }
++  h1 { font-size: 1.6rem; }
++  .system-stats { gap: 1rem; }
++  .stat-item span { font-size: 1.5rem; }
++  .header-actions { grid-template-columns: 1fr; }
++  .action-grid { justify-content: center; }
++  .btn-group-glass { flex-wrap: wrap; }
++  
++  .modal-overlay { padding: 0.75rem; }
++  .premium-modal { 
++    border-radius: 18px; 
++    max-height: 88vh;
++  }
++  .modal-header { padding: 1.25rem 1.5rem; }
++  .modal-body-premium { padding: 1.25rem; }
++  
++  .form-grid, .form-grid-2 { grid-template-columns: 1fr; }
++  .form-group.full-width { grid-column: span 1; }
++  
++  .settings-layout { grid-template-columns: 1fr; }
++  .settings-nav { 
++    flex-direction: row; 
++    overflow-x: auto; 
++    border-right: none;
++    border-bottom: 1px solid var(--border);
++    padding: 0.75rem;
++  }
++  .nav-item { padding: 0.6rem 1rem; white-space: nowrap; font-size: 0.8rem; }
++  .catalog-grid { grid-template-columns: 1fr; }
++  
++  .modal-body-detail { padding: 1.25rem; }
++  .detail-grid-v2 { grid-template-columns: 1fr; }
++  
++  .modal-footer-premium {
++    padding: 1rem;
++    flex-direction: column;
++  }
++  .save-btn, .cancel-btn { width: 100%; }
++}
++
++@media (max-width: 480px) {
++  .theme-toggle { top: 1rem; right: 1rem; }
++  .system-stats { flex-direction: column; gap: 0.5rem; }
++  .stat-divider { width: 40px; height: 1px; }
++  .premium-btn { padding: 0.6rem 1rem; font-size: 0.8rem; }
++  .badge { font-size: 0.65rem; padding: 0.3rem 0.5rem; }
++  th, td { padding: 0.75rem 0.5rem; font-size: 0.75rem; }
++}
++
++/* Accessibility */
++@media (prefers-reduced-motion: reduce) {
++  *, *::before, *::after {
++    animation-duration: 0.01ms !important;
++    animation-iteration-count: 1 !important;
++    transition-duration: 0.01ms !important;
++  }
++}
++
++/* Animations */
++@keyframes fadeIn {
++  from { opacity: 0; transform: translateY(10px); }
++  to { opacity: 1; transform: translateY(0); }
++}
++
++.fade-in {
++  animation: fadeIn 0.3s ease forwards;
++}
+diff --git a/src/utils.js b/src/utils.js
+new file mode 100644
+index 0000000..8826adf
+--- /dev/null
++++ b/src/utils.js
+@@ -0,0 +1,10 @@
++export const sanitize = (str) => {
++    if (str == null) return '';
++    const div = document.createElement('div');
++    div.textContent = str;
++    return div.innerHTML;
++};
++
++export const sanitizeHTML = (html) => {
++    return html.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
++};
+-- 
+2.39.5
+
