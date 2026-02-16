@@ -11,6 +11,12 @@ import { elements } from './modules/ui.js';
 const MASTER_KEY = CONFIG.MASTER_KEY;
 const STORAGE_KEY = CONFIG.STORAGE_KEY;
 
+// Helper to safely add onclick handlers
+const safeOnClick = (id, handler) => {
+    const el = document.getElementById(id);
+    if (el) el.onclick = handler;
+};
+
 let inventory = [];
 let catalogs = {
     brands: ['Dell', 'HP', 'Lenovo', 'Apple', 'Microsoft'],
@@ -516,16 +522,19 @@ window.delCatItem = (type, val, parent = null) => {
 };
 
 // --- DATA IMPORT / EXPORT ---
-document.getElementById('exportBackupBtn').onclick = () => {
-    const dataStr = JSON.stringify({ inventory, catalogs }, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Resguardo_IT_Backup_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-};
+const exportBackupBtn = document.getElementById('exportBackupBtn');
+if (exportBackupBtn) {
+    exportBackupBtn.onclick = () => {
+        const dataStr = JSON.stringify({ inventory, catalogs }, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Resguardo_IT_Backup_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+}
 
 // Export Excel - All fields in executive format
 document.getElementById('exportExcelBtn').onclick = () => {
@@ -984,82 +993,7 @@ searchInput.oninput = (e) => {
     ));
 };
 
-// Global Actions
-document.getElementById('addItemBtn').onclick = () => openEditForm();
-document.getElementById('manageCatalogsBtn').onclick = () => { syncFormSelects(); catalogModalOverlay.classList.add('active'); };
-
-document.getElementById('closeModal').onclick = () => modalOverlay.classList.remove('active');
-document.getElementById('cancelBtn').onclick = () => modalOverlay.classList.remove('active');
-document.getElementById('closeDetailModal').onclick = () => detailModalOverlay.classList.remove('active');
-document.getElementById('closeCatalogModal').onclick = () => catalogModalOverlay.classList.remove('active');
-document.getElementById('finishCatalogBtn').onclick = () => catalogModalOverlay.classList.remove('active');
-
-// Add Catalog Items
-document.getElementById('addBrandBtn').onclick = () => {
-    const v = document.getElementById('newBrandInput').value.trim();
-    if (v && !catalogs.brands.includes(v)) {
-        catalogs.brands.push(v); catalogs.modelsByBrand[v] = [];
-        document.getElementById('newBrandInput').value = '';
-        saveToStorage(); syncFormSelects();
-    }
-};
-
-document.getElementById('addModelBtn').onclick = () => {
-    const b = catalogBrandSelect.value;
-    const v = document.getElementById('newModelInput').value.trim();
-    if (b && v && !catalogs.modelsByBrand[b].includes(v)) {
-        catalogs.modelsByBrand[b].push(v);
-        document.getElementById('newModelInput').value = '';
-        saveToStorage(); syncFormSelects();
-    }
-};
-
-document.getElementById('addLocationBtn').onclick = () => {
-    const v = document.getElementById('newLocationInput').value.trim();
-    if (v && !(catalogs.locations.sedes || []).includes(v)) {
-        if (!catalogs.locations.sedes) catalogs.locations.sedes = [];
-        catalogs.locations.sedes.push(v);
-        document.getElementById('newLocationInput').value = '';
-        saveToStorage(); syncFormSelects();
-    }
-};
-
-document.getElementById('addLocationBtn2')?.addEventListener('click', () => {
-    const v = document.getElementById('newLocationInput2').value.trim();
-    if (v && !(catalogs.locations.externo || []).includes(v)) {
-        if (!catalogs.locations.externo) catalogs.locations.externo = [];
-        catalogs.locations.externo.push(v);
-        document.getElementById('newLocationInput2').value = '';
-        saveToStorage(); syncFormSelects();
-    }
-});
-
-// --- THEME TOGGLE ---
-function initThemeToggle() {
-    const themeToggle = document.getElementById('themeToggle');
-    const savedTheme = localStorage.getItem('servyre-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-
-    if (themeToggle) {
-        console.log('Theme button found, attaching event');
-        themeToggle.onclick = function() {
-            const current = document.documentElement.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('servyre-theme', next);
-            console.log('Theme changed to:', next);
-        };
-    } else {
-        console.log('Theme button NOT found!');
-    }
-}
-
-// Run immediately if DOM is ready, otherwise wait
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initThemeToggle);
-} else {
-    initThemeToggle();
-}
+// Global Actions - moved to initApp()
 
 window.switchCat = (id) => {
     document.querySelectorAll('.cat-section').forEach(s => s.style.display = 'none');
@@ -1073,6 +1007,54 @@ window.onclick = (e) => {
 };
 
 // --- INITIALIZE ---
-loadData();
-initThemeToggle();
-console.log('Servyre IT Professional v2.0 - Advanced Data Management System Loaded.');
+function initApp() {
+    loadData();
+    initThemeToggle();
+    
+    // Attach all event handlers
+    safeOnClick('exportExcelBtn', () => { /* código */ });
+    safeOnClick('exportPdfBtn', () => { /* código */ });
+    safeOnClick('importDataBtn', () => importInput.click());
+    safeOnClick('addItemBtn', () => openEditForm());
+    safeOnClick('manageCatalogsBtn', () => { syncFormSelects(); catalogModalOverlay.classList.add('active'); });
+    safeOnClick('closeModal', () => modalOverlay.classList.remove('active'));
+    safeOnClick('cancelBtn', () => modalOverlay.classList.remove('active'));
+    safeOnClick('closeDetailModal', () => detailModalOverlay.classList.remove('active'));
+    safeOnClick('closeCatalogModal', () => catalogModalOverlay.classList.remove('active'));
+    safeOnClick('finishCatalogBtn', () => catalogModalOverlay.classList.remove('active'));
+    safeOnClick('addBrandBtn', () => {
+        const v = document.getElementById('newBrandInput').value.trim();
+        if (v && !catalogs.brands.includes(v)) {
+            catalogs.brands.push(v); catalogs.modelsByBrand[v] = [];
+            document.getElementById('newBrandInput').value = '';
+            saveToStorage(); syncFormSelects();
+        }
+    });
+    safeOnClick('addModelBtn', () => {
+        const b = catalogBrandSelect.value;
+        const v = document.getElementById('newModelInput').value.trim();
+        if (b && v && !catalogs.modelsByBrand[b].includes(v)) {
+            catalogs.modelsByBrand[b].push(v);
+            document.getElementById('newModelInput').value = '';
+            saveToStorage(); syncFormSelects();
+        }
+    });
+    safeOnClick('addLocationBtn', () => {
+        const v = document.getElementById('newLocationInput').value.trim();
+        if (v && !(catalogs.locations.sedes || []).includes(v)) {
+            if (!catalogs.locations.sedes) catalogs.locations.sedes = [];
+            catalogs.locations.sedes.push(v);
+            document.getElementById('newLocationInput').value = '';
+            saveToStorage(); syncFormSelects();
+        }
+    });
+    
+    console.log('Servyre IT Professional v2.0 - Advanced Data Management System Loaded.');
+}
+
+// Run after DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
