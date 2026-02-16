@@ -1035,7 +1035,7 @@ document.getElementById('addLocationBtn2')?.addEventListener('click', () => {
 });
 
 // --- THEME TOGGLE ---
-document.addEventListener('DOMContentLoaded', () => {
+function initThemeToggle() {
     const themeToggle = document.getElementById('themeToggle');
     const savedTheme = localStorage.getItem('servyre-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -1052,7 +1052,14 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.log('Theme button NOT found!');
     }
-});
+}
+
+// Run immediately if DOM is ready, otherwise wait
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initThemeToggle);
+} else {
+    initThemeToggle();
+}
 
 window.switchCat = (id) => {
     document.querySelectorAll('.cat-section').forEach(s => s.style.display = 'none');
@@ -1067,4 +1074,5 @@ window.onclick = (e) => {
 
 // --- INITIALIZE ---
 loadData();
+initThemeToggle();
 console.log('Servyre IT Professional v2.0 - Advanced Data Management System Loaded.');
