@@ -7,6 +7,7 @@
   <title>Servyre | IT Advanced Management</title>
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <link rel="stylesheet" href="/src/style.css">
+  <link rel="stylesheet" href="/src/css/dashboard.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Animate.css for quick premium transitions -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
@@ -38,7 +39,58 @@
       </div>
     </header>
 
-    <section class="header-actions animate__animated animate__fadeIn">
+    <nav class="nav-tabs">
+      <button class="nav-tab active" id="tabDashboard">
+        <i data-lucide="layout-dashboard"></i> Dashboard
+      </button>
+      <button class="nav-tab" id="tabInventory">
+        <i data-lucide="database"></i> Inventario
+      </button>
+    </nav>
+
+    <div id="dashboardContainer" class="animate__animated animate__fadeIn">
+    </div>
+
+    <section id="inventorySection" class="animate__animated animate__fadeIn" style="display: none;">
+      <div class="inventory-toolbar">
+        <div class="search-actions-row">
+          <div class="search-bar-container glass-container" style="flex: 1; min-width: 300px;">
+            <i data-lucide="search"></i>
+            <input type="text" id="searchInput" placeholder="Buscar por serie, usuario, ubicación o cualquier campo...">
+          </div>
+          <button id="addItemBtn" class="premium-btn primary">
+            <i data-lucide="plus-circle"></i> <span>Nuevo Registro</span>
+          </button>
+        </div>
+        <div class="actions-row">
+          <div class="btn-group-glass">
+            <button id="saveDiskBtn" class="glass-btn" style="color: var(--success);" title="Guardar">
+              <i data-lucide="save"></i> <span>Guardar</span>
+            </button>
+            <button id="openDiskBtn" class="glass-btn" style="color: var(--primary);" title="Abrir">
+              <i data-lucide="folder-open"></i> <span>Abrir</span>
+            </button>
+          </div>
+          <div class="btn-group-glass">
+            <button id="manageCatalogsBtn" class="glass-btn" title="Configuración">
+              <i data-lucide="settings"></i> <span>Ajustes</span>
+            </button>
+            <button id="importDataBtn" class="glass-btn" title="Importar">
+              <i data-lucide="upload-cloud"></i> <span>Importar</span>
+            </button>
+            <button id="exportExcelBtn" class="glass-btn">
+              <i data-lucide="file-spreadsheet"></i> <span>Excel</span>
+            </button>
+            <button id="exportPdfBtn" class="glass-btn">
+              <i data-lucide="file-text"></i> <span>PDF</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <input type="file" id="importInput" style="display: none;" accept=".json,.xlsx,.xls">
+
+      <main class="table-card glass-table-container">
       <div class="search-bar-container glass-container">
         <i data-lucide="search"></i>
         <input type="text" id="searchInput" placeholder="Buscar por serie, usuario, ubicación o cualquier campo...">

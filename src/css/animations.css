@@ -1,0 +1,40 @@
+/* Lightweight animations to replace animate.css */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translate3d(0, -20px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translate3d(0, 20px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale3d(0.3, 0.3, 0.3); }
+    50% { opacity: 1; }
+}
+
+.animate__animated {
+    animation-duration: 0.5s; /* Faster than default 1s for "snappier" feel */
+    animation-fill-mode: both;
+}
+
+.animate__fadeIn { animation-name: fadeIn; }
+.animate__fadeInDown { animation-name: fadeInDown; }
+.animate__fadeInUp { animation-name: fadeInUp; }
+.animate__zoomIn { animation-name: zoomIn; }
+
+/* Micro-interactions */
+.glass-btn, .premium-btn, .action-btn {
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease;
+}
+
+.glass-btn:active, .premium-btn:active {
+    transform: scale(0.95);
+}

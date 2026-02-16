@@ -4,6 +4,8 @@ import autoTable from 'jspdf-autotable';
 import CryptoJS from 'crypto-js';
 import { CONFIG } from './config.js';
 import { sanitize } from './utils.js';
+import { renderDashboard } from './modules/dashboard.js';
+import { elements } from './modules/ui.js';
 
 // --- CONFIGURATION & STATE ---
 const MASTER_KEY = CONFIG.MASTER_KEY;
@@ -76,7 +78,34 @@ const loadData = () => {
     renderTable();
     updateStats();
     syncFormSelects();
+    renderDashboard(inventory, 'dashboardContainer');
 };
+
+// --- TAB NAVIGATION ---
+let currentView = 'dashboard';
+
+const switchToDashboard = () => {
+    currentView = 'dashboard';
+    document.getElementById('dashboardContainer').style.display = 'block';
+    document.getElementById('inventorySection').style.display = 'none';
+    document.getElementById('tabDashboard').classList.add('active');
+    document.getElementById('tabInventory').classList.remove('active');
+    renderDashboard(inventory, 'dashboardContainer');
+};
+
+const switchToInventory = () => {
+    currentView = 'inventory';
+    document.getElementById('dashboardContainer').style.display = 'none';
+    document.getElementById('inventorySection').style.display = 'block';
+    document.getElementById('tabInventory').classList.add('active');
+    document.getElementById('tabDashboard').classList.remove('active');
+};
+
+document.getElementById('tabDashboard')?.addEventListener('click', switchToDashboard);
+document.getElementById('tabInventory')?.addEventListener('click', switchToInventory);
+
+// Initialize
+switchToDashboard();
 
 const updateStats = () => {
     totalAssetsEl.textContent = inventory.length;
