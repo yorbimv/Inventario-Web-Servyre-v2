@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Theme</title>
+  <style>
+    :root {
+      --primary: #FCD34D;
+      --bg: #0F0F0F;
+      --surface: #1e1e1e;
+    }
+    [data-theme="light"] {
+      --bg: #f0f0f0;
+      --surface: #ffffff;
+    }
+    body { background: var(--bg); color: white; padding: 50px; }
+    [data-theme="light"] body { color: black; }
+    
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      background: var(--surface);
+      border: 1px solid #ccc;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <button id="themeToggle" class="theme-toggle">Toggle Theme</button>
+  <h1>Theme Test</h1>
+  <p>Current theme: <span id="themeStatus">dark</span></p>
+  
+  <script>
+    console.log('Script loaded');
+    
+    const themeToggle = document.getElementById('themeToggle');
+    console.log('Button found:', !!themeToggle);
+    
+    const savedTheme = localStorage.getItem('servyre-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeStatus').textContent = savedTheme;
+    
+    themeToggle.addEventListener('click', () => {
+      console.log('Click handler triggered');
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('servyre-theme', next);
+      document.getElementById('themeStatus').textContent = next;
+      console.log('Theme changed to:', next);
+    });
+  </script>
+</body>
+</html>

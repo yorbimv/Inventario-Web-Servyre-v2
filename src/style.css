@@ -147,19 +147,20 @@ h1 span {
   position: fixed;
   top: 1.5rem;
   right: 1.5rem;
-  z-index: 1000;
+  z-index: 10000;
   background: var(--surface-glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: 50px;
   padding: 0.5rem;
-  cursor: pointer;
+  cursor: pointer !important;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
+  pointer-events: auto !important;
 }
 
 .theme-toggle:hover {
