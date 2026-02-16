@@ -536,268 +536,11 @@ if (exportBackupBtn) {
     };
 }
 
-// Export Excel - All fields in executive format
-document.getElementById('exportExcelBtn').onclick = () => {
-    if (inventory.length === 0) {
-        alert('No hay registros para exportar.');
-        return;
-    }
+// ============================================================================
+// CÓDIGO PRINCIPAL - Se ejecuta después de DOMContentLoaded
+// ============================================================================
 
-    const headers = [
-        "Resguardo", "Usuario", "Puesto", "Correo", "Extensión", "Departamento",
-        "Dirección", "Ubicación", "Tipo Equipo", "Marca", "Modelo", "Serie",
-        "Nombre PC", "Sistema Operativo", "Procesador", "RAM", "Disco",
-        "Estado", "Precio", "Fecha Compra", "Marca Periférico", "Modelo Periférico",
-        "Serie Periférico", "Mouse Externo", "Último Mtto", "Próximo Mtto",
-        "Condiciones", "Incidentes", "Notas", "Fotos"
-    ];
-
-    const rows = inventory.map(item => [
-        item.resguardo || '', item.fullName || '', item.position || '', item.email || '',
-        item.extension || '', item.department || '', item.address || '', item.location || '',
-        item.deviceType || '', item.brand || '', item.model || '', item.serialNumber || '',
-        item.pcName || '', item.os || '', item.processor || '', item.ram || '', item.storageCapacity || '',
-        item.status || '', item.price || '', item.purchaseDate || '',
-        item.periphBrand || '', item.periphModel || '', item.periphSerial || '',
-        item.mouseExternal || '', item.lastMtto || '', item.nextMtto || '',
-        item.conditions || '', item.incidentReport || '', item.notes || '', item.photos || ''
-    ]);
-
-    const wsData = [headers, ...rows];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    
-    ws['!cols'] = headers.map(() => ({ wch: 18 }));
-    ws['!rows'] = [{ hpt: 20 }];
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Inventario IT");
-
-    XLSX.writeFile(wb, `Inventario_IT_Completo_${new Date().toISOString().split('T')[0]}.xlsx`);
-};
-
-// PDF Column Modal Elements
-const pdfColumnModal = document.getElementById('pdfColumnModal');
-const closePdfColumnModal = document.getElementById('closePdfColumnModal');
-const cancelPdfBtn = document.getElementById('cancelPdfBtn');
-const generatePdfBtn = document.getElementById('generatePdfBtn');
-const selectAllColumns = document.getElementById('selectAllColumns');
-const deselectAllColumns = document.getElementById('deselectAllColumns');
-
-let currentPdfFilter = 'todos';
-
-// Column labels mapping
-const columnLabels = {
-    resguardo: 'Resguardo',
-    fullName: 'Usuario',
-    position: 'Puesto',
-    department: 'Departamento',
-    location: 'Ubicación',
-    deviceType: 'Equipo',
-    brand: 'Marca',
-    model: 'Modelo',
-    serialNumber: 'Serie',
-    pcName: 'Nombre PC',
-    os: 'Sistema Operativo',
-    processor: 'Procesador',
-    ram: 'RAM',
-    storageCapacity: 'Disco',
-    email: 'Correo',
-    extension: 'Extensión',
-    status: 'Estado',
-    price: 'Precio',
-    purchaseDate: 'Fecha Compra',
-    mouseExternal: 'Mouse'
-};
-
-// Export PDF - Show column selector first
-document.getElementById('exportPdfBtn').onclick = () => {
-    currentPdfFilter = document.getElementById('pdfFilter').value;
-    
-    if (inventory.length === 0) {
-        alert('No hay registros para exportar.');
-        return;
-    }
-    
-    pdfColumnModal.classList.add('active');
-};
-
-// Close modal handlers
-closePdfColumnModal?.addEventListener('click', () => pdfColumnModal.classList.remove('active'));
-cancelPdfBtn?.addEventListener('click', () => pdfColumnModal.classList.remove('active'));
-
-// Select/Deselect all
-selectAllColumns?.addEventListener('click', () => {
-    document.querySelectorAll('.pdf-column-checkbox input').forEach(cb => cb.checked = true);
-});
-
-deselectAllColumns?.addEventListener('click', () => {
-    document.querySelectorAll('.pdf-column-checkbox input').forEach(cb => cb.checked = false);
-});
-
-// Generate PDF with selected columns
-generatePdfBtn?.addEventListener('click', () => {
-    try {
-        const selectedColumns = Array.from(document.querySelectorAll('.pdf-column-checkbox input:checked')).map(cb => cb.value);
-        
-        if (selectedColumns.length === 0) {
-            alert('Selecciona al menos una columna.');
-            return;
-        }
-        
-        let filteredData = inventory;
-        if (currentPdfFilter !== 'todos') {
-            filteredData = inventory.filter(item => item.status === currentPdfFilter);
-        }
-
-        if (filteredData.length === 0) {
-            alert('No hay registros para exportar.');
-            return;
-        }
-
-        pdfColumnModal.classList.remove('active');
-
-        const doc = new jsPDF('l', 'mm', 'legal');
-        
-        // Executive header - Professional blue palette
-        doc.setFillColor(30, 58, 138);
-        doc.rect(0, 0, 356, 28, 'F');
-        doc.setFillColor(37, 99, 235);
-        doc.rect(0, 28, 356, 4, 'F');
-        
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(22);
-        doc.setFont('helvetica', 'bold');
-        doc.text('SERVYRE IT', 14, 14);
-        
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'normal');
-        const filterLabel = currentPdfFilter === 'todos' ? 'Reporte General' : currentPdfFilter;
-        doc.text(`Inventario de Activos - ${filterLabel}`, 14, 22);
-        
-        // Date and count
-        doc.setFontSize(9);
-        doc.text(`Fecha: ${new Date().toLocaleDateString('es-MX')}`, 330, 10, { align: 'right' });
-        doc.text(`Total: ${filteredData.length} registros`, 330, 18, { align: 'right' });
-
-        // Build table headers and data based on selected columns
-        const headers = ['#', ...selectedColumns.map(col => columnLabels[col] || col)];
-        
-        const getCellValue = (item, col) => {
-            const val = item[col];
-            if (val === undefined || val === null || val === '') return '-';
-            return String(val);
-        };
-        
-        const tableData = filteredData.map((item, index) => [
-            index + 1,
-            ...selectedColumns.map(col => getCellValue(item, col))
-        ]);
-
-        // Calculate column widths - wider columns for full names
-        const colCount = selectedColumns.length + 1;
-        const minColWidth = 22;
-        const maxColWidth = 55;
-        const pageWidth = 336;
-        const rowNumWidth = 12;
-        const availableWidth = pageWidth - rowNumWidth;
-        
-        let baseWidth = Math.floor(availableWidth / colCount);
-        if (baseWidth > maxColWidth) baseWidth = maxColWidth;
-        if (baseWidth < minColWidth) baseWidth = minColWidth;
-        
-        const columnStyles = { 0: { cellWidth: rowNumWidth, fontStyle: 'bold' } };
-        selectedColumns.forEach((_, i) => {
-            columnStyles[i + 1] = { cellWidth: baseWidth };
-        });
-
-        autoTable(doc, {
-            head: [headers],
-            body: tableData,
-            startY: 38,
-            theme: 'striped',
-            headStyles: {
-                fillStyle: [30, 58, 138],
-                textColor: [255, 255, 255],
-                fontStyle: 'bold',
-                fontSize: 9,
-                cellPadding: 3
-            },
-            bodyStyles: {
-                fontSize: 8,
-                textColor: [50, 50, 50],
-                cellPadding: 2
-            },
-            alternateRowStyles: {
-                fillStyle: [248, 250, 252]
-            },
-            columnStyles: columnStyles,
-            margin: { left: 10, right: 10 },
-            styles: {
-                overflow: 'linebreak',
-                cellWidth: 'wrap'
-            }
-        });
-
-        // Executive Summary
-        const finalY = doc.lastAutoTable.finalY + 12;
-        doc.setFillColor(248, 250, 252);
-        doc.roundedRect(10, finalY - 4, 336, 45, 3, 3, 'F');
-        
-        doc.setFontSize(11);
-        doc.setTextColor(30, 58, 138);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Resumen Ejecutivo', 16, finalY + 4);
-        
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(70, 70, 70);
-        
-        // Status counts
-        const counts = { Activo: 0, Mantenimiento: 0, Baja: 0 };
-        inventory.forEach(item => {
-            if (counts[item.status] !== undefined) counts[item.status]++;
-        });
-        
-        doc.text(`Activos: ${counts.Activo}`, 16, finalY + 12);
-        doc.text(`En Mantenimiento: ${counts.Mantenimiento}`, 70, finalY + 12);
-        doc.text(`Bajas: ${counts.Baja}`, 140, finalY + 12);
-        
-        // Location breakdown
-        const locations = {};
-        inventory.forEach(item => {
-            const loc = item.location || 'Sin asignar';
-            locations[loc] = (locations[loc] || 0) + 1;
-        });
-        
-        const locEntries = Object.entries(locations).slice(0, 4);
-        let locY = finalY + 20;
-        doc.setFont('helvetica', 'bold');
-        doc.text('Por Ubicación:', 16, locY);
-        doc.setFont('helvetica', 'normal');
-        
-        let colX = 16;
-        locEntries.forEach(([loc, count], i) => {
-            if (i === 2) { colX = 100; locY = finalY + 26; }
-            doc.text(`• ${loc}: ${count}`, colX, locY);
-            colX += 70;
-        });
-
-        // Footer
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text('Sistema de Gestión de Activos IT - Servyre', 178, 330, { align: 'center' });
-
-        const filename = `Inventario_Servyre_${currentPdfFilter}_${new Date().toISOString().split('T')[0]}.pdf`;
-        doc.save(filename);
-        
-    } catch (error) {
-        console.error('Error generando PDF:', error);
-        alert('Error al generar PDF: ' + error.message);
-    }
-});
-
-// Function to generate and download a Template Excel
-window.downloadTemplate = () => {
+searchInput.oninput = (e) => {
     const headers = [
         "Nombre Completo", "Ubicación", "Direccion", "Departamento", "Puesto",
         "Extension", "Correo", "Resguardo", "Equipo", "Marca", "Modelo", "Serie",
@@ -1009,11 +752,45 @@ window.onclick = (e) => {
 // --- INITIALIZE ---
 function initApp() {
     loadData();
-    initThemeToggle();
+    
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('servyre-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    if (themeToggle) {
+        themeToggle.onclick = function() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('servyre-theme', next);
+        };
+    }
     
     // Attach all event handlers
-    safeOnClick('exportExcelBtn', () => { /* código */ });
-    safeOnClick('exportPdfBtn', () => { /* código */ });
+    safeOnClick('exportExcelBtn', () => {
+        if (inventory.length === 0) {
+            alert('No hay registros para exportar.');
+            return;
+        }
+        const headers = ["Resguardo", "Usuario", "Puesto", "Correo", "Extensión", "Departamento", "Dirección", "Ubicación", "Tipo Equipo", "Marca", "Modelo", "Serie", "Nombre PC", "Sistema Operativo", "Procesador", "RAM", "Disco", "Estado", "Precio", "Fecha Compra", "Marca Periférico", "Modelo Periférico", "Serie Periférico", "Mouse Externo", "Último Mtto", "Próximo Mtto", "Condiciones", "Incidentes", "Notas", "Fotos"];
+        const rows = inventory.map(item => [item.resguardo || '', item.fullName || '', item.position || '', item.email || '', item.extension || '', item.department || '', item.address || '', item.location || '', item.deviceType || '', item.brand || '', item.model || '', item.serialNumber || '', item.pcName || '', item.os || '', item.processor || '', item.ram || '', item.storageCapacity || '', item.status || '', item.price || '', item.purchaseDate || '', item.periphBrand || '', item.periphModel || '', item.periphSerial || '', item.mouseExternal || '', item.lastMtto || '', item.nextMtto || '', item.conditions || '', item.incidentReport || '', item.notes || '', item.photos || '']);
+        const wsData = [headers, ...rows];
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        ws['!cols'] = headers.map(() => ({ wch: 18 }));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Inventario IT");
+        XLSX.writeFile(wb, `Inventario_IT_Completo_${new Date().toISOString().split('T')[0]}.xlsx`);
+    });
+    
+    safeOnClick('exportPdfBtn', () => {
+        if (inventory.length === 0) {
+            alert('No hay registros para exportar.');
+            return;
+        }
+        pdfColumnModal.classList.add('active');
+    });
+    
     safeOnClick('importDataBtn', () => importInput.click());
     safeOnClick('addItemBtn', () => openEditForm());
     safeOnClick('manageCatalogsBtn', () => { syncFormSelects(); catalogModalOverlay.classList.add('active'); });
