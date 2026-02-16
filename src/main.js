@@ -1035,16 +1035,28 @@ document.getElementById('addLocationBtn2')?.addEventListener('click', () => {
 });
 
 // --- THEME TOGGLE ---
-const themeToggle = document.getElementById('themeToggle');
-const savedTheme = localStorage.getItem('servyre-theme') || 'dark';
-document.documentElement.setAttribute('data-theme', savedTheme);
+const initTheme = () => {
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('servyre-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
 
-themeToggle?.addEventListener('click', () => {
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('servyre-theme', next);
-});
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('servyre-theme', next);
+            console.log('Theme changed to:', next);
+        });
+    }
+};
+
+// Initialize theme after DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTheme);
+} else {
+    initTheme();
+}
 
 window.switchCat = (id) => {
     document.querySelectorAll('.cat-section').forEach(s => s.style.display = 'none');
