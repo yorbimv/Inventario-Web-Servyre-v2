@@ -626,6 +626,67 @@ window.delCatItem = (type, val, parent = null) => {
 };
 
 // --- DATA IMPORT / EXPORT ---
+
+// Botón Guardar en Disco (Exportar JSON)
+const saveDiskBtn = document.getElementById('saveDiskBtn');
+if (saveDiskBtn) {
+    saveDiskBtn.onclick = () => {
+        const data = {
+            version: "2.0",
+            exportDate: new Date().toISOString(),
+            inventory: inventory,
+            catalogs: catalogs
+        };
+        const dataStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Servyre_Inventario_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        
+        // Mostrar notificación
+        showNotification('Datos guardados en disco correctamente', 'success');
+    };
+}
+
+// Botón Abrir desde Disco (Importar JSON)
+const openDiskBtn = document.getElementById('openDiskBtn');
+if (openDiskBtn) {
+    openDiskBtn.onclick = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (data.inventory) {
+                            inventory = data.inventory;
+                            if (data.catalogs) catalogs = data.catalogs;
+                            saveToStorage();
+                            renderTable();
+                            updateStats();
+                            showNotification('Datos cargados desde disco correctamente', 'success');
+                        } else {
+                            showNotification('El archivo no contiene datos válidos', 'error');
+                        }
+                    } catch (err) {
+                        showNotification('Error al leer el archivo: ' + err.message, 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        };
+        input.click();
+    };
+}
+
+// Botón Exportar Backup
 const exportBackupBtn = document.getElementById('exportBackupBtn');
 if (exportBackupBtn) {
     exportBackupBtn.onclick = () => {
@@ -637,7 +698,33 @@ if (exportBackupBtn) {
         link.download = `Resguardo_IT_Backup_${new Date().toISOString().split('T')[0]}.json`;
         link.click();
         URL.revokeObjectURL(url);
+        showNotification('Backup exportado correctamente', 'success');
     };
+}
+
+// Función para mostrar notificaciones
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        background: ${type === 'success' ? 'rgba(16, 185, 129, 0.9)' : type === 'error' ? 'rgba(239, 68, 68, 0.9)' : 'rgba(59, 130, 246, 0.9)'};
+        color: white;
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+        backdrop-filter: blur(10px);
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
 // ============================================================================
