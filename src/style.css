@@ -152,26 +152,27 @@ h1 span {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
-  border-radius: 50px;
-  padding: 0.5rem;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   cursor: pointer !important;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
   box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
   pointer-events: auto !important;
 }
 
 .theme-toggle:hover {
-  transform: scale(1.05);
+  transform: scale(1.1);
   box-shadow: var(--shadow);
 }
 
 .theme-toggle-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1081,8 +1082,8 @@ textarea {
 }
 
 [data-theme="light"] .detail-modal {
-  background: #FFFFFF;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  background: #FFF9F0;
+  box-shadow: 0 25px 50px -12px rgba(139, 90, 43, 0.15);
 }
 
 .modal-body-detail {
@@ -1092,7 +1093,7 @@ textarea {
 }
 
 [data-theme="light"] .modal-body-detail {
-  background: #FFFFFF;
+  background: #FFF9F0;
 }
 
 .modal-footer-detail {
@@ -1105,8 +1106,8 @@ textarea {
 }
 
 [data-theme="light"] .modal-footer-detail {
-  background: #F8F9FA;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background: #FEF3D9;
+  border-top: 1px solid rgba(139, 90, 43, 0.15);
 }
 
 .action-btn {
@@ -1156,8 +1157,8 @@ textarea {
 }
 
 [data-theme="light"] .user-profile-card {
-  background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  background: linear-gradient(180deg, #FFF9F0 0%, #FEF3D9 100%);
+  box-shadow: 0 4px 16px rgba(139, 90, 43, 0.1);
 }
 
 .user-avatar-premium {
@@ -1189,9 +1190,9 @@ textarea {
 }
 
 [data-theme="light"] .info-card {
-  background: #FFFFFF;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: #FFF9F0;
+  border: 1px solid rgba(139, 90, 43, 0.1);
+  box-shadow: 0 2px 8px rgba(139, 90, 43, 0.05);
 }
 
 .info-card label {
