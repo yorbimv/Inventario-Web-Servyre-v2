@@ -382,11 +382,22 @@ tr:hover td {
   position: sticky;
   top: 0;
   z-index: 10;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.modal-header.no-border {
+  border-bottom: none;
+  background: linear-gradient(to bottom, var(--card-bg) 80%, transparent);
 }
 
 [data-theme="light"] .modal-header {
   background: #F8F9FA;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .modal-header.no-border {
+  background: linear-gradient(to bottom, #F8F9FA 80%, transparent);
 }
 
 .modal-header h2 {
