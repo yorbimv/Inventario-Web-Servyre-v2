@@ -50,6 +50,11 @@ class DashboardManager {
 
     this.initCharts();
     this.animateWidgets();
+    
+    // Renderizar iconos de Lucide
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
   }
 
   /**
@@ -181,7 +186,7 @@ class DashboardManager {
 
     return kpis.map((kpi, index) => `
       <div class="widget-container" data-widget-id="${kpi.id}">
-        <div class="dashboard-widget kpi-widget widget-animate" style="animation-delay: ${index * 0.08}s">
+        <div class="dashboard-widget kpi-widget widget-animate">
           <div class="drag-handle">
             <i data-lucide="grip-vertical"></i>
           </div>
@@ -209,7 +214,7 @@ class DashboardManager {
   renderChartWidgets() {
     return `
       <div class="widget-container" data-widget-id="chart-status" style="grid-column: span 2;">
-        <div class="dashboard-widget chart-widget widget-animate" style="animation-delay: 0.48s">
+        <div class="dashboard-widget chart-widget widget-animate">
           <div class="drag-handle">
             <i data-lucide="grip-vertical"></i>
           </div>
@@ -222,7 +227,7 @@ class DashboardManager {
         </div>
       </div>
       <div class="widget-container" data-widget-id="chart-brands">
-        <div class="dashboard-widget chart-widget widget-animate" style="animation-delay: 0.56s">
+        <div class="dashboard-widget chart-widget widget-animate">
           <div class="drag-handle">
             <i data-lucide="grip-vertical"></i>
           </div>
@@ -245,7 +250,7 @@ class DashboardManager {
     
     return `
       <div class="widget-container table-widget" data-widget-id="table-recent">
-        <div class="dashboard-widget widget-animate" style="animation-delay: 0.64s">
+        <div class="dashboard-widget widget-animate">
           <div class="drag-handle">
             <i data-lucide="grip-vertical"></i>
           </div>
@@ -604,6 +609,11 @@ class DashboardManager {
    * Refresca el dashboard
    */
   refresh() {
+    // Destruir instancia anterior de Sortable para evitar duplicados
+    if (this.sortable) {
+      this.sortable.destroy();
+      this.sortable = null;
+    }
     this.render();
     this.initDragAndDrop();
   }

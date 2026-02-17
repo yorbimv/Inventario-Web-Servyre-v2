@@ -462,6 +462,16 @@ const openEditForm = (id = null) => {
             // New Fields
             document.getElementById('price').value = i.price || '';
             document.getElementById('purchaseDate').value = i.purchaseDate || '';
+            document.getElementById('warranty').value = i.warranty || '';
+            document.getElementById('warrantyEndDate').value = i.warrantyEndDate || '';
+            document.getElementById('hdmiAdapter').value = i.hdmiAdapter || '';
+            const otroCheck = document.getElementById('otroAccesorioCheck');
+            const otroInput = document.getElementById('otroAccesorio');
+            if (otroCheck && otroInput && i.otroAccesorio) {
+                otroCheck.checked = true;
+                otroInput.style.display = 'block';
+                otroInput.value = i.otroAccesorio;
+            }
             document.getElementById('periphBrand').value = i.periphBrand || '';
             document.getElementById('periphModel').value = i.periphModel || '';
             document.getElementById('periphSerial').value = i.periphSerial || '';
@@ -471,6 +481,11 @@ const openEditForm = (id = null) => {
             document.getElementById('conditions').value = i.conditions || '';
             document.getElementById('photos').value = i.photos || '';
             document.getElementById('notes').value = i.notes || '';
+            
+            // Recalcular días de garantía
+            if (window.updateWarrantyDays) {
+                window.updateWarrantyDays();
+            }
         }
     } else {
         modelInput.disabled = true;
@@ -794,6 +809,9 @@ inventoryForm.onsubmit = (e) => {
         price: document.getElementById('price').value,
         purchaseDate: document.getElementById('purchaseDate').value,
         warranty: document.getElementById('warranty').value,
+        warrantyEndDate: document.getElementById('warrantyEndDate')?.value || '',
+        hdmiAdapter: document.getElementById('hdmiAdapter')?.value || '',
+        otroAccesorio: document.getElementById('otroAccesorio')?.value || '',
         periphBrand: document.getElementById('periphBrand').value,
         periphModel: document.getElementById('periphModel').value,
         periphSerial: document.getElementById('periphSerial').value,
