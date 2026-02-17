@@ -299,11 +299,39 @@ const viewAssetDetail = (id) => {
                 </div>
 
                 <div class="info-card" style="grid-column: span 2;">
-                    <label>Observaciones / Fotos</label>
+                    <label>Observaciones</label>
                     <div class="value" style="font-size: 0.8rem; color: var(--text-dim);">${sanitize(item.notes || '-')}</div>
-                    ${item.photos ? `<div style="font-size:0.7rem; color:var(--primary); margin-top:5px; overflow:hidden; text-overflow:ellipsis;">LINK: ${sanitize(item.photos)}</div>` : ''}
                 </div>
             </div>
+            
+            <!-- Carrusel de Fotos -->
+            ${(() => {
+                const photos = item.photos ? item.photos.split(',').map(p => p.trim()).filter(p => p) : [];
+                if (photos.length === 0) return '';
+                
+                const carouselId = 'photoCarousel_' + item.id;
+                return `
+                    <div class="photo-carousel-container" style="margin-top: 2rem; text-align: center;">
+                        <h3 style="margin-bottom: 1rem; color: var(--text-dim);"><i data-lucide="image"></i> Galería de Fotos</h3>
+                        <div class="photo-carousel" id="${carouselId}" style="position: relative; max-width: 600px; margin: 0 auto; border-radius: 12px; overflow: hidden; background: var(--card-bg);">
+                            ${photos.map((photo, idx) => `
+                                <div class="carousel-slide ${idx === 0 ? 'active' : ''}" data-index="${idx}" style="display: ${idx === 0 ? 'block' : 'none'}; padding: 1rem;">
+                                    <img src="${photo}" alt="Foto ${idx + 1}" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px;" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'padding: 2rem; color: var(--text-dim);\'>No se pudo cargar la imagen</div>';">
+                                </div>
+                            `).join('')}
+                        </div>
+                        ${photos.length > 1 ? `
+                            <button class="carousel-btn prev" onclick="window.moveCarousel('${carouselId}', -1)" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; z-index: 10;">❮</button>
+                            <button class="carousel-btn next" onclick="window.moveCarousel('${carouselId}', 1)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; z-index: 10;">❯</button>
+                            <div class="carousel-dots" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem;">
+                                ${photos.map((_, idx) => `
+                                    <span class="dot ${idx === 0 ? 'active' : ''}" onclick="window.goToSlide('${carouselId}', ${idx})" style="width: 10px; height: 10px; border-radius: 50%; background: var(--text-dim); cursor: pointer; opacity: 0.5; ${idx === 0 ? 'opacity: 1; background: var(--primary);' : ''}"></span>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            })()}
         </div>
     `;
 
@@ -798,6 +826,103 @@ searchInput.oninput = (e) => {
 
 // Global Actions - moved to initApp()
 
+// Toggle Otro Accesorio
+window.toggleOtroAccesorio = () => {
+    const checkbox = document.getElementById('otroAccesorioCheck');
+    const input = document.getElementById('otroAccesorio');
+    if (checkbox && input) {
+        input.style.display = checkbox.checked ? 'block' : 'none';
+        if (!checkbox.checked) input.value = '';
+    }
+};
+
+// Calculate Warranty End Date
+window.calculateWarrantyEnd = () => {
+    const purchaseDate = document.getElementById('purchaseDate')?.value;
+    const warrantyMonths = document.getElementById('warranty')?.value;
+    
+    if (purchaseDate && warrantyMonths) {
+        const start = new Date(purchaseDate);
+        const end = new Date(start);
+        end.setMonth(end.getMonth() + parseInt(warrantyMonths));
+        
+        const endDateInput = document.getElementById('warrantyEndDate');
+        if (endDateInput) {
+            endDateInput.value = end.toISOString().split('T')[0];
+        }
+        
+        window.updateWarrantyDays();
+    }
+};
+
+// Carousel Functions
+window.moveCarousel = (carouselId, direction) => {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+    
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    const dots = carousel.parentElement.querySelectorAll('.dot');
+    let currentIndex = 0;
+    
+    slides.forEach((slide, idx) => {
+        if (slide.style.display === 'block') currentIndex = idx;
+    });
+    
+    let newIndex = currentIndex + direction;
+    if (newIndex < 0) newIndex = slides.length - 1;
+    if (newIndex >= slides.length) newIndex = 0;
+    
+    window.goToSlide(carouselId, newIndex);
+};
+
+window.goToSlide = (carouselId, index) => {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+    
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    const dots = carousel.parentElement.querySelectorAll('.dot');
+    
+    slides.forEach((slide, idx) => {
+        slide.style.display = idx === index ? 'block' : 'none';
+        slide.classList.toggle('active', idx === index);
+    });
+    
+    dots.forEach((dot, idx) => {
+        dot.style.opacity = idx === index ? '1' : '0.5';
+        dot.style.background = idx === index ? 'var(--primary)' : 'var(--text-dim)';
+    });
+};
+
+// Update Warranty Days Display
+window.updateWarrantyDays = () => {
+    const endDateInput = document.getElementById('warrantyEndDate');
+    const badge = document.getElementById('warrantyDaysRemaining');
+    
+    if (!endDateInput || !badge || !endDateInput.value) return;
+    
+    const end = new Date(endDateInput.value);
+    const now = new Date();
+    const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+    
+    if (diff < 0) {
+        badge.textContent = `Vencida (${Math.abs(diff)} días)`;
+        badge.style.background = 'rgba(255, 69, 58, 0.2)';
+        badge.style.color = '#FF453A';
+    } else if (diff <= 30) {
+        badge.textContent = `${diff} días`;
+        badge.style.background = 'rgba(255, 159, 10, 0.2)';
+        badge.style.color = '#FF9F0A';
+    } else if (diff <= 90) {
+        badge.textContent = `${diff} días`;
+        badge.style.background = 'rgba(255, 149, 0, 0.2)';
+        badge.style.color = '#FF9500';
+    } else {
+        badge.textContent = `${diff} días`;
+        badge.style.background = 'rgba(52, 199, 89, 0.2)';
+        badge.style.color = '#34C759';
+    }
+};
+
 window.switchCat = (id) => {
     document.querySelectorAll('.cat-section').forEach(s => s.style.display = 'none');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -854,6 +979,19 @@ function initApp() {
             statusSelectContainer.classList.remove('open');
         });
     }
+    
+    // Otro Accesorio checkbox
+    const otroCheck = document.getElementById('otroAccesorioCheck');
+    if (otroCheck) {
+        otroCheck.addEventListener('change', window.toggleOtroAccesorio);
+    }
+    
+    // Update warranty days every minute
+    setInterval(() => {
+        if (document.getElementById('warrantyEndDate')?.value) {
+            window.updateWarrantyDays();
+        }
+    }, 60000);
     
     // Attach all event handlers
     safeOnClick('exportExcelBtn', () => {

@@ -132,6 +132,12 @@ export const renderDashboard = (inventory, containerId = 'dashboardContainer') =
                 <button class="dashboard-nav-btn" data-section="mantenimiento">
                     <i data-lucide="tool"></i> Mantenimiento
                 </button>
+                <button class="dashboard-nav-btn" data-section="garantias">
+                    <i data-lucide="shield-check"></i> Garantías
+                </button>
+                <button class="dashboard-nav-btn" data-section="estados">
+                    <i data-lucide="filter"></i> Estados
+                </button>
                 <button class="dashboard-nav-btn" data-section="financiero">
                     <i data-lucide="dollar-sign"></i> Financiero
                 </button>
@@ -478,7 +484,256 @@ const renderFinancieroSection = (inventory) => {
     `;
 };
 
+const renderGarantiasSection = (inventory) => {
+    const now = new Date();
+    
+    const garantia15 = inventory.filter(item => {
+        if (!item.warrantyEndDate) return false;
+        const end = new Date(item.warrantyEndDate);
+        const diff = (end - now) / (1000 * 60 * 60 * 24);
+        return diff <= 15 && diff > 0;
+    });
+    
+    const garantia30 = inventory.filter(item => {
+        if (!item.warrantyEndDate) return false;
+        const end = new Date(item.warrantyEndDate);
+        const diff = (end - now) / (1000 * 60 * 60 * 24);
+        return diff <= 30 && diff > 15;
+    });
+    
+    const garantia60 = inventory.filter(item => {
+        if (!item.warrantyEndDate) return false;
+        const end = new Date(item.warrantyEndDate);
+        const diff = (end - now) / (1000 * 60 * 60 * 24);
+        return diff <= 60 && diff > 30;
+    });
+    
+    const vencidas = inventory.filter(item => {
+        if (!item.warrantyEndDate) return false;
+        return new Date(item.warrantyEndDate) < now;
+    });
+
+    const renderWarrantyTable = (items, title, color) => {
+        if (items.length === 0) return '';
+        return `
+            <div class="chart-card" style="margin-top: 1.5rem;">
+                <h3 style="color: ${color};"><i data-lucide="alert-circle"></i> ${title} (${items.length})</h3>
+                <div class="table-responsive">
+                    <table class="table-mini">
+                        <thead>
+                            <tr>
+                                <th>Resguardo</th>
+                                <th>Equipo</th>
+                                <th>Usuario</th>
+                                <th>Fin Garantía</th>
+                                <th>Días</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items.map(item => {
+                                const end = new Date(item.warrantyEndDate);
+                                const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+                                return `
+                                    <tr>
+                                        <td><code>${item.resguardo || '-'}</code></td>
+                                        <td>${item.deviceType} ${item.brand}</td>
+                                        <td>${item.fullName}</td>
+                                        <td>${item.warrantyEndDate}</td>
+                                        <td><span class="badge" style="background: ${color}; color: white;">${diff} días</span></td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    };
+
+    return `
+        <div class="dashboard-section" id="section-garantias">
+            <div class="kpi-grid">
+                <div class="kpi-card" style="border-left: 4px solid #FF453A;">
+                    <div class="kpi-header">
+                        <div class="kpi-icon red"><i data-lucide="alert-circle"></i></div>
+                    </div>
+                    <div class="kpi-value">${vencidas.length}</div>
+                    <div class="kpi-label">Garantías Vencidas</div>
+                </div>
+                <div class="kpi-card" style="border-left: 4px solid #FF9F0A;">
+                    <div class="kpi-header">
+                        <div class="kpi-icon orange"><i data-lucide="clock"></i></div>
+                    </div>
+                    <div class="kpi-value">${garantia15.length}</div>
+                    <div class="kpi-label">15 días o menos</div>
+                </div>
+                <div class="kpi-card" style="border-left: 4px solid #FF9500;">
+                    <div class="kpi-header">
+                        <div class="kpi-icon" style="background: rgba(255, 149, 0, 0.15); color: #FF9500;"><i data-lucide="calendar"></i></div>
+                    </div>
+                    <div class="kpi-value">${garantia30.length}</div>
+                    <div class="kpi-label">16-30 días</div>
+                </div>
+                <div class="kpi-card" style="border-left: 4px solid #34C759;">
+                    <div class="kpi-header">
+                        <div class="kpi-icon green"><i data-lucide="check-circle"></i></div>
+                    </div>
+                    <div class="kpi-value">${garantia60.length}</div>
+                    <div class="kpi-label">31-60 días</div>
+                </div>
+            </div>
+            
+            ${renderWarrantyTable(vencidas, 'Vencidas', '#FF453A')}
+            ${renderWarrantyTable(garantia15, '15 días o menos', '#FF9F0A')}
+            ${renderWarrantyTable(garantia30, '16-30 días', '#FF9500')}
+        </div>
+    `;
+};
+
+const renderEstadosSection = (inventory) => {
+    const counts = {
+        activo: inventory.filter(i => i.status === 'Activo').length,
+        mantenimiento: inventory.filter(i => i.status === 'Mantenimiento').length,
+        baja: inventory.filter(i => i.status === 'Baja').length,
+        cancelado: inventory.filter(i => i.status === 'Cancelado').length,
+        piezas: inventory.filter(i => i.status === 'Para piezas').length
+    };
+
+    const renderStatusTable = (items, title) => {
+        if (items.length === 0) return '';
+        return `
+            <div class="chart-card" style="margin-top: 1.5rem;">
+                <h3><i data-lucide="list"></i> ${title} (${items.length} equipos)</h3>
+                <div class="table-responsive">
+                    <table class="table-mini">
+                        <thead>
+                            <tr>
+                                <th>Resguardo</th>
+                                <th>Equipo</th>
+                                <th>Marca</th>
+                                <th>Serie</th>
+                                <th>Usuario</th>
+                                <th>Ubicación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items.map(item => `
+                                <tr>
+                                    <td><code>${item.resguardo || '-'}</code></td>
+                                    <td>${item.deviceType}</td>
+                                    <td>${item.brand}</td>
+                                    <td>${item.serialNumber}</td>
+                                    <td>${item.fullName}</td>
+                                    <td>${item.location}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    };
+
+    return `
+        <div class="dashboard-section" id="section-estados">
+            <div class="filter-buttons-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <button class="filter-btn active" data-filter="all" onclick="window.filterDashboardStatus('all')" style="padding: 1rem; border: 2px solid var(--primary); background: var(--surface); border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--primary);">${inventory.length}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-dim);">Todos</div>
+                </button>
+                <button class="filter-btn" data-filter="Activo" onclick="window.filterDashboardStatus('Activo')" style="padding: 1rem; border: 2px solid #34C759; background: var(--surface); border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #34C759;">${counts.activo}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-dim);">Activos</div>
+                </button>
+                <button class="filter-btn" data-filter="Mantenimiento" onclick="window.filterDashboardStatus('Mantenimiento')" style="padding: 1rem; border: 2px solid #FF9F0A; background: var(--surface); border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #FF9F0A;">${counts.mantenimiento}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-dim);">Mantenimiento</div>
+                </button>
+                <button class="filter-btn" data-filter="Baja" onclick="window.filterDashboardStatus('Baja')" style="padding: 1rem; border: 2px solid #FF453A; background: var(--surface); border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #FF453A;">${counts.baja}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-dim);">Bajas</div>
+                </button>
+                <button class="filter-btn" data-filter="Cancelado" onclick="window.filterDashboardStatus('Cancelado')" style="padding: 1rem; border: 2px solid #8E8E93; background: var(--surface); border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #8E8E93;">${counts.cancelado}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-dim);">Cancelados</div>
+                </button>
+                <button class="filter-btn" data-filter="Para piezas" onclick="window.filterDashboardStatus('Para piezas')" style="padding: 1rem; border: 2px solid #FF9500; background: var(--surface); border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #FF9500;">${counts.piezas}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-dim);">Para Piezas</div>
+                </button>
+            </div>
+            <div id="filteredStatusResults">
+                ${renderStatusTable(inventory, 'Todos los Equipos')}
+            </div>
+        </div>
+    `;
+};
+
 const initDashboardNavigation = (inventory) => {
+    // Set up filter function for Estados section
+    window.filterDashboardStatus = (filter) => {
+        const container = document.getElementById('filteredStatusResults');
+        if (!container) return;
+        
+        let filteredData = inventory;
+        let title = 'Todos los Equipos';
+        
+        if (filter !== 'all') {
+            filteredData = inventory.filter(item => item.status === filter);
+            title = `Equipos - ${filter}`;
+        }
+        
+        // Update active button state
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            if (btn.dataset.filter === filter) {
+                btn.style.background = 'var(--primary)';
+                btn.style.color = '#000';
+            } else {
+                btn.style.background = 'var(--surface)';
+                btn.style.color = 'inherit';
+            }
+        });
+        
+        // Re-render table
+        const renderStatusTable = (items, title) => {
+            if (items.length === 0) return '<div class="chart-card" style="margin-top: 1.5rem; text-align: center; padding: 2rem;"><p>No hay equipos en esta categoría</p></div>';
+            return `
+                <div class="chart-card" style="margin-top: 1.5rem;">
+                    <h3><i data-lucide="list"></i> ${title} (${items.length} equipos)</h3>
+                    <div class="table-responsive">
+                        <table class="table-mini">
+                            <thead>
+                                <tr>
+                                    <th>Resguardo</th>
+                                    <th>Equipo</th>
+                                    <th>Marca</th>
+                                    <th>Serie</th>
+                                    <th>Usuario</th>
+                                    <th>Ubicación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${items.map(item => `
+                                    <tr>
+                                        <td><code>${item.resguardo || '-'}</code></td>
+                                        <td>${item.deviceType}</td>
+                                        <td>${item.brand}</td>
+                                        <td>${item.serialNumber}</td>
+                                        <td>${item.fullName}</td>
+                                        <td>${item.location}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        };
+        
+        container.innerHTML = renderStatusTable(filteredData, title);
+        if (window.lucide) window.lucide.createIcons();
+    };
+
     document.querySelectorAll('.dashboard-nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.dashboard-nav-btn').forEach(b => b.classList.remove('active'));
@@ -493,12 +748,16 @@ const initDashboardNavigation = (inventory) => {
                 content.innerHTML = renderEquiposSection(inventory);
             } else if (section === 'mantenimiento') {
                 content.innerHTML = renderMantenimientoSection(inventory);
+            } else if (section === 'garantias') {
+                content.innerHTML = renderGarantiasSection(inventory);
+            } else if (section === 'estados') {
+                content.innerHTML = renderEstadosSection(inventory);
             } else if (section === 'financiero') {
                 content.innerHTML = renderFinancieroSection(inventory);
             }
 
-            if (window.createIcons) {
-                window.createIcons();
+            if (window.lucide) {
+                window.lucide.createIcons();
             }
             
             initCharts(inventory, section);

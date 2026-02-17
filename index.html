@@ -234,6 +234,14 @@
               <div class="form-group"><label>Marca Monitor</label><input type="text" id="periphBrand" class="uppercase"></div>
               <div class="form-group"><label>Modelo Monitor</label><input type="text" id="periphModel" class="uppercase"></div>
               <div class="form-group"><label>Serie Monitor</label><input type="text" id="periphSerial" class="uppercase"></div>
+              <div class="form-group"><label>Adaptador HDMI</label><input type="text" id="hdmiAdapter" class="uppercase" placeholder="Serie/Modelo"></div>
+              <div class="form-group full-width" style="grid-column: span 3;">
+                <label>
+                  <input type="checkbox" id="otroAccesorioCheck" style="margin-right: 0.5rem;"> 
+                  Otro Accesorio
+                </label>
+                <input type="text" id="otroAccesorio" class="uppercase" placeholder="Especificar accesorio" style="display:none; margin-top: 0.5rem;">
+              </div>
             </div>
           </div>
 
@@ -242,8 +250,13 @@
             <h3><i data-lucide="dollar-sign"></i> Datos Administrativos</h3>
             <div class="form-grid form-grid-3">
               <div class="form-group"><label>Precio Unitario</label><input type="text" id="price" placeholder="ej: $15,000.00"></div>
-              <div class="form-group"><label>Fecha de Compra</label><input type="date" id="purchaseDate"></div>
-              <div class="form-group"><label>Garantía (meses)</label><input type="number" id="warranty" placeholder="ej: 12"></div>
+              <div class="form-group"><label>Fecha de Compra</label><input type="date" id="purchaseDate" onchange="calculateWarrantyEnd()"></div>
+              <div class="form-group"><label>Garantía (meses)</label><input type="number" id="warranty" placeholder="ej: 12" onchange="calculateWarrantyEnd()"></div>
+              <div class="form-group"><label>Fecha Fin Garantía</label><input type="date" id="warrantyEndDate" readonly style="background: var(--card-bg);"></div>
+              <div class="form-group">
+                <label>Días Restantes</label>
+                <div id="warrantyDaysRemaining" class="warranty-badge" style="padding: 0.75rem; border-radius: 8px; background: var(--card-bg); font-weight: 600;">-</div>
+              </div>
             </div>
           </div>
 
