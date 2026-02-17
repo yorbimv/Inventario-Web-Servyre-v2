@@ -31,22 +31,22 @@
   --primary-glow: rgba(212, 160, 23, 0.25);
   --secondary: #B8860B;
   --accent: #DC2626;
-  --bg: #F0F1F3;
-  --bg-gradient: linear-gradient(180deg, #E8E9EB 0%, #F0F1F3 100%);
-  --surface: rgba(255, 255, 255, 0.95);
-  --surface-opaque: #FFFFFF;
-  --surface-glass: rgba(255, 255, 255, 0.88);
-  --text: #1A1A1E;
-  --text-dim: #5C5C66;
-  --border: rgba(0, 0, 0, 0.1);
-  --border-light: rgba(0, 0, 0, 0.05);
+  --bg: #FDF6E3;
+  --bg-gradient: linear-gradient(180deg, #FEF3D9 0%, #FDF6E3 100%);
+  --surface: rgba(255, 252, 245, 0.95);
+  --surface-opaque: #FFF9F0;
+  --surface-glass: rgba(255, 252, 245, 0.88);
+  --text: #3D3428;
+  --text-dim: #6B5D4D;
+  --border: rgba(139, 90, 43, 0.15);
+  --border-light: rgba(139, 90, 43, 0.08);
   --success: #16A34A;
   --warning: #D97706;
   --danger: #DC2626;
   --radius: 20px;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --card-bg: rgba(0, 0, 0, 0.03);
+  --shadow: 0 8px 32px rgba(139, 90, 43, 0.1);
+  --shadow-sm: 0 2px 8px rgba(139, 90, 43, 0.05);
+  --card-bg: rgba(139, 90, 43, 0.05);
 }
 
 * {
