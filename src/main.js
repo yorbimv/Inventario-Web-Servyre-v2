@@ -3,7 +3,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import CryptoJS from 'crypto-js';
 import { CONFIG } from './config.js';
-import { sanitize } from './utils.js';
+import { sanitize, generateId } from './modules/utils.js';
 import { renderDashboard } from './modules/dashboard.js';
 import { elements } from './modules/ui.js';
 
@@ -81,6 +81,47 @@ const loadData = () => {
             catalogs = dec.catalogs || catalogs;
         }
     }
+    
+    // Si no hay inventario, agregar usuario de ejemplo
+    if (inventory.length === 0) {
+        const testUser = {
+            id: generateId(),
+            resguardo: "SERV-TEST-001",
+            fullName: "JUAN PÉREZ GARCÍA",
+            position: "GERENTE DE TI",
+            email: "juan.perez@servyre.com",
+            extension: "4501",
+            department: "TECNOLOGÍAS DE LA INFORMACIÓN",
+            address: "TORRE CORPORATIVA PISO 3",
+            location: "Corporativo",
+            deviceType: "Laptop",
+            brand: "Dell",
+            model: "Latitude 5430",
+            serialNumber: "JHSK2023TEST001",
+            os: "Windows 11 Pro",
+            pcName: "TI-JUANP-LT01",
+            processor: "Intel Core i7-1265U",
+            ram: "16 GB",
+            storageCapacity: "512 GB SSD",
+            status: "Activo",
+            price: "$28,500.00",
+            purchaseDate: "2023-06-15",
+            warranty: 36,
+            periphBrand: "Dell",
+            periphModel: "U2722D",
+            periphSerial: "TEST-MON-001",
+            mouseExternal: "TEST-MOUSE-001",
+            lastMtto: "2024-01-10",
+            nextMtto: "2024-07-10",
+            conditions: "Excelente estado, sin daños",
+            incidentReport: "",
+            notes: "Equipo de prueba para demostración del sistema",
+            photos: ""
+        };
+        inventory.push(testUser);
+        saveToStorage();
+    }
+    
     renderTable();
     updateStats();
     syncFormSelects();

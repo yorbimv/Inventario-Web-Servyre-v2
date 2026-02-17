@@ -472,6 +472,36 @@ tr:hover td {
   grid-column: span 2;
 }
 
+/* Uppercase input fields */
+input.uppercase, textarea.uppercase {
+  text-transform: uppercase;
+}
+
+/* Status select with colors */
+.status-select {
+  font-weight: 600;
+}
+
+.status-select option[value="Activo"] {
+  color: #34C759;
+}
+
+.status-select option[value="Mantenimiento"] {
+  color: #FF9F0A;
+}
+
+.status-select option[value="Baja"] {
+  color: #FF453A;
+}
+
+.status-select option[value="Cancelado"] {
+  color: #8E8E93;
+}
+
+.status-select option[value="Para piezas"] {
+  color: #FF9500;
+}
+
 input, select, textarea {
   width: 100%;
   background: var(--card-bg);
