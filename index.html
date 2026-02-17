@@ -136,13 +136,26 @@
               <div class="form-group"><label>N° Resguardo</label><input type="text" id="resguardo" class="uppercase"></div>
               <div class="form-group">
                 <label>Estado</label>
-                <select id="status" class="status-select">
-                  <option value="Activo">Activo</option>
-                  <option value="Mantenimiento">Mantenimiento</option>
-                  <option value="Baja">Baja</option>
-                  <option value="Cancelado">Cancelado</option>
-                  <option value="Para piezas">Para piezas</option>
-                </select>
+                <div class="custom-select" id="statusSelectContainer">
+                  <div class="custom-select-trigger" id="statusTrigger">
+                    <span class="status-badge" data-value="Activo">Activo</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </div>
+                  <div class="custom-select-dropdown" id="statusDropdown">
+                    <div class="custom-select-option" data-value="Activo"><span class="status-dot" style="background:#34C759"></span>Activo</div>
+                    <div class="custom-select-option" data-value="Mantenimiento"><span class="status-dot" style="background:#FF9F0A"></span>Mantenimiento</div>
+                    <div class="custom-select-option" data-value="Baja"><span class="status-dot" style="background:#FF453A"></span>Baja</div>
+                    <div class="custom-select-option" data-value="Cancelado"><span class="status-dot" style="background:#8E8E93"></span>Cancelado</div>
+                    <div class="custom-select-option" data-value="Para piezas"><span class="status-dot" style="background:#FF9500"></span>Para piezas</div>
+                  </div>
+                  <select id="status" style="display:none;">
+                    <option value="Activo">Activo</option>
+                    <option value="Mantenimiento">Mantenimiento</option>
+                    <option value="Baja">Baja</option>
+                    <option value="Cancelado">Cancelado</option>
+                    <option value="Para piezas">Para piezas</option>
+                  </select>
+                </div>
               </div>
               <div class="form-group"><label>Usuario</label><input type="text" id="fullName" class="uppercase"></div>
               <div class="form-group"><label>Puesto</label><input type="text" id="position" class="uppercase"></div>

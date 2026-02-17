@@ -808,6 +808,34 @@ function initApp() {
         };
     }
     
+    // Custom Select for Status
+    const statusSelectContainer = document.getElementById('statusSelectContainer');
+    const statusTrigger = document.getElementById('statusTrigger');
+    const statusDropdown = document.getElementById('statusDropdown');
+    const statusSelect = document.getElementById('status');
+    
+    if (statusSelectContainer && statusTrigger) {
+        statusTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            statusSelectContainer.classList.toggle('open');
+        });
+        
+        document.querySelectorAll('.custom-select-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const value = option.dataset.value;
+                statusSelect.value = value;
+                const badge = statusTrigger.querySelector('.status-badge');
+                badge.textContent = value;
+                badge.dataset.value = value;
+                statusSelectContainer.classList.remove('open');
+            });
+        });
+        
+        document.addEventListener('click', () => {
+            statusSelectContainer.classList.remove('open');
+        });
+    }
+    
     // Attach all event handlers
     safeOnClick('exportExcelBtn', () => {
         if (inventory.length === 0) {
