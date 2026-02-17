@@ -466,6 +466,12 @@ tr:hover td {
   gap: 1rem;
 }
 
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

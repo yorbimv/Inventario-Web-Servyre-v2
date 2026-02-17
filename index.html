@@ -130,12 +130,14 @@
         <div class="modal-body-premium">
           <input type="hidden" id="itemId">
 
+          <!-- SECCIÓN 1: IDENTIFICACIÓN -->
           <div class="form-section">
-            <h3><i data-lucide="users"></i> Datos del Resguardo</h3>
-            <div class="form-grid form-grid-2" style="grid-template-columns: 1fr 1fr 1fr;">
-              <div class="form-group"><label>N° Resguardo</label><input type="text" id="resguardo" class="uppercase"></div>
+            <h3><i data-lucide="id-card"></i> Identificación</h3>
+            <div class="form-grid form-grid-3">
+              <div class="form-group"><label>N° Resguardo *</label><input type="text" id="resguardo" class="uppercase" required></div>
+              <div class="form-group"><label>Serie *</label><input type="text" id="serialNumber" class="uppercase" required></div>
               <div class="form-group">
-                <label>Estado</label>
+                <label>Estado *</label>
                 <div class="custom-select" id="statusSelectContainer">
                   <div class="custom-select-trigger" id="statusTrigger">
                     <span class="status-badge" data-value="Activo">Activo</span>
@@ -157,93 +159,95 @@
                   </select>
                 </div>
               </div>
-              <div class="form-group"><label>Usuario</label><input type="text" id="fullName" class="uppercase"></div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 2: USUARIO -->
+          <div class="form-section">
+            <h3><i data-lucide="users"></i> Usuario Asignado</h3>
+            <div class="form-grid form-grid-3">
+              <div class="form-group"><label>Nombre Completo *</label><input type="text" id="fullName" class="uppercase" required></div>
               <div class="form-group"><label>Puesto</label><input type="text" id="position" class="uppercase"></div>
               <div class="form-group"><label>Correo</label><input type="email" id="email"></div>
               <div class="form-group"><label>Extensión</label><input type="text" id="extension" class="uppercase"></div>
               <div class="form-group"><label>Departamento</label><input type="text" id="department" class="uppercase"></div>
-              <div class="form-group"><label>Dirección</label><input type="text" id="address" class="uppercase"></div>
-              <div class="form-group"><label>Ubicación</label><select id="location"></select></div>
+              <div class="form-group"><label>Ubicación *</label><select id="location" required></select></div>
+              <div class="form-group full-width"><label>Dirección</label><input type="text" id="address" class="uppercase"></div>
             </div>
           </div>
 
+          <!-- SECCIÓN 3: EQUIPO -->
           <div class="form-section">
             <h3><i data-lucide="cpu"></i> Especificaciones del Equipo</h3>
-            <div class="form-grid form-grid-2">
+            <div class="form-grid form-grid-3">
               <div class="form-group">
-                <label>Tipo de Equipo</label>
-                <select id="deviceType">
+                <label>Tipo de Equipo *</label>
+                <select id="deviceType" required>
+                  <option value="">Seleccionar...</option>
                   <option value="Laptop">Laptop</option>
                   <option value="Desktop">Desktop</option>
                   <option value="Servidor">Servidor</option>
                   <option value="Monitor">Monitor</option>
                   <option value="Impresora">Impresora</option>
+                  <option value="Celular">Celular</option>
+                  <option value="Tablet">Tablet</option>
                   <option value="Otro">Otro</option>
                 </select>
               </div>
-              <div class="form-group"><label>Marca</label><select id="brand"></select></div>
+              <div class="form-group"><label>Marca *</label><select id="brand" required></select></div>
               <div class="form-group"><label>Modelo</label><select id="model" disabled></select></div>
-              <div class="form-group"><label>Serie</label><input type="text" id="serialNumber" class="uppercase"></div>
+              <div class="form-group"><label>Nombre PC/Host</label><input type="text" id="pcName" class="uppercase"></div>
               <div class="form-group"><label>Sistema Operativo</label>
                 <select id="os">
                   <option value="">Seleccionar...</option>
-                  <optgroup label="Windows 8.1">
-                    <option value="Windows 8.1 Standard">Windows 8.1 Standard</option>
-                    <option value="Windows 8.1 Pro">Windows 8.1 Pro</option>
-                  </optgroup>
-                  <optgroup label="Windows 10">
-                    <option value="Windows 10 Home">Windows 10 Home</option>
-                    <option value="Windows 10 Pro">Windows 10 Pro</option>
-                    <option value="Windows 10 Enterprise">Windows 10 Enterprise</option>
-                    <option value="Windows 10 Education">Windows 10 Education</option>
-                    <option value="Windows 10 LTSC">Windows 10 LTSC</option>
-                  </optgroup>
-                  <optgroup label="Windows 11">
-                    <option value="Windows 11 Home">Windows 11 Home</option>
-                    <option value="Windows 11 Pro">Windows 11 Pro</option>
-                    <option value="Windows 11 Enterprise">Windows 11 Enterprise</option>
+                  <optgroup label="Windows">
+                    <option value="Windows 8.1">Windows 8.1</option>
+                    <option value="Windows 10">Windows 10</option>
+                    <option value="Windows 11">Windows 11</option>
                   </optgroup>
                   <optgroup label="macOS">
-                    <option value="macOS Ventura">macOS Ventura</option>
-                    <option value="macOS Monterey">macOS Monterey</option>
-                    <option value="macOS Sonoma">macOS Sonoma</option>
-                    <option value="macOS Big Sur">macOS Big Sur</option>
+                    <option value="macOS">macOS</option>
                   </optgroup>
                   <optgroup label="Linux">
-                    <option value="Ubuntu">Ubuntu</option>
-                    <option value="Fedora">Fedora</option>
-                    <option value="Linux Mint">Linux Mint</option>
-                    <option value="Debian">Debian</option>
-                    <option value="Otro Linux">Otro Linux</option>
+                    <option value="Linux">Linux</option>
                   </optgroup>
+                  <optgroup label="Android">
+                    <option value="Android">Android</option>
+                  </optgroup>
+                  <optgroup label="iOS">
+                    <option value="iOS">iOS</option>
+                  </optgroup>
+                  <option value="Sin SO">Sin Sistema Operativo</option>
                 </select>
               </div>
-              <div class="form-group"><label>Nombre PC</label><input type="text" id="pcName" class="uppercase"></div>
               <div class="form-group"><label>Procesador</label><input type="text" id="processor"></div>
-              <div class="form-group"><label>RAM (GB)</label><input type="text" id="ram" placeholder="ej: 16 GB"></div>
-              <div class="form-group"><label>Disco (GB)</label><input type="text" id="storageCapacity" placeholder="ej: 512 GB SSD"></div>
-              <div class="form-group"><label>Mouse Externo</label><input type="text" id="mouseExternal" placeholder="Serie del mouse" class="uppercase"></div>
+              <div class="form-group"><label>RAM</label><input type="text" id="ram" placeholder="ej: 16 GB"></div>
+              <div class="form-group"><label>Almacenamiento</label><input type="text" id="storageCapacity" placeholder="ej: 512 GB SSD"></div>
             </div>
           </div>
 
+          <!-- SECCIÓN 4: ACCESORIOS -->
           <div class="form-section">
-            <h3><i data-lucide="shield-check"></i> Garantía y Costos</h3>
-            <div class="form-grid form-grid-2">
+            <h3><i data-lucide="monitor"></i> Accesorios</h3>
+            <div class="form-grid form-grid-3">
+              <div class="form-group"><label>Mouse</label><input type="text" id="mouseExternal" class="uppercase" placeholder="Serie del mouse"></div>
+              <div class="form-group"><label>Marca Monitor</label><input type="text" id="periphBrand" class="uppercase"></div>
+              <div class="form-group"><label>Modelo Monitor</label><input type="text" id="periphModel" class="uppercase"></div>
+              <div class="form-group"><label>Serie Monitor</label><input type="text" id="periphSerial" class="uppercase"></div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 5: ADMINISTRATIVO -->
+          <div class="form-section">
+            <h3><i data-lucide="dollar-sign"></i> Datos Administrativos</h3>
+            <div class="form-grid form-grid-3">
               <div class="form-group"><label>Precio Unitario</label><input type="text" id="price" placeholder="ej: $15,000.00"></div>
               <div class="form-group"><label>Fecha de Compra</label><input type="date" id="purchaseDate"></div>
               <div class="form-group"><label>Garantía (meses)</label><input type="number" id="warranty" placeholder="ej: 12"></div>
             </div>
           </div>
 
-          <div class="form-section">
-            <h3><i data-lucide="monitor"></i> Periféricos / Accesorios</h3>
-            <div class="form-grid form-grid-2">
-              <div class="form-group"><label>Marca (Monitor/Accesorio)</label><input type="text" id="periphBrand" class="uppercase"></div>
-              <div class="form-group"><label>Modelo (Monitor/Accesorio)</label><input type="text" id="periphModel" class="uppercase"></div>
-              <div class="form-group"><label>Serie (Monitor/Accesorio)</label><input type="text" id="periphSerial" class="uppercase"></div>>
-            </div>
-          </div>
-
+          <!-- SECCIÓN 6: MANTENIMIENTO -->
           <div class="form-section">
             <h3><i data-lucide="tool"></i> Mantenimiento</h3>
             <div class="form-grid form-grid-2">
@@ -252,30 +256,28 @@
             </div>
           </div>
 
+          <!-- SECCIÓN 7: NOTAS -->
           <div class="form-section">
-            <h3><i data-lucide="alert-triangle"></i> Condiciones e Incidentes</h3>
+            <h3><i data-lucide="file-text"></i> Notas y Documentación</h3>
             <div class="form-grid form-grid-2">
               <div class="form-group">
                 <label>Condiciones del Equipo</label>
-                <textarea id="conditions" rows="2" placeholder="Estado físico, reparaciones realizadas..."></textarea>
+                <textarea id="conditions" rows="2" placeholder="Estado físico, reparaciones..."></textarea>
               </div>
               <div class="form-group">
                 <label>Reporte de Incidentes</label>
-                <textarea id="incidentReport" rows="2" placeholder="Fallas, golpes, robos, etc."></textarea>
+                <textarea id="incidentReport" rows="2" placeholder="Fallas, golpes, robos..."></textarea>
               </div>
-            </div>
-          </div>
-
-          <div class="form-section">
-            <h3><i data-lucide="link"></i> Documentación</h3>
-            <div class="form-grid form-grid-2">
               <div class="form-group full-width">
                 <label>Links / Fotos</label>
                 <input type="url" id="photos" placeholder="https://...">
               </div>
               <div class="form-group full-width">
                 <label>Observaciones Adicionales</label>
-                <textarea id="notes" rows="3" placeholder="Notas internas, detalles del resguardo..."></textarea>
+                <textarea id="notes" rows="2" placeholder="Notas internas..."></textarea>
+              </div>
+            </div>
+          </div>
               </div>
             </div>
           </div>

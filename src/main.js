@@ -6,6 +6,7 @@ import { CONFIG } from './config.js';
 import { sanitize, generateId } from './modules/utils.js';
 import { renderDashboard } from './modules/dashboard.js';
 import { elements } from './modules/ui.js';
+import { exportExcel, exportJSON, exportCSV, exportPDF, generateDetailPdf, downloadTemplate, importData } from './modules/export.js';
 
 // --- CONFIGURATION & STATE ---
 const MASTER_KEY = CONFIG.MASTER_KEY;
@@ -67,8 +68,17 @@ const decrypt = (ciphertext) => {
     } catch (e) { return null; }
 };
 
+// Data version constant
+const DATA_VERSION = "2.0";
+
 const saveToStorage = () => {
-    localStorage.setItem(STORAGE_KEY, encrypt({ inventory, catalogs }));
+    const data = {
+        version: DATA_VERSION,
+        lastModified: new Date().toISOString(),
+        inventory,
+        catalogs
+    };
+    localStorage.setItem(STORAGE_KEY, encrypt(data));
     updateStats();
 };
 
@@ -77,8 +87,17 @@ const loadData = () => {
     if (stored) {
         const dec = decrypt(stored);
         if (dec) {
-            inventory = dec.inventory || [];
-            catalogs = dec.catalogs || catalogs;
+            // Handle migration from older versions
+            if (!dec.version) {
+                console.log("Migrating data from v1 to v2.0...");
+                inventory = dec.inventory || [];
+                catalogs = dec.catalogs || catalogs;
+                // Save with new version after migration
+                saveToStorage();
+            } else {
+                inventory = dec.inventory || [];
+                catalogs = dec.catalogs || catalogs;
+            }
         }
     }
     
@@ -838,18 +857,7 @@ function initApp() {
     
     // Attach all event handlers
     safeOnClick('exportExcelBtn', () => {
-        if (inventory.length === 0) {
-            alert('No hay registros para exportar.');
-            return;
-        }
-        const headers = ["Resguardo", "Usuario", "Puesto", "Correo", "Extensión", "Departamento", "Dirección", "Ubicación", "Tipo Equipo", "Marca", "Modelo", "Serie", "Nombre PC", "Sistema Operativo", "Procesador", "RAM", "Disco", "Estado", "Precio", "Fecha Compra", "Marca Periférico", "Modelo Periférico", "Serie Periférico", "Mouse Externo", "Último Mtto", "Próximo Mtto", "Condiciones", "Incidentes", "Notas", "Fotos"];
-        const rows = inventory.map(item => [item.resguardo || '', item.fullName || '', item.position || '', item.email || '', item.extension || '', item.department || '', item.address || '', item.location || '', item.deviceType || '', item.brand || '', item.model || '', item.serialNumber || '', item.pcName || '', item.os || '', item.processor || '', item.ram || '', item.storageCapacity || '', item.status || '', item.price || '', item.purchaseDate || '', item.periphBrand || '', item.periphModel || '', item.periphSerial || '', item.mouseExternal || '', item.lastMtto || '', item.nextMtto || '', item.conditions || '', item.incidentReport || '', item.notes || '', item.photos || '']);
-        const wsData = [headers, ...rows];
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-        ws['!cols'] = headers.map(() => ({ wch: 18 }));
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Inventario IT");
-        XLSX.writeFile(wb, `Inventario_IT_Completo_${new Date().toISOString().split('T')[0]}.xlsx`);
+        exportExcel(inventory);
     });
     
     safeOnClick('exportPdfBtn', () => {
@@ -859,6 +867,12 @@ function initApp() {
         }
         pdfColumnModal.classList.add('active');
     });
+    
+    // Export JSON Backup
+    const expBackupBtn = document.getElementById('exportBackupBtn');
+    if (expBackupBtn) {
+        expBackupBtn.onclick = () => exportJSON(inventory, catalogs);
+    }
     
     safeOnClick('importDataBtn', () => importInput.click());
     safeOnClick('addItemBtn', () => openEditForm());
