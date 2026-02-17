@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/src/style.css">
   <link rel="stylesheet" href="/src/css/dashboard.css">
   <link rel="stylesheet" href="/src/css/dashboard-premium.css">
+  <link rel="stylesheet" href="/src/css/logo-manager.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Animate.css for quick premium transitions -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
@@ -315,6 +316,8 @@
         <nav class="settings-nav">
           <button class="nav-item active" onclick="switchCat('brands')">Marcas y Modelos</button>
           <button class="nav-item" onclick="switchCat('locations')">Ubicaciones</button>
+          <button class="nav-item" onclick="switchCat('marca')">Marca</button>
+          <button class="nav-item" onclick="switchCat('pdf-template')">Plantilla PDF</button>
           <button class="nav-item" onclick="switchCat('plantilla')">Plantilla Excel</button>
         </nav>
         <div class="settings-content">
@@ -361,6 +364,104 @@
               </div>
             </div>
           </div>
+          <div id="cat-marca" class="cat-section" style="display: none;">
+            <div id="brandSettingsContainer">
+              <!-- Logo Manager se renderizará aquí -->
+              <div style="text-align: center; padding: 2rem; color: var(--text-dim);">
+                <i data-lucide="loader" style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
+                <p>Cargando configuración...</p>
+              </div>
+            </div>
+          </div>
+          
+          <div id="cat-pdf-template" class="cat-section" style="display: none;">
+            <div id="pdfTemplateSettings">
+              <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+                <i data-lucide="file-text"></i>
+                Configuración de Plantilla PDF
+              </h3>
+              
+              <div class="form-section" style="margin-bottom: 1.5rem;">
+                <h4 style="font-size: 0.95rem; margin-bottom: 1rem; color: var(--text-secondary);">📐 Formato Predeterminado</h4>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                  <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: var(--card-bg); border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="defaultPdfFormat" value="a4-landscape" checked style="accent-color: var(--primary);">
+                    <span>A4 Horizontal</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: var(--card-bg); border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="defaultPdfFormat" value="a4-portrait" style="accent-color: var(--primary);">
+                    <span>A4 Vertical</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: var(--card-bg); border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="defaultPdfFormat" value="oficio" style="accent-color: var(--primary);">
+                    <span>Oficio (Ejecutivo)</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: var(--card-bg); border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="defaultPdfFormat" value="doble-carta" style="accent-color: var(--primary);">
+                    <span>Doble Carta</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-section" style="margin-bottom: 1.5rem;">
+                <h4 style="font-size: 0.95rem; margin-bottom: 1rem; color: var(--text-secondary);">🎨 Estilo Visual Predeterminado</h4>
+                <select id="defaultPdfStyle" style="width: 100%; padding: 0.75rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text);">
+                  <option value="executive">Ejecutivo Corporativo (Azul + Dorado)</option>
+                  <option value="classic">Clásico Elegante (Blanco y Negro)</option>
+                  <option value="modern">Moderno Profesional (Oscuro)</option>
+                </select>
+              </div>
+
+              <div class="form-section" style="margin-bottom: 1.5rem;">
+                <h4 style="font-size: 0.95rem; margin-bottom: 1rem; color: var(--text-secondary);">📊 Secciones Predeterminadas</h4>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="defaultIncludeKPIs" checked style="accent-color: var(--primary);">
+                    <span>Resumen Ejecutivo (KPIs)</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="defaultIncludeCharts" checked style="accent-color: var(--primary);">
+                    <span>Gráficos Estadísticos</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="defaultIncludeTables" checked style="accent-color: var(--primary);">
+                    <span>Tablas de Detalle</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="defaultIncludeAlerts" checked style="accent-color: var(--primary);">
+                    <span>Alertas y Notificaciones</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-section" style="margin-bottom: 1.5rem;">
+                <h4 style="font-size: 0.95rem; margin-bottom: 1rem; color: var(--text-secondary);">⚙️ Opciones Adicionales</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="defaultIncludeLogo" checked style="accent-color: var(--primary);">
+                    <span>Incluir logo de la empresa</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="defaultIncludeDate" checked style="accent-color: var(--primary);">
+                    <span>Incluir fecha de generación</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="defaultPageNumbers" checked style="accent-color: var(--primary);">
+                    <span>Incluir numeración de páginas</span>
+                  </label>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                <button type="button" class="glass-btn" onclick="window.resetPdfTemplateSettings()">Restaurar Predeterminados</button>
+                <button type="button" class="premium-btn primary" onclick="window.savePdfTemplateSettings()">
+                  <i data-lucide="save"></i>
+                  Guardar Configuración
+                </button>
+              </div>
+            </div>
+          </div>
+          
           <div id="cat-plantilla" class="cat-section" style="display: none;">
             <div class="plantilla-section">
               <div class="plantilla-info">

@@ -1153,6 +1153,99 @@ function initApp() {
         }
     });
     
+    // Inicializar Logo Manager cuando se abra la pestaña de Marca
+    window.initBrandSettings = () => {
+        import('./modules/logo-manager.js').then(({ logoManager }) => {
+            logoManager.render('brandSettingsContainer');
+        });
+    };
+    
+    // Observar cuando se muestra la pestaña de marca
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const marcaSection = document.getElementById('cat-marca');
+                if (marcaSection && marcaSection.style.display !== 'none') {
+                    window.initBrandSettings();
+                }
+            }
+        });
+    });
+    
+    const marcaSection = document.getElementById('cat-marca');
+    if (marcaSection) {
+        observer.observe(marcaSection, { attributes: true });
+    }
+    
+    // Configuración de Plantilla PDF
+    const PDF_TEMPLATE_KEY = 'servyre-pdf-template-settings';
+    
+    window.savePdfTemplateSettings = () => {
+        const settings = {
+            defaultFormat: document.querySelector('input[name="defaultPdfFormat"]:checked')?.value || 'a4-landscape',
+            defaultStyle: document.getElementById('defaultPdfStyle')?.value || 'executive',
+            defaultSections: {
+                kpis: document.getElementById('defaultIncludeKPIs')?.checked ?? true,
+                charts: document.getElementById('defaultIncludeCharts')?.checked ?? true,
+                tables: document.getElementById('defaultIncludeTables')?.checked ?? true,
+                alerts: document.getElementById('defaultIncludeAlerts')?.checked ?? true
+            },
+            includeLogo: document.getElementById('defaultIncludeLogo')?.checked ?? true,
+            includeDate: document.getElementById('defaultIncludeDate')?.checked ?? true,
+            pageNumbers: document.getElementById('defaultPageNumbers')?.checked ?? true
+        };
+        
+        localStorage.setItem(PDF_TEMPLATE_KEY, JSON.stringify(settings));
+        showNotification('Configuración guardada correctamente', 'success');
+    };
+    
+    window.resetPdfTemplateSettings = () => {
+        if (confirm('¿Restaurar configuración predeterminada?')) {
+            localStorage.removeItem(PDF_TEMPLATE_KEY);
+            location.reload();
+        }
+    };
+    
+    window.loadPdfTemplateSettings = () => {
+        try {
+            const settings = JSON.parse(localStorage.getItem(PDF_TEMPLATE_KEY));
+            if (settings) {
+                // Aplicar configuraciones cargadas
+                const formatRadio = document.querySelector(`input[name="defaultPdfFormat"][value="${settings.defaultFormat}"]`);
+                if (formatRadio) formatRadio.checked = true;
+                
+                const styleSelect = document.getElementById('defaultPdfStyle');
+                if (styleSelect) styleSelect.value = settings.defaultStyle;
+                
+                const includeKPIs = document.getElementById('defaultIncludeKPIs');
+                if (includeKPIs) includeKPIs.checked = settings.defaultSections?.kpis ?? true;
+                
+                const includeCharts = document.getElementById('defaultIncludeCharts');
+                if (includeCharts) includeCharts.checked = settings.defaultSections?.charts ?? true;
+                
+                const includeTables = document.getElementById('defaultIncludeTables');
+                if (includeTables) includeTables.checked = settings.defaultSections?.tables ?? true;
+                
+                const includeAlerts = document.getElementById('defaultIncludeAlerts');
+                if (includeAlerts) includeAlerts.checked = settings.defaultSections?.alerts ?? true;
+                
+                const includeLogo = document.getElementById('defaultIncludeLogo');
+                if (includeLogo) includeLogo.checked = settings.includeLogo ?? true;
+                
+                const includeDate = document.getElementById('defaultIncludeDate');
+                if (includeDate) includeDate.checked = settings.includeDate ?? true;
+                
+                const pageNumbers = document.getElementById('defaultPageNumbers');
+                if (pageNumbers) pageNumbers.checked = settings.pageNumbers ?? true;
+            }
+        } catch (e) {
+            console.error('Error loading PDF template settings:', e);
+        }
+    };
+    
+    // Cargar configuraciones al iniciar
+    window.loadPdfTemplateSettings();
+    
     console.log('Servyre IT Professional v2.0 - Advanced Data Management System Loaded.');
 }
 

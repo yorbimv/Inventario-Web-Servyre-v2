@@ -1,0 +1,185 @@
+/** Logo Manager Styles */
+
+.brand-settings-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+.settings-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-section-title i {
+  color: var(--primary);
+}
+
+/* Logo Preview */
+.logo-preview-container {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.logo-preview {
+  width: 200px;
+  height: 120px;
+  background: var(--card-bg);
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.logo-preview:hover {
+  border-color: var(--primary);
+}
+
+.logo-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+}
+
+.logo-placeholder i {
+  font-size: 2rem;
+}
+
+.logo-placeholder span {
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.logo-info {
+  flex: 1;
+}
+
+.logo-info p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Upload Area */
+.logo-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.logo-upload-area:hover {
+  border-color: var(--primary);
+  background: rgba(252, 211, 77, 0.05);
+}
+
+.logo-upload-area.dragover {
+  border-color: var(--primary);
+  background: rgba(252, 211, 77, 0.1);
+  transform: scale(1.02);
+}
+
+.upload-content i {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 0.75rem;
+}
+
+.upload-text {
+  color: var(--text);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.upload-or {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+}
+
+/* Settings Inputs */
+.settings-input {
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.settings-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(252, 211, 77, 0.1);
+}
+
+.settings-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Notification Area */
+.notification-area {
+  min-height: 40px;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .logo-preview-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .logo-preview {
+    width: 100%;
+    max-width: 300px;
+  }
+}

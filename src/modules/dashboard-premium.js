@@ -632,11 +632,327 @@ class DashboardManager {
   }
 
   /**
-   * Exporta dashboard
+   * Muestra modal de exportación
+   */
+  showExportModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay glass-blur';
+    modal.id = 'exportModal';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+      <div class="modal" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border); padding: 1.5rem;">
+          <h2 style="font-size: 1.3rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="file-text"></i>
+            Exportar Reporte Ejecutivo
+          </h2>
+          <button class="close-btn" onclick="document.getElementById('exportModal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dim);">&times;</button>
+        </div>
+        
+        <div class="modal-body-premium" style="padding: 1.5rem;">
+          <!-- Formato del documento -->
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary);">📐 Formato del Documento</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: var(--card-bg); border-radius: 8px; cursor: pointer; border: 2px solid var(--border);" class="format-option" data-format="a4-landscape">
+                <input type="radio" name="pdfFormat" value="a4-landscape" checked style="accent-color: var(--primary);">
+                <div>
+                  <div style="font-weight: 600;">A4 Horizontal</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">297 × 210 mm</div>
+                </div>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: var(--card-bg); border-radius: 8px; cursor: pointer; border: 2px solid var(--border);" class="format-option" data-format="a4-portrait">
+                <input type="radio" name="pdfFormat" value="a4-portrait" style="accent-color: var(--primary);">
+                <div>
+                  <div style="font-weight: 600;">A4 Vertical</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">210 × 297 mm</div>
+                </div>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: var(--card-bg); border-radius: 8px; cursor: pointer; border: 2px solid var(--border);" class="format-option" data-format="oficio">
+                <input type="radio" name="pdfFormat" value="oficio" style="accent-color: var(--primary);">
+                <div>
+                  <div style="font-weight: 600;">Oficio</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">216 × 330 mm</div>
+                </div>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: var(--card-bg); border-radius: 8px; cursor: pointer; border: 2px solid var(--border);" class="format-option" data-format="doble-carta">
+                <input type="radio" name="pdfFormat" value="doble-carta" style="accent-color: var(--primary);">
+                <div>
+                  <div style="font-weight: 600;">Doble Carta</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">432 × 279 mm</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Estilo visual -->
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary);">🎨 Estilo Visual</h3>
+            <select id="pdfStyle" style="width: 100%; padding: 0.75rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text);">
+              <option value="executive">Ejecutivo Corporativo (Azul + Dorado)</option>
+              <option value="classic">Clásico Elegante (Blanco y Negro)</option>
+              <option value="modern">Moderno Profesional (Oscuro)</option>
+            </select>
+          </div>
+
+          <!-- Secciones a incluir -->
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary);">📊 Secciones a Incluir</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="includeKPIs" checked style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <span>Resumen Ejecutivo (KPIs)</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="includeCharts" checked style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <span>Gráficos Estadísticos</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="includeTables" checked style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <span>Tablas de Detalle</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="includeAlerts" checked style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <span>Alertas y Notificaciones</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Campos de equipos -->
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary);">📋 Campos de Equipos</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; max-height: 120px; overflow-y: auto; padding: 0.75rem; background: var(--card-bg); border-radius: 8px;">
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="resguardo" checked style="accent-color: var(--primary);">
+                <span>Resguardo</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="fullName" checked style="accent-color: var(--primary);">
+                <span>Usuario</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="deviceType" checked style="accent-color: var(--primary);">
+                <span>Equipo</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="brand" checked style="accent-color: var(--primary);">
+                <span>Marca</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="model" style="accent-color: var(--primary);">
+                <span>Modelo</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="serialNumber" style="accent-color: var(--primary);">
+                <span>Serie</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="location" checked style="accent-color: var(--primary);">
+                <span>Ubicación</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="department" style="accent-color: var(--primary);">
+                <span>Departamento</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="status" checked style="accent-color: var(--primary);">
+                <span>Estado</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="purchaseDate" style="accent-color: var(--primary);">
+                <span>Fecha Compra</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="price" style="accent-color: var(--primary);">
+                <span>Precio</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
+                <input type="checkbox" class="field-checkbox" value="warrantyEndDate" style="accent-color: var(--primary);">
+                <span>Fin Garantía</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Opciones adicionales -->
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary);">⚙️ Opciones Adicionales</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="includeLogo" checked style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <span>Incluir logo de la empresa</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="includeDate" checked style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <span>Incluir fecha de generación</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="includePageNumbers" checked style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <span>Incluir numeración de páginas</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Vista previa -->
+          <div style="background: var(--card-bg); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted);">👁️ Vista Previa</h3>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+              <div style="width: 60px; height: 80px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.6rem; text-align: center;">
+                PDF
+              </div>
+              <div>
+                <div style="font-weight: 600; margin-bottom: 0.25rem;">Reporte Ejecutivo</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                  <span id="previewFormat">A4 Horizontal</span> • 
+                  <span id="previewStyle">Ejecutivo</span> • 
+                  <span id="previewPages">~3 páginas</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer-premium" style="padding: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 1rem;">
+          <button type="button" class="glass-btn" onclick="document.getElementById('exportModal').remove()">
+            Cancelar
+          </button>
+          <button type="button" class="premium-btn primary" id="generatePDFBtn" style="display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="file-down"></i>
+            Generar PDF
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Renderizar iconos
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+    
+    // Event listeners
+    document.getElementById('generatePDFBtn').addEventListener('click', () => {
+      this.generatePDF();
+    });
+    
+    // Actualizar vista previa al cambiar opciones
+    modal.querySelectorAll('input, select').forEach(input => {
+      input.addEventListener('change', () => this.updatePreview());
+    });
+  }
+
+  /**
+   * Actualiza la vista previa
+   */
+  updatePreview() {
+    const format = document.querySelector('input[name="pdfFormat"]:checked')?.value || 'a4-landscape';
+    const style = document.getElementById('pdfStyle')?.value || 'executive';
+    
+    const formatLabels = {
+      'a4-landscape': 'A4 Horizontal',
+      'a4-portrait': 'A4 Vertical',
+      'oficio': 'Oficio',
+      'doble-carta': 'Doble Carta'
+    };
+    
+    const styleLabels = {
+      'executive': 'Ejecutivo',
+      'classic': 'Clásico',
+      'modern': 'Moderno'
+    };
+    
+    const previewFormat = document.getElementById('previewFormat');
+    const previewStyle = document.getElementById('previewStyle');
+    
+    if (previewFormat) previewFormat.textContent = formatLabels[format];
+    if (previewStyle) previewStyle.textContent = styleLabels[style];
+  }
+
+  /**
+   * Genera el PDF
+   */
+  async generatePDF() {
+    const generateBtn = document.getElementById('generatePDFBtn');
+    generateBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Generando...';
+    generateBtn.disabled = true;
+    
+    try {
+      // Recopilar opciones
+      const formatValue = document.querySelector('input[name="pdfFormat"]:checked')?.value || 'a4-landscape';
+      const [format, orientation] = formatValue.split('-');
+      
+      const selectedFields = Array.from(document.querySelectorAll('.field-checkbox:checked')).map(cb => cb.value);
+      
+      const options = {
+        format: format,
+        orientation: orientation,
+        style: document.getElementById('pdfStyle')?.value || 'executive',
+        sections: {
+          kpis: document.getElementById('includeKPIs')?.checked ?? true,
+          charts: document.getElementById('includeCharts')?.checked ?? true,
+          tables: document.getElementById('includeTables')?.checked ?? true,
+          alerts: document.getElementById('includeAlerts')?.checked ?? true
+        },
+        selectedFields: selectedFields,
+        includeLogo: document.getElementById('includeLogo')?.checked ?? true,
+        includeDate: document.getElementById('includeDate')?.checked ?? true,
+        includeFooter: true,
+        pageNumbers: document.getElementById('includePageNumbers')?.checked ?? true
+      };
+      
+      // Importar y usar el generador
+      const { PDFExecutiveGenerator } = await import('./pdf-executive-generator.js');
+      const generator = new PDFExecutiveGenerator(this.inventory, options);
+      await generator.generate();
+      generator.save();
+      
+      // Cerrar modal
+      document.getElementById('exportModal')?.remove();
+      
+      // Mostrar notificación
+      this.showNotification('PDF generado correctamente', 'success');
+      
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      this.showNotification('Error al generar PDF: ' + error.message, 'error');
+      generateBtn.innerHTML = '<i data-lucide="file-down"></i> Generar PDF';
+      generateBtn.disabled = false;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  /**
+   * Muestra notificación
+   */
+  showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      background: ${type === 'success' ? 'rgba(16, 185, 129, 0.9)' : type === 'error' ? 'rgba(239, 68, 68, 0.9)' : 'rgba(59, 130, 246, 0.9)'};
+      color: white;
+      font-weight: 600;
+      z-index: 10000;
+      animation: slideIn 0.3s ease;
+      backdrop-filter: blur(10px);
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  /**
+   * Exporta dashboard (alias para compatibilidad)
    */
   exportDashboard() {
-    // Aquí iría la lógica de exportación
-    console.log('Exportando dashboard...');
+    this.showExportModal();
   }
 
   /**
