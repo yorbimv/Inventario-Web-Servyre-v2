@@ -6,7 +6,7 @@ import { CONFIG } from './config.js';
 import { sanitize, generateId } from './modules/utils.js';
 import { renderDashboard } from './modules/dashboard.js';
 import { initPremiumDashboard } from './modules/dashboard-premium.js';
-import { initDashboardEjecutivo } from './modules/dashboard-ejecutivo.js';
+import { initDashboardNew } from './modules/dashboard-new.js';
 import { elements } from './modules/ui.js';
 import { exportExcel, exportJSON, exportCSV, exportPDF, generateDetailPdf, downloadTemplate, importData } from './modules/export.js';
 
@@ -354,7 +354,7 @@ const switchToDashboard = () => {
     document.getElementById('inventorySection').style.display = 'none';
     document.getElementById('tabDashboard').classList.add('active');
     document.getElementById('tabInventory').classList.remove('active');
-    initDashboardEjecutivo(inventory, 'dashboardContainer');
+    initDashboardNew(inventory, 'dashboardContainer');
 };
 
 const switchToInventory = () => {
