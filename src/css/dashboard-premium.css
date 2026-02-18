@@ -470,6 +470,16 @@
   border-bottom: 1px solid var(--border-light);
 }
 
+.data-table td .badge {
+  display: inline-block;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 100%;
+  line-height: 1.4;
+  position: relative;
+  z-index: 1;
+}
+
 .data-table tr:hover td {
   background: rgba(255, 255, 255, 0.02);
 }

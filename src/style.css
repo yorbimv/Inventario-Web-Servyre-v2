@@ -796,6 +796,7 @@ textarea {
 
 /* Badges */
 .badge {
+  display: inline-block;
   padding: 0.35rem 0.75rem;
   border-radius: 8px;
   font-size: 0.7rem;
