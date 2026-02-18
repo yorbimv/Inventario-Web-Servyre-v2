@@ -1199,6 +1199,25 @@ function showStatusChangeAlert(oldStatus, newStatus, itemName) {
         alertDiv.style.animation = 'slideIn 0.3s ease reverse';
         setTimeout(() => alertDiv.remove(), 300);
     }, 5000);
+    
+    // Guardar cambio de estado en localStorage
+    const statusChanges = JSON.parse(localStorage.getItem('statusChanges')) || [];
+    statusChanges.push({
+        oldStatus,
+        newStatus,
+        itemName,
+        timestamp: new Date().toISOString()
+    });
+    // Mantener solo los últimos 10 cambios
+    if (statusChanges.length > 10) {
+        statusChanges.splice(0, statusChanges.length - 10);
+    }
+    localStorage.setItem('statusChanges', JSON.stringify(statusChanges));
+    
+    // Actualizar el dashboard si existe
+    if (window.dashboard) {
+        window.dashboard.render();
+    }
 }
 
 searchInput.oninput = (e) => {

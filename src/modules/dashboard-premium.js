@@ -453,6 +453,23 @@ class DashboardManager {
     const now = new Date();
     const dismissed = this.getDismissedAlerts();
     
+    // Alertas de cambio de estado
+    const statusChanges = this.getStatusChanges();
+    if (statusChanges.length > 0) {
+      const alertKey = 'statusChanges';
+      const dismissedInfo = dismissed[alertKey];
+      const lastChangeCount = statusChanges.length;
+      if (!dismissedInfo || lastChangeCount > dismissedInfo.count) {
+        alerts.push({
+          key: alertKey,
+          type: 'info',
+          icon: 'refresh-cw',
+          title: 'Estados actualizados',
+          description: `${lastChangeCount} registro${lastChangeCount > 1 ? 's' : ''} cambiada${lastChangeCount > 1 ? 's' : ''} de estado`
+        });
+      }
+    }
+    
     // Garantías por vencer
     const warrantyExpiring = this.inventory.filter(i => {
       if (!i.warrantyEndDate) return false;
@@ -520,6 +537,14 @@ class DashboardManager {
       return JSON.parse(localStorage.getItem('dismissedAlerts')) || {};
     } catch {
       return {};
+    }
+  }
+
+  getStatusChanges() {
+    try {
+      return JSON.parse(localStorage.getItem('statusChanges')) || [];
+    } catch {
+      return [];
     }
   }
 
