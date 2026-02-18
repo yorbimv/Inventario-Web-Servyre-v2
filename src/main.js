@@ -102,86 +102,221 @@ const loadData = () => {
         }
     }
     
-    // Si no hay inventario, agregar 10 usuarios de ejemplo con datos aleatorios
+    // Si no hay inventario, mostrar selector de ejemplos
     if (inventory.length === 0) {
-        const nombres = ["CARLOS", "MARÍA", "JOSÉ", "ANA", "LUIS", "PATRICIA", "JORGE", "ELENA", "FERNANDO", "SOFÍA"];
-        const apellidos = ["GARCÍA", "MARTÍNEZ", "LÓPEZ", "HERNÁNDEZ", "GONZÁLEZ", "PÉREZ", "RODRÍGUEZ", "SÁNCHEZ", "RAMÍREZ", "TORRES"];
-        const posiciones = ["GERENTE", "ANALISTA", "COORDINADOR", "DIRECTOR", "ESPECIALISTA", "ADMINISTRADOR", "SUPERVISOR", "CONSULTOR", "JEFE", "ASISTENTE"];
-        const areas = ["TI", "OPERACIONES", "FINANZAS", "RRHH", "VENTAS", "MARKETING", "LOGÍSTICA", "LEGAL", "ADMINISTRACIÓN", "CALIDAD"];
-        const marcas = ["Dell", "HP", "Lenovo", "Apple", "Microsoft"];
-        const modelos = {
-            "Dell": ["Latitude 3420", "Latitude 5430", "OptiPlex 7090", "Precision 3581"],
-            "HP": ["EliteDesk 800", "ProBook 450", "ZBook Firefly", "EliteBook 840"],
-            "Lenovo": ["ThinkPad X1", "ThinkCentre M70", "Legion 5 Pro"],
-            "Apple": ["MacBook Pro M2", "MacBook Air M3", "iMac 24\""],
-            "Microsoft": ["Surface Pro 9", "Surface Laptop 5"]
-        };
-        const ubicaciones = ["Corporativo", "Naucalpan", "Campo"];
-        const tipos = ["Laptop", "Desktop", "All-in-One"];
-        const procesadores = ["Intel Core i5-1135G7", "Intel Core i7-1265U", "Intel Core i5-1235U", "AMD Ryzen 5 5500U", "Apple M2"];
-        const rams = ["8 GB", "16 GB", "32 GB"];
-        const discos = ["256 GB SSD", "512 GB SSD", "1 TB SSD"];
-        
-        const random = (arr) => arr[Math.floor(Math.random() * arr.length)];
-        const randomDate = () => {
-            const start = new Date(2022, 0, 1);
-            const end = new Date();
-            const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-            return date.toISOString().split('T')[0];
-        };
-        
-        for (let i = 1; i <= 10; i++) {
-            const nombre = random(nombres);
-            const apellido = random(apellidos);
-            const marca = random(marcas);
-            const modelo = random(modelos[marca]);
-            const ubicacion = random(ubicaciones);
-            const fechaCompra = randomDate();
-            
-            inventory.push({
-                id: generateId(),
-                resguardo: `SERV-2024-${String(i).padStart(3, '0')}`,
-                fullName: `${nombre} ${apellido} ${random(apellidos)}`,
-                position: `${random(posiciones)} DE ${random(areas)}`,
-                email: `${nombre.toLowerCase()}.${apellido.toLowerCase()}@servyre.com`,
-                extension: `${4000 + i}`,
-                department: random(areas),
-                address: ubicacion === "Corporativo" ? "TORRE CORPORATIVA" : ubicacion === "Naucalpan" ? "PLANTA NAUCALPAN" : "EXTERNO",
-                location: ubicacion,
-                deviceType: random(tipos),
-                brand: marca,
-                model: modelo,
-                serialNumber: `SN${marca.substring(0, 2).toUpperCase()}2024${String(i).padStart(4, '0')}`,
-                os: marca === "Apple" ? "macOS Sonoma" : "Windows 11 Pro",
-                pcName: `${random(areas).substring(0, 2)}-${nombre.substring(0, 3)}-LT${String(i).padStart(2, '0')}`,
-                processor: random(procesadores),
-                ram: random(rams),
-                storageCapacity: random(discos),
-                status: Math.random() > 0.2 ? "Activo" : (Math.random() > 0.5 ? "Mantenimiento" : "Baja"),
-                price: `$${(15000 + Math.floor(Math.random() * 35000)).toLocaleString()}.00`,
-                purchaseDate: fechaCompra,
-                warranty: 24 + Math.floor(Math.random() * 24),
-                periphBrand: random(marcas),
-                periphModel: `Monitor ${22 + Math.floor(Math.random() * 10)}\"`,
-                periphSerial: `MON-${String(i).padStart(4, '0')}`,
-                mouseExternal: Math.random() > 0.3 ? `MOUSE-${String(i).padStart(4, '0')}` : "",
-                lastMtto: randomDate(),
-                nextMtto: randomDate(),
-                conditions: "Equipo en buenas condiciones de operación",
-                incidentReport: "",
-                notes: `Usuario de prueba #${i} generado automáticamente`,
-                photos: ""
-            });
-        }
-        saveToStorage();
-        console.log('✅ 10 usuarios de ejemplo agregados correctamente');
+        showExampleSelector();
+        return; // No continuar hasta que seleccione un ejemplo
     }
     
     renderTable();
     updateStats();
     syncFormSelects();
     initPremiumDashboard(inventory, 'dashboardContainer');
-};
+}
+
+function showExampleSelector() {
+    const examples = [
+        {
+            id: 1,
+            name: "Empresa Pequeña",
+            description: "15 equipos - Uso mainly office",
+            icon: "🏢",
+            color: "#10B981"
+        },
+        {
+            id: 2,
+            name: "Empresa Mediana", 
+            description: "30 equipos - Diversos departamentos",
+            icon: "🏭",
+            color: "#3B82F6"
+        },
+        {
+            id: 3,
+            name: "Empresa Grande",
+            description: "50 equipos - Con mantenimientos",
+            icon: "🏢",
+            color: "#8B5CF6"
+        },
+        {
+            id: 4,
+            name: "Empresa con Problemas",
+            description: "25 equipos - Muchos en mantenimiento",
+            icon: "⚠️",
+            color: "#F59E0B"
+        },
+        {
+            id: 5,
+            name: "Startup Tech",
+            description: "20 equipos - Mayormente MacBooks",
+            icon: "🚀",
+            color: "#EC4899"
+        }
+    ];
+    
+    const modal = document.createElement('div');
+    modal.id = 'exampleModal';
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'display:flex;align-items:center;justify-content:center;';
+    
+    modal.innerHTML = `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;max-width:700px;width:90%;max-height:90vh;overflow-y:auto;">
+            <h2 style="text-align:center;margin-bottom:0.5rem;">
+                <i data-lucide="database"></i> Selecciona un Ejemplo
+            </h2>
+            <p style="text-align:center;color:var(--text-muted);margin-bottom:2rem;">
+                Elige un escenario predefinido para comenzar a probar el sistema
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+                ${examples.map(ex => `
+                    <button onclick="loadExample(${ex.id})" style="
+                        background:var(--card-bg);
+                        border:2px solid var(--border);
+                        border-radius:12px;
+                        padding:1.5rem;
+                        cursor:pointer;
+                        transition:all 0.3s;
+                        text-align:left;
+                    " onmouseover="this.style.borderColor='var(--primary)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+                        <div style="font-size:2rem;margin-bottom:0.5rem;">${ex.icon}</div>
+                        <div style="font-weight:600;font-size:1rem;margin-bottom:0.25rem;color:var(--text);">${ex.name}</div>
+                        <div style="font-size:0.8rem;color:var(--text-muted);">${ex.description}</div>
+                    </button>
+                `).join('')}
+            </div>
+            <div style="margin-top:2rem;text-align:center;">
+                <button onclick="loadExample(0)" style="
+                    background:transparent;
+                    border:1px solid var(--border);
+                    color:var(--text-muted);
+                    padding:0.75rem 1.5rem;
+                    border-radius:8px;
+                    cursor:pointer;
+                " onmouseover="this.style.borderColor='var(--text-muted)'" onmouseout="this.style.borderColor='var(--border)'">
+                    Comenzar en blanco
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    if (window.lucide) window.lucide.createIcons();
+}
+
+function loadExample(exampleId) {
+    const nombres = ["CARLOS", "MARÍA", "JOSÉ", "ANA", "LUIS", "PATRICIA", "JORGE", "ELENA", "FERNANDO", "SOFÍA", "MIGUEL", "ALEJANDRA", "ROBERTO", "CAROLINA", "DANIEL"];
+    const apellidos = ["GARCÍA", "MARTÍNEZ", "LÓPEZ", "HERNÁNDEZ", "GONZÁLEZ", "PÉREZ", "RODRÍGUEZ", "SÁNCHEZ", "RAMÍREZ", "TORRES", "FLORES", "RIVERA", "GÓMEZ", "DÍAZ", "REYES"];
+    const posiciones = ["GERENTE", "ANALISTA", "COORDINADOR", "DIRECTOR", "ESPECIALISTA", "ADMINISTRADOR", "SUPERVISOR", "CONSULTOR", "JEFE", "ASISTENTE", "TECNICO", "CONTADOR", "AUXILIAR", "COORDINADOR"];
+    const areas = ["TI", "OPERACIONES", "FINANZAS", "RRHH", "VENTAS", "MARKETING", "LOGÍSTICA", "LEGAL", "ADMINISTRACIÓN", "CALIDAD", "COMPRAS", "PRODUCCIÓN"];
+    const marcas = ["Dell", "HP", "Lenovo", "Apple", "Microsoft", "Asus", "Acer"];
+    const modelos = {
+        "Dell": ["Latitude 3420", "Latitude 5430", "Latitude 5540", "OptiPlex 7090", "Precision 3581", "Vostro 3520"],
+        "HP": ["EliteDesk 800", "ProBook 450", "ZBook Firefly", "EliteBook 840", "ProBook 640", "Victus 15"],
+        "Lenovo": ["ThinkPad X1", "ThinkCentre M70", "Legion 5 Pro", "IdeaPad Gaming", "ThinkBook 15", "Yoga 9i"],
+        "Apple": ["MacBook Pro M2", "MacBook Pro M3", "MacBook Air M3", "iMac 24\"", "Mac Mini M2", "MacBook Air M1"],
+        "Microsoft": ["Surface Pro 9", "Surface Laptop 5", "Surface Studio 2", "Surface Go 4"],
+        "Asus": [" VivoBook 15", "ZenBook 14", "ROG Strix", "ExpertBook B1"],
+        "Acer": ["Aspire 5", "Nitro 5", "Swift 3", "ConceptD 3"]
+    };
+    const ubicaciones = ["Corporativo", "Naucalpan", "Campo", "Sucursal Centro", "Sucursal Norte", "Warehouse"];
+    const tipos = ["Laptop", "Desktop", "All-in-One", "Tablet", "Servidor"];
+    const procesadores = ["Intel Core i5-1135G7", "Intel Core i7-1265U", "Intel Core i5-1235U", "Intel Core i9-13900H", "AMD Ryzen 5 5500U", "AMD Ryzen 7 6800U", "Apple M2", "Apple M3", "Intel Core i3-1215U"];
+    const rams = ["8 GB", "16 GB", "32 GB", "64 GB"];
+    const discos = ["256 GB SSD", "512 GB SSD", "1 TB SSD", "2 TB SSD"];
+    const estados = ["Activo", "Mantenimiento", "Baja", "Cancelado", "Para piezas"];
+    
+    const random = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const randomDate = (startYear = 2020, endYear = 2024) => {
+        const start = new Date(startYear, 0, 1);
+        const end = new Date(endYear, 11, 31);
+        const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+        return date.toISOString().split('T')[0];
+    };
+    
+    const config = {
+        1: { count: 15, statusWeights: { Activo: 0.8, Mantenimiento: 0.1, Baja: 0.1 }, brandWeights: { Dell: 0.4, HP: 0.3, Lenovo: 0.2, Apple: 0.1 } },
+        2: { count: 30, statusWeights: { Activo: 0.7, Mantenimiento: 0.15, Baja: 0.1, Cancelado: 0.05 }, brandWeights: { Dell: 0.35, HP: 0.25, Lenovo: 0.2, Apple: 0.1, Microsoft: 0.1 } },
+        3: { count: 50, statusWeights: { Activo: 0.6, Mantenimiento: 0.25, Baja: 0.1, "Para piezas": 0.05 }, brandWeights: { Dell: 0.3, HP: 0.25, Lenovo: 0.2, Apple: 0.15, Microsoft: 0.1 } },
+        4: { count: 25, statusWeights: { Activo: 0.35, Mantenimiento: 0.35, Baja: 0.2, "Para piezas": 0.1 }, brandWeights: { Dell: 0.3, HP: 0.35, Lenovo: 0.2, Asus: 0.1, Acer: 0.05 } },
+        5: { count: 20, statusWeights: { Activo: 0.85, Mantenimiento: 0.1, Baja: 0.05 }, brandWeights: { Apple: 0.5, Dell: 0.2, Lenovo: 0.15, Microsoft: 0.15 } }
+    };
+    
+    const getStatus = (weights) => {
+        const r = Math.random();
+        let cum = 0;
+        for (const [status, weight] of Object.entries(weights)) {
+            cum += weight;
+            if (r < cum) return status;
+        }
+        return "Activo";
+    };
+    
+    const getBrand = (weights) => {
+        const r = Math.random();
+        let cum = 0;
+        for (const [brand, weight] of Object.entries(weights)) {
+            cum += weight;
+            if (r < cum) return brand;
+        }
+        return "Dell";
+    };
+    
+    let inventory = [];
+    const cfg = config[exampleId] || config[1];
+    
+    for (let i = 1; i <= cfg.count; i++) {
+        const nombre = random(nombres);
+        const apellido = random(apellidos);
+        const marca = getBrand(cfg.brandWeights);
+        const modelo = random(modelos[marca] || ["Generic"]);
+        const ubicacion = random(ubicaciones);
+        const fechaCompra = randomDate(2021, 2024);
+        const estado = getStatus(cfg.statusWeights);
+        const anioCompra = parseInt(fechaCompra.split('-')[0]);
+        
+        inventory.push({
+            id: generateId(),
+            resguardo: `SERV-${anioCompra}-${String(i).padStart(3, '0')}`,
+            fullName: `${nombre} ${apellido} ${random(apellidos)}`,
+            position: `${random(posiciones)} DE ${random(areas)}`,
+            email: `${nombre.toLowerCase()}.${apellido.toLowerCase()}@servyre.com`,
+            extension: `${4000 + i}`,
+            department: random(areas),
+            address: ubicacion === "Corporativo" ? "TORRE CORPORATIVA PISO " + random([1,2,3,4,5,6,7,8]) : ubicacion === "Naucalpan" ? "PLANTA NAUCALPAN" : "EXTERNO",
+            location: ubicacion,
+            deviceType: random(tipos),
+            brand: marca,
+            model: modelo,
+            serialNumber: `SN${marca.substring(0, 2).toUpperCase()}${anioCompra}${String(i).padStart(5, '0')}`,
+            os: marca === "Apple" ? (Math.random() > 0.5 ? "macOS Sonoma" : "macOS Ventura") : "Windows 11 Pro",
+            pcName: `${random(areas).substring(0, 2).toUpperCase()}-${nombre.substring(0, 3).toUpperCase()}-LT${String(i).padStart(2, '0')}`,
+            processor: random(procesadores),
+            ram: random(rams),
+            storageCapacity: random(discos),
+            status: estado,
+            price: `$${(12000 + Math.floor(Math.random() * 45000)).toLocaleString()}.00`,
+            purchaseDate: fechaCompra,
+            warranty: estado === "Baja" ? 0 : 12 + Math.floor(Math.random() * 36),
+            periphBrand: random(marcas),
+            periphModel: `Monitor ${random([19,21,22,24,27,32])}" ${random(['HD','Full HD','4K'])}`,
+            periphSerial: `MON-${String(i).padStart(5, '0')}`,
+            mouseExternal: Math.random() > 0.2 ? `MOUSE-${String(i).padStart(5, '0')}` : "",
+            lastMtto: estado === "Activo" ? randomDate(2023, 2024) : randomDate(2022, 2023),
+            nextMtto: estado === "Activo" ? randomDate(2024, 2025) : "",
+            conditions: estado === "Baja" ? "Equipo dado de baja por obsolescencia" : (estado === "Mantenimiento" ? "Equipo en taller para mantenimiento preventivo" : "Equipo en buenas condiciones de operación"),
+            incidentReport: estado === "Mantenimiento" ? `Reporte #${Math.floor(Math.random() * 9999)} - Requiere servicio` : "",
+            notes: `Ejemplo ${exampleId === 0 ? 'vacío' : 'predefinido #'+exampleId}`,
+            photos: ""
+        });
+    }
+    
+    // Cerrar modal y cargar inventario
+    const modal = document.getElementById('exampleModal');
+    if (modal) modal.remove();
+    
+    // Guardar y renderizar
+    saveData(inventory, catalogs);
+    window.location.reload();
+}
 
 // --- TAB NAVIGATION ---
 let currentView = 'dashboard';
