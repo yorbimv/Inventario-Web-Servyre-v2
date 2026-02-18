@@ -291,10 +291,12 @@
 /* GridStack Styles */
 .grid-stack {
   margin-bottom: 1.5rem;
+  padding: 10px;
+  margin: -5px;
 }
 
 .grid-stack-item {
-  margin: 8px 10px !important;
+  margin: 12px !important;
 }
 
 .grid-stack-item-content {
