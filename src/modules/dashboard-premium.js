@@ -170,12 +170,15 @@ class DashboardManager {
       </div>
       <div class="alerts-toast-body">
         ${alerts.map(alert => `
-          <div class="alert-item ${alert.type}">
+          <div class="alert-item ${alert.type}" data-alert-key="${alert.key}" data-alert-count="${alert.description.match(/\d+/)[0]}">
             <i data-lucide="${alert.icon}"></i>
             <div>
               <strong>${alert.title}</strong>
               <p>${alert.description}</p>
             </div>
+            <button class="dismiss-alert-btn" title="Cerrar esta alerta">
+              <i data-lucide="x"></i>
+            </button>
           </div>
         `).join('')}
       </div>
@@ -186,6 +189,29 @@ class DashboardManager {
       </div>
     `;
     document.body.appendChild(toast);
+    
+    // Agregar event listeners para cerrar cada alerta
+    toast.querySelectorAll('.alert-item').forEach(item => {
+      const dismissBtn = item.querySelector('.dismiss-alert-btn');
+      if (dismissBtn) {
+        dismissBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const key = item.dataset.alertKey;
+          const count = parseInt(item.dataset.alertCount);
+          this.dismissAlert(key, count);
+          item.remove();
+          
+          // Actualizar contador
+          const remainingAlerts = toast.querySelectorAll('.alert-item').length;
+          toast.querySelector('.alerts-toast-header span').textContent = `Alertas (${remainingAlerts})`;
+          
+          // Cerrar toast si no hay más alertas
+          if (remainingAlerts === 0) {
+            toast.remove();
+          }
+        });
+      }
+    });
     
     if (window.lucide) {
       window.lucide.createIcons();
@@ -425,6 +451,7 @@ class DashboardManager {
   generateAlerts() {
     const alerts = [];
     const now = new Date();
+    const dismissed = this.getDismissedAlerts();
     
     // Garantías por vencer
     const warrantyExpiring = this.inventory.filter(i => {
@@ -435,12 +462,18 @@ class DashboardManager {
     });
     
     if (warrantyExpiring.length > 0) {
-      alerts.push({
-        type: 'warning',
-        icon: 'shield-alert',
-        title: 'Garantías por vencer',
-        description: `${warrantyExpiring.length} equipos en los próximos 30 días`
-      });
+      const alertKey = 'warranty';
+      const dismissedInfo = dismissed[alertKey];
+      // Mostrar si nunca se cerró O si hay más equipos que cuando se cerró
+      if (!dismissedInfo || warrantyExpiring.length > dismissedInfo.count) {
+        alerts.push({
+          key: alertKey,
+          type: 'warning',
+          icon: 'shield-alert',
+          title: 'Garantías por vencer',
+          description: `${warrantyExpiring.length} equipos en los próximos 30 días`
+        });
+      }
     }
     
     // Mantenimientos vencidos
@@ -450,26 +483,56 @@ class DashboardManager {
     });
     
     if (overdueMtto.length > 0) {
-      alerts.push({
-        type: 'danger',
-        icon: 'alert-triangle',
-        title: 'Mantenimientos vencidos',
-        description: `${overdueMtto.length} equipos requieren atención`
-      });
+      const alertKey = 'overdueMtto';
+      const dismissedInfo = dismissed[alertKey];
+      if (!dismissedInfo || overdueMtto.length > dismissedInfo.count) {
+        alerts.push({
+          key: alertKey,
+          type: 'danger',
+          icon: 'alert-triangle',
+          title: 'Mantenimientos vencidos',
+          description: `${overdueMtto.length} equipos requieren atención`
+        });
+      }
     }
     
     // Equipos en mantenimiento
     const inMaintenance = this.inventory.filter(i => i.status === 'Mantenimiento');
     if (inMaintenance.length > 0) {
-      alerts.push({
-        type: 'info',
-        icon: 'wrench',
-        title: 'En mantenimiento',
-        description: `${inMaintenance.length} equipos en servicio`
-      });
+      const alertKey = 'inMaintenance';
+      const dismissedInfo = dismissed[alertKey];
+      if (!dismissedInfo || inMaintenance.length > dismissedInfo.count) {
+        alerts.push({
+          key: alertKey,
+          type: 'info',
+          icon: 'wrench',
+          title: 'En mantenimiento',
+          description: `${inMaintenance.length} equipos en servicio`
+        });
+      }
     }
     
     return alerts;
+  }
+
+  getDismissedAlerts() {
+    try {
+      return JSON.parse(localStorage.getItem('dismissedAlerts')) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  dismissAlert(alertKey, alertCount) {
+    const dismissed = this.getDismissedAlerts();
+    dismissed[alertKey] = {
+      count: alertCount,
+      dismissedAt: new Date().toISOString()
+    };
+    localStorage.setItem('dismissedAlerts', JSON.stringify(dismissed));
+    
+    // Actualizar la campana
+    this.render();
   }
 
   /**

@@ -170,10 +170,45 @@
 
 .alerts-toast-body .alert-item {
   display: flex;
+  align-items: flex-start;
   gap: 0.75rem;
   padding: 0.75rem;
   border-radius: 8px;
   margin-bottom: 0.5rem;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.alerts-toast-body .alert-item:hover {
+  transform: translateX(4px);
+}
+
+.alerts-toast-body .alert-item .dismiss-alert-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  color: #fff;
+}
+
+.alerts-toast-body .alert-item:hover .dismiss-alert-btn {
+  opacity: 1;
+}
+
+.alerts-toast-body .alert-item .dismiss-alert-btn:hover {
+  background: var(--danger);
+  transform: scale(1.1);
 }
 
 .alerts-toast-body .alert-item.warning {
