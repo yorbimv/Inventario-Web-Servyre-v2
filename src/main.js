@@ -320,9 +320,20 @@ function loadExample(exampleId) {
         inventory: inventory,
         catalogs: {
             departments: [...new Set(inventory.map(i => i.department))],
-            locations: [...new Set(inventory.map(i => i.location))],
-            brands: [...new Set(inventory.map(i => i.brand))],
-            deviceTypes: [...new Set(inventory.map(i => i.deviceType))]
+            locations: {
+                sedes: ['Corporativo', 'Naucalpan'],
+                externo: ['Campo', 'Sucursal Centro', 'Sucursal Norte', 'Warehouse']
+            },
+            brands: ['Dell', 'HP', 'Lenovo', 'Apple', 'Microsoft', 'Asus', 'Acer'],
+            modelsByBrand: {
+                "Dell": ["Latitude 3420", "Latitude 5430", "Latitude 5540", "OptiPlex 7090", "Precision 3581", "Vostro 3520"],
+                "HP": ["EliteDesk 800", "ProBook 450", "ZBook Firefly", "EliteBook 840", "ProBook 640", "Victus 15"],
+                "Lenovo": ["ThinkPad X1", "ThinkCentre M70", "Legion 5 Pro", "IdeaPad Gaming", "ThinkBook 15", "Yoga 9i"],
+                "Apple": ["MacBook Pro M2", "MacBook Pro M3", "MacBook Air M3", "iMac 24\"", "Mac Mini M2", "MacBook Air M1"],
+                "Microsoft": ["Surface Pro 9", "Surface Laptop 5", "Surface Studio 2", "Surface Go 4"],
+                "Asus": ["VivoBook 15", "ZenBook 14", "ROG Strix", "ExpertBook B1"],
+                "Acer": ["Aspire 5", "Nitro 5", "Swift 3", "ConceptD 3"]
+            }
         }
     };
     localStorage.setItem(STORAGE_KEY, encrypt(dataToSave));
@@ -332,7 +343,6 @@ function loadExample(exampleId) {
 }
 
 window.loadExample = loadExample;
-window.openEditForm = openEditForm;
 
 // --- TAB NAVIGATION ---
 let currentView = 'dashboard';
@@ -682,6 +692,8 @@ const openEditForm = (id = null) => {
     }
     modalOverlay.classList.add('active');
 };
+
+window.openEditForm = openEditForm;
 
 const updateModelsDropdown = () => {
     const brand = brandInput.value;
