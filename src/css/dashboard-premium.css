@@ -1,9 +1,11 @@
-/** Dashboard Premium Styles */
+/** Dashboard Premium Styles - Enhanced */
 
 /* Dashboard Layout */
 .dashboard-container {
   padding: 2rem;
   min-height: calc(100vh - 80px);
+  background: var(--gradient-mesh-1), var(--gradient-mesh-2), var(--gradient-mesh-3);
+  background-attachment: fixed;
 }
 
 /* Toolbar Superior */
@@ -12,22 +14,28 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  background: var(--surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   margin-bottom: 1.5rem;
   position: sticky;
   top: 1rem;
   z-index: 100;
-  box-shadow: var(--shadow);
+  box-shadow: var(--glass-shadow);
+  transition: all var(--transition-normal);
+}
+
+.dashboard-toolbar:hover {
+  box-shadow: var(--glass-shadow), 0 0 30px var(--primary-glow);
+  border-color: rgba(252, 211, 77, 0.2);
 }
 
 .toolbar-title {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -42,7 +50,12 @@
 .toolbar-actions .glass-btn {
   position: relative;
   padding: 0.5rem;
-  transition: transform 0.2s ease;
+  transition: all var(--transition-bounce);
+}
+
+.toolbar-actions .glass-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 .toolbar-actions .glass-btn:active {
@@ -285,28 +298,42 @@
 }
 
 .grid-stack-item-content {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   padding: 1.5rem;
   height: 100%;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all var(--transition-bounce);
   position: relative;
   overflow: visible !important;
   cursor: move;
+  box-shadow: var(--glass-shadow);
+}
+
+.grid-stack-item-content:hover {
+  border-color: rgba(252, 211, 77, 0.3);
+  box-shadow: var(--glass-shadow), 0 0 30px var(--primary-glow);
+  transform: translateY(-4px);
 }
 
 /* Widget Base */
 .dashboard-widget {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   padding: 1.5rem;
   height: 100%;
   cursor: grab;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all var(--transition-bounce);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--glass-shadow);
+}
+
+.dashboard-widget:hover {
+  border-color: rgba(252, 211, 77, 0.3);
+  box-shadow: var(--glass-shadow), 0 0 30px var(--primary-glow);
+  transform: translateY(-4px);
 }
 
 .dashboard-widget::before {
@@ -316,7 +343,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(252, 211, 77, 0.3), transparent);
+  background: var(--gradient-primary);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -460,7 +487,7 @@
   letter-spacing: 0.05em;
   color: var(--text-muted);
   background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .data-table td {
@@ -468,10 +495,20 @@
   font-size: 0.875rem;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-light);
+  transition: all var(--transition-fast);
 }
 
-.data-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+.data-table tbody tr {
+  transition: all var(--transition-normal);
+}
+
+.data-table tbody tr:hover {
+  background: rgba(252, 211, 77, 0.05);
+  transform: translateX(4px);
+}
+
+.data-table tbody tr:hover td {
+  color: var(--text);
 }
 
 /* Animations */
