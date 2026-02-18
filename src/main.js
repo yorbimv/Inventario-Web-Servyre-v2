@@ -313,14 +313,25 @@ function loadExample(exampleId) {
     const modal = document.getElementById('exampleModal');
     if (modal) modal.remove();
     
-    // Guardar y renderizar
-    saveToStorage();
+    // Guardar directamente en localStorage con los datos generados
+    const dataToSave = {
+        version: "2.0",
+        lastModified: new Date().toISOString(),
+        inventory: inventory,
+        catalogs: {
+            departments: [...new Set(inventory.map(i => i.department))],
+            locations: [...new Set(inventory.map(i => i.location))],
+            brands: [...new Set(inventory.map(i => i.brand))],
+            deviceTypes: [...new Set(inventory.map(i => i.deviceType))]
+        }
+    };
+    localStorage.setItem(STORAGE_KEY, encrypt(dataToSave));
+    
+    // Recargar la página
     window.location.reload();
 }
 
 window.loadExample = loadExample;
-window.saveToStorage = saveToStorage;
-window.inventory = inventory;
 
 // --- TAB NAVIGATION ---
 let currentView = 'dashboard';
