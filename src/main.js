@@ -314,7 +314,7 @@ function loadExample(exampleId) {
     if (modal) modal.remove();
     
     // Guardar y renderizar
-    saveData(inventory, catalogs);
+    saveToStorage();
     window.location.reload();
 }
 
@@ -1426,7 +1426,7 @@ function initApp() {
     // Cargar configuraciones al iniciar
     window.loadPdfTemplateSettings();
     
-    console.log('Servyre IT Professional v2.0 - Advanced Data Management System Loaded.');
+    console.log('Servyre IT v2.0 - Inventario');
 }
 
 // Run after DOM is ready
