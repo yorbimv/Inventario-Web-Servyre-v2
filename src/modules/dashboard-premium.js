@@ -23,7 +23,7 @@ class DashboardManager {
   init() {
     this.loadLayout();
     this.render();
-    this.initDragAndDrop();
+    this.initGridStack();
     this.initRealtimeSync();
     this.initEventListeners();
   }

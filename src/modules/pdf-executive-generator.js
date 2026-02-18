@@ -282,7 +282,7 @@ export class PDFExecutiveGenerator {
             total: { label: 'Total Equipos', value: kpis.total, icon: 'package' },
             value: { label: 'Valor Total', value: this.formatCurrency(kpis.totalValue), icon: 'dollar-sign' },
             active: { label: 'Activos', value: kpis.active, icon: 'check-circle', percentage: Math.round((kpis.active / kpis.total) * 100) },
-            maintenance: { label: 'En Mantenimiento', value: kpis.maintenance, icon: 'tool' },
+            maintenance: { label: 'En Mantenimiento', value: kpis.maintenance, icon: 'wrench' },
             warranty: { label: 'Garantías Próximas', value: kpis.warrantyExpiring, icon: 'shield-alert' },
             bajas: { label: 'Bajas', value: kpis.bajas, icon: 'x-circle' }
         };

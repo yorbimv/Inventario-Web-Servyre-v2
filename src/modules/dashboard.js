@@ -130,7 +130,7 @@ export const renderDashboard = (inventory, containerId = 'dashboardContainer') =
                     <i data-lucide="laptop"></i> Equipos
                 </button>
                 <button class="dashboard-nav-btn" data-section="mantenimiento">
-                    <i data-lucide="tool"></i> Mantenimiento
+                    <i data-lucide="wrench"></i> Mantenimiento
                 </button>
                 <button class="dashboard-nav-btn" data-section="garantias">
                     <i data-lucide="shield-check"></i> Garantías
