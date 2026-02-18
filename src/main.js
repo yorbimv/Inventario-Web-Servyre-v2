@@ -318,6 +318,8 @@ function loadExample(exampleId) {
     window.location.reload();
 }
 
+window.loadExample = loadExample;
+
 // --- TAB NAVIGATION ---
 let currentView = 'dashboard';
 
