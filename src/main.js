@@ -1113,6 +1113,14 @@ inventoryForm.onsubmit = (e) => {
 
     if (id) {
         const idx = inventory.findIndex(i => i.id === id);
+        const oldStatus = inventory[idx]?.status;
+        const newStatus = itemData.status;
+        
+        // Detectar cambio de estado
+        if (oldStatus && oldStatus !== newStatus) {
+            showStatusChangeAlert(oldStatus, newStatus, itemData.fullName || itemData.serialNumber);
+        }
+        
         inventory[idx] = itemData;
     } else {
         inventory.unshift(itemData);
@@ -1121,6 +1129,77 @@ inventoryForm.onsubmit = (e) => {
     saveToStorage(); renderTable();
     modalOverlay.classList.remove('active');
 };
+
+// Función para mostrar alerta de cambio de estado
+function showStatusChangeAlert(oldStatus, newStatus, itemName) {
+    const statusColors = {
+        'Activo': '#10B981',
+        'Mantenimiento': '#F59E0B',
+        'Baja': '#EF4444',
+        'Cancelado': '#6B7280',
+        'Para piezas': '#F97316'
+    };
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: rgba(26, 26, 46, 0.98);
+        border: 2px solid ${statusColors[newStatus] || '#3B82F6'};
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        z-index: 2000;
+        animation: slideIn 0.3s ease;
+        max-width: 350px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    `;
+    
+    alertDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="
+                width: 40px; height: 40px;
+                background: ${statusColors[newStatus] || '#3B82F6'};
+                border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+                color: white; font-weight: bold;
+            ">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+            </div>
+            <div>
+                <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">
+                    Estado actualizado
+                </div>
+                <div style="font-size: 0.8rem; color: #9CA3AF;">
+                    <span style="color: ${statusColors[oldStatus]}; text-decoration: line-through;">${oldStatus}</span>
+                    →
+                    <span style="color: ${statusColors[newStatus]}; font-weight: bold;">${newStatus}</span>
+                </div>
+                <div style="font-size: 0.75rem; color: #6B7280; margin-top: 4px;">
+                    ${itemName || 'Equipo'}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Agregar animación CSS si no existe
+    if (!document.getElementById('statusAlertStyle')) {
+        const style = document.createElement('style');
+        style.id = 'statusAlertStyle';
+        style.textContent = `
+            @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        alertDiv.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => alertDiv.remove(), 300);
+    }, 5000);
+}
 
 searchInput.oninput = (e) => {
     const q = e.target.value.toLowerCase();
