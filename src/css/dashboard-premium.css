@@ -294,7 +294,7 @@
 }
 
 .grid-stack-item {
-  margin: 10px 0;
+  margin: 8px 10px !important;
 }
 
 .grid-stack-item-content {

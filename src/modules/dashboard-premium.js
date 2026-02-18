@@ -683,8 +683,8 @@ class DashboardManager {
     // Inicializar GridStack
     this.grid = GridStack.init({
       column: 4,
-      cellHeight: 80,
-      margin: 10,
+      cellHeight: 100,
+      margin: 15,
       animate: true,
       float: true,
       resizable: {
