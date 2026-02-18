@@ -332,6 +332,7 @@ function loadExample(exampleId) {
 }
 
 window.loadExample = loadExample;
+window.openEditForm = openEditForm;
 
 // --- TAB NAVIGATION ---
 let currentView = 'dashboard';
