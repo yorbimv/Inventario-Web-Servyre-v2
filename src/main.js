@@ -319,6 +319,8 @@ function loadExample(exampleId) {
 }
 
 window.loadExample = loadExample;
+window.saveToStorage = saveToStorage;
+window.inventory = inventory;
 
 // --- TAB NAVIGATION ---
 let currentView = 'dashboard';
