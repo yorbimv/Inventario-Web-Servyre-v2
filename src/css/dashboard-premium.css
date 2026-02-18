@@ -146,6 +146,28 @@
   padding: 0.5rem;
 }
 
+.alerts-toast-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.alerts-toast-footer .close-alerts-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--primary);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.alerts-toast-footer .close-alerts-btn:hover {
+  background: var(--primary-hover, #fbbf24);
+  transform: translateY(-2px);
+}
+
 .alerts-toast-body .alert-item {
   display: flex;
   gap: 0.75rem;

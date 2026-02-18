@@ -167,9 +167,6 @@ class DashboardManager {
       <div class="alerts-toast-header">
         <i data-lucide="bell"></i>
         <span>Alertas (${alerts.length})</span>
-        <button class="close-alerts-btn" style="background:none;border:none;cursor:pointer;margin-left:auto;">
-          <i data-lucide="x"></i>
-        </button>
       </div>
       <div class="alerts-toast-body">
         ${alerts.map(alert => `
@@ -182,22 +179,13 @@ class DashboardManager {
           </div>
         `).join('')}
       </div>
+      <div class="alerts-toast-footer">
+        <button class="close-alerts-btn" onclick="document.getElementById('alertsToast').remove()">
+          Cerrar
+        </button>
+      </div>
     `;
     document.body.appendChild(toast);
-    
-    // Agregar event listener para cerrar
-    const closeBtn = toast.querySelector('.close-alerts-btn');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => toast.remove());
-    }
-    
-    // Cerrar al hacer clic fuera
-    document.addEventListener('click', function closeAlerts(e) {
-      if (!toast.contains(e.target) && !e.target.closest('.bell-btn')) {
-        toast.remove();
-        document.removeEventListener('click', closeAlerts);
-      }
-    });
     
     if (window.lucide) {
       window.lucide.createIcons();
