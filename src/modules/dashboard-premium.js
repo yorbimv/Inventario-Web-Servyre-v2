@@ -146,19 +146,20 @@ class DashboardManager {
       return;
     }
     
-    let toast = document.getElementById('alertsToast');
-    if (toast) {
-      toast.remove();
+    // Cerrar toast anterior si existe
+    const existingToast = document.getElementById('alertsToast');
+    if (existingToast) {
+      existingToast.remove();
     }
     
-    toast = document.createElement('div');
+    const toast = document.createElement('div');
     toast.id = 'alertsToast';
     toast.className = 'alerts-toast';
     toast.innerHTML = `
       <div class="alerts-toast-header">
         <i data-lucide="bell"></i>
         <span>Alertas (${alerts.length})</span>
-        <button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;cursor:pointer;">
+        <button class="close-alerts-btn" style="background:none;border:none;cursor:pointer;margin-left:auto;">
           <i data-lucide="x"></i>
         </button>
       </div>
@@ -175,6 +176,20 @@ class DashboardManager {
       </div>
     `;
     document.body.appendChild(toast);
+    
+    // Agregar event listener para cerrar
+    const closeBtn = toast.querySelector('.close-alerts-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => toast.remove());
+    }
+    
+    // Cerrar al hacer clic fuera
+    document.addEventListener('click', function closeAlerts(e) {
+      if (!toast.contains(e.target) && !e.target.closest('.bell-btn')) {
+        toast.remove();
+        document.removeEventListener('click', closeAlerts);
+      }
+    });
     
     if (window.lucide) {
       window.lucide.createIcons();
