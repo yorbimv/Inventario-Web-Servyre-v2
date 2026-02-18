@@ -575,11 +575,11 @@ class DashboardManager {
           datasets: [{
             data: Object.values(statusData),
             backgroundColor: [
-              '#10B981', // Activo
-              '#F59E0B', // Mantenimiento
-              '#EF4444', // Baja
-              '#71717A', // Cancelado
-              '#FF9500'  // Para piezas
+              '#10B981', // Activo - success
+              '#F59E0B', // Mantenimiento - warning
+              '#EF4444', // Baja - danger
+              '#6B7280', // Cancelado - gray
+              '#F97316'  // Para piezas - orange
             ],
             borderWidth: 0
           }]
@@ -613,7 +613,15 @@ class DashboardManager {
           datasets: [{
             label: 'Equipos',
             data: Object.values(brandsData),
-            backgroundColor: 'rgba(252, 211, 77, 0.8)',
+            backgroundColor: [
+              '#FCD34D', // Dell - primary
+              '#3B82F6', // HP - info
+              '#10B981', // Lenovo - success
+              '#EC4899', // Apple - pink
+              '#8B5CF6', // Microsoft - purple
+              '#EF4444', // Asus - danger
+              '#06B6D4'  // Acer - cyan
+            ],
             borderRadius: 6
           }]
         },
