@@ -404,6 +404,12 @@ const renderTable = (data = inventory) => {
             <td><code>${sanitize(item.serialNumber)}</code></td>
             <td><span class="badge badge-blue">${sanitize(item.location || '-')}</span></td>
             <td><span class="badge ${sc}">${sanitize(item.status || '-').toUpperCase()}</span></td>
+            <td>${item.ipAddress ? `
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                    <code style="font-size: 0.75rem;">${sanitize(item.ipAddress)}</code>
+                    <span class="badge badge-blue" style="font-size: 0.6rem; padding: 0.2rem 0.4rem;">${sanitize(item.ipType || 'DHCP')}</span>
+                </div>
+            ` : '-'}</td>
             <td>
                 <div class="btn-group-glass">
                     <button class="glass-btn btn-row-edit" title="Editar"><i data-lucide="edit-2" style="width:14px"></i></button>
@@ -476,6 +482,15 @@ const viewAssetDetail = (id) => {
                 <div class="info-card"><label>Hardware Specs</label><div class="value" style="font-size:0.8rem">${sanitize(item.processor || 'CPU')} / RAM ${sanitize(item.ram)} / ${sanitize(item.storageCapacity)}</div></div>
                 <div class="info-card"><label>Mouse (Serie)</label><div class="value">${sanitize(item.mouseExternal || '-')}</div></div>
 
+                <!-- Configuración de Red -->
+                <div class="info-card" style="grid-column: span 2; border-left: 3px solid var(--primary);">
+                    <label>Configuración de Red</label>
+                    <div class="value" style="font-size: 0.85rem;">
+                        <span>IP: <code>${sanitize(item.ipAddress || '-')}</code></span>
+                        <span style="margin-left: 1rem;">Tipo: <span class="badge badge-blue" style="font-size: 0.65rem;">${sanitize(item.ipType || 'Sin asignar')}</span></span>
+                    </div>
+                </div>
+
                 <!-- Peripherals -->
                 <div class="info-card" style="grid-column: span 2; border-left: 3px solid var(--secondary);">
                     <label>Monitor / Accesorio</label>
@@ -530,6 +545,55 @@ const viewAssetDetail = (id) => {
                                 `).join('')}
                             </div>
                         ` : ''}
+                    </div>
+                `;
+            })()}
+            
+            <!-- Historial de Usuarios -->
+            ${(() => {
+                const history = item.userHistory || [];
+                if (history.length === 0) return '';
+                
+                return `
+                    <div class="user-history-section" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                        <h3 style="margin-bottom: 1rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.5rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            Historial de Usuarios
+                        </h3>
+                        <div class="history-table-container" style="overflow-x: auto;">
+                            <table class="history-table" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                                <thead>
+                                    <tr style="background: var(--card-bg);">
+                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Usuario</th>
+                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Fecha Alta</th>
+                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Fecha Baja</th>
+                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Estado</th>
+                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Modelo</th>
+                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">RAM</th>
+                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Disco</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${history.map(h => `
+                                        <tr style="${h.isCurrent ? 'background: rgba(16, 185, 129, 0.1);' : ''}">
+                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">
+                                                <span style="font-weight: 600;">${sanitize(h.fullName || '-')}</span>
+                                            </td>
+                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">${sanitize(h.startDate || '-')}</td>
+                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">${sanitize(h.endDate || 'Actual')}</td>
+                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">
+                                                <span class="badge ${h.isCurrent ? 'badge-green' : 'badge-gray'}" style="font-size: 0.65rem;">
+                                                    ${h.isCurrent ? 'Actual' : 'Histórico'}
+                                                </span>
+                                            </td>
+                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">${sanitize(h.specs?.model || '-')}</td>
+                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">${sanitize(h.specs?.ram || '-')}</td>
+                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">${sanitize(h.specs?.storage || '-')}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 `;
             })()}
@@ -681,6 +745,10 @@ const openEditForm = (id = null) => {
             document.getElementById('conditions').value = i.conditions || '';
             document.getElementById('photos').value = i.photos || '';
             document.getElementById('notes').value = i.notes || '';
+            
+            // Campos de Red
+            document.getElementById('ipAddress').value = i.ipAddress || '';
+            document.getElementById('ipType').value = i.ipType || '';
             
             // Recalcular días de garantía
             if (window.updateWarrantyDays) {
@@ -1108,12 +1176,16 @@ inventoryForm.onsubmit = (e) => {
         lastMtto: document.getElementById('lastMtto').value,
         nextMtto: document.getElementById('nextMtto').value,
         conditions: document.getElementById('conditions').value,
-        photos: document.getElementById('photos').value
+        photos: document.getElementById('photos').value,
+        // Campos de Red
+        ipAddress: document.getElementById('ipAddress').value,
+        ipType: document.getElementById('ipType').value
     };
 
     if (id) {
         const idx = inventory.findIndex(i => i.id === id);
-        const oldStatus = inventory[idx]?.status;
+        const oldItem = inventory[idx];
+        const oldStatus = oldItem?.status;
         const newStatus = itemData.status;
         
         // Detectar cambio de estado
@@ -1121,8 +1193,63 @@ inventoryForm.onsubmit = (e) => {
             showStatusChangeAlert(oldStatus, newStatus, itemData.fullName || itemData.serialNumber);
         }
         
+        // Detectar cambio de usuario y registrar en historial
+        if (oldItem && oldItem.fullName !== itemData.fullName) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Inicializar historial si no existe
+            if (!oldItem.userHistory) {
+                oldItem.userHistory = [];
+            }
+            
+            // Cerrar el registro anterior del usuario
+            if (oldItem.userHistory.length > 0) {
+                const lastEntry = oldItem.userHistory[oldItem.userHistory.length - 1];
+                if (lastEntry.isCurrent) {
+                    lastEntry.endDate = today;
+                    lastEntry.isCurrent = false;
+                }
+            }
+            
+            // Agregar nuevo registro de usuario
+            const newEntry = {
+                fullName: itemData.fullName,
+                startDate: today,
+                endDate: null,
+                isCurrent: true,
+                specs: {
+                    model: itemData.model,
+                    ram: itemData.ram,
+                    storage: itemData.storageCapacity
+                }
+            };
+            itemData.userHistory = [...(oldItem.userHistory || []), newEntry];
+        } else if (oldItem && oldItem.userHistory) {
+            // Actualizar specs si el usuario es el mismo pero cambiaron las specs
+            itemData.userHistory = oldItem.userHistory;
+        }
+        
+        // Mostrar alerta de modificación exitosa
+        showModificationAlert(itemData.serialNumber);
+        
         inventory[idx] = itemData;
     } else {
+        // Para nuevos registros, inicializar historial con el primer usuario
+        const today = new Date().toISOString().split('T')[0];
+        itemData.userHistory = [{
+            fullName: itemData.fullName,
+            startDate: today,
+            endDate: null,
+            isCurrent: true,
+            specs: {
+                model: itemData.model,
+                ram: itemData.ram,
+                storage: itemData.storageCapacity
+            }
+        }];
+        
+        // Mostrar alerta de nuevo registro
+        showNewRecordAlert(itemData.serialNumber);
         inventory.unshift(itemData);
     }
 
@@ -1218,6 +1345,82 @@ function showStatusChangeAlert(oldStatus, newStatus, itemName) {
     if (window.dashboard) {
         window.dashboard.render();
     }
+}
+
+// Función para mostrar alerta de modificación exitosa
+function showModificationAlert(serialNumber) {
+    const alertDiv = document.createElement('div');
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: rgba(16, 185, 129, 0.95);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        z-index: 2000;
+        animation: slideIn 0.3s ease;
+        max-width: 350px;
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+        color: white;
+    `;
+    
+    alertDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div>
+                <div style="font-weight: 600; font-size: 0.9rem;">Registro actualizado</div>
+                <div style="font-size: 0.75rem; opacity: 0.9;">Serie: ${serialNumber || 'N/A'}</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remover después de 3 segundos
+    setTimeout(() => {
+        alertDiv.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => alertDiv.remove(), 300);
+    }, 3000);
+}
+
+// Función para mostrar alerta de nuevo registro
+function showNewRecordAlert(serialNumber) {
+    const alertDiv = document.createElement('div');
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: rgba(59, 130, 246, 0.95);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        z-index: 2000;
+        animation: slideIn 0.3s ease;
+        max-width: 350px;
+        box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+        color: white;
+    `;
+    
+    alertDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </div>
+            <div>
+                <div style="font-weight: 600; font-size: 0.9rem;">Nuevo registro agregado</div>
+                <div style="font-size: 0.75rem; opacity: 0.9;">Serie: ${serialNumber || 'N/A'}</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remover después de 3 segundos
+    setTimeout(() => {
+        alertDiv.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => alertDiv.remove(), 300);
+    }, 3000);
 }
 
 searchInput.oninput = (e) => {
