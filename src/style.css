@@ -91,6 +91,17 @@ body {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+/* Ocultar scrollbar global pero mantener funcionalidad */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE y Edge */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 #app {
   max-width: 1500px;
   margin: 0 auto;
@@ -457,10 +468,51 @@ tr:hover td {
   color: var(--text);
 }
 
+/* Modal Header Actions - Save Icon */
+.modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.save-btn-icon {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.save-btn-icon:hover {
+  background: var(--primary-glow);
+  color: var(--primary-light);
+  transform: scale(1.1);
+}
+
+.save-btn-icon:active {
+  transform: scale(0.95);
+}
+
+.save-btn-icon i {
+  width: 22px;
+  height: 22px;
+}
+
 .modal-body-premium {
   padding: 2rem;
   overflow-y: auto;
   flex: 1;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE y Edge */
+}
+
+.modal-body-premium::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .form-section {
@@ -784,6 +836,16 @@ textarea {
 .badge-danger {
   background: rgba(255, 69, 58, 0.15);
   color: #FF453A;
+}
+
+.badge-gray {
+  background: rgba(142, 142, 147, 0.15);
+  color: #8E8E93;
+}
+
+[data-theme="light"] .badge-gray {
+  background: rgba(142, 142, 147, 0.12);
+  color: #6B6B6F;
 }
 
 /* Settings Modal */

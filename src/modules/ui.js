@@ -38,7 +38,11 @@ export const renderTable = (data) => {
         tr.style.cursor = 'pointer';
         tr.dataset.id = item.id;
 
-        const statusClass = item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : 'badge-danger';
+        const statusClass = item.status === 'Activo' ? 'badge-green' 
+            : item.status === 'Mantenimiento' ? 'badge-orange' 
+            : item.status === 'Cancelado' ? 'badge-gray' 
+            : item.status === 'Para piezas' ? 'badge-orange'
+            : 'badge-danger';
 
         tr.innerHTML = `
             <td><code>${sanitize(item.resguardo || '-')}</code></td>
@@ -54,7 +58,7 @@ export const renderTable = (data) => {
             <td>${sanitize(item.pcName || '-')}</td>
             <td><code>${sanitize(item.serialNumber)}</code></td>
             <td><span class="badge badge-blue">${sanitize(item.location || '-')}</span></td>
-            <td><span class="badge ${statusClass}">${sanitize(item.status)}</span></td>
+            <td><span class="badge ${statusClass}">${sanitize(item.status || '-').toUpperCase()}</span></td>
             <td class="actions-cell">
                 <button class="glass-btn btn-row-edit" title="Editar">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>

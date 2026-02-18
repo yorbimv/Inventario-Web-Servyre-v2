@@ -102,44 +102,79 @@ const loadData = () => {
         }
     }
     
-    // Si no hay inventario, agregar usuario de ejemplo
+    // Si no hay inventario, agregar 10 usuarios de ejemplo con datos aleatorios
     if (inventory.length === 0) {
-        const testUser = {
-            id: generateId(),
-            resguardo: "SERV-TEST-001",
-            fullName: "JUAN PÉREZ GARCÍA",
-            position: "GERENTE DE TI",
-            email: "juan.perez@servyre.com",
-            extension: "4501",
-            department: "TECNOLOGÍAS DE LA INFORMACIÓN",
-            address: "TORRE CORPORATIVA PISO 3",
-            location: "Corporativo",
-            deviceType: "Laptop",
-            brand: "Dell",
-            model: "Latitude 5430",
-            serialNumber: "JHSK2023TEST001",
-            os: "Windows 11 Pro",
-            pcName: "TI-JUANP-LT01",
-            processor: "Intel Core i7-1265U",
-            ram: "16 GB",
-            storageCapacity: "512 GB SSD",
-            status: "Activo",
-            price: "$28,500.00",
-            purchaseDate: "2023-06-15",
-            warranty: 36,
-            periphBrand: "Dell",
-            periphModel: "U2722D",
-            periphSerial: "TEST-MON-001",
-            mouseExternal: "TEST-MOUSE-001",
-            lastMtto: "2024-01-10",
-            nextMtto: "2024-07-10",
-            conditions: "Excelente estado, sin daños",
-            incidentReport: "",
-            notes: "Equipo de prueba para demostración del sistema",
-            photos: ""
+        const nombres = ["CARLOS", "MARÍA", "JOSÉ", "ANA", "LUIS", "PATRICIA", "JORGE", "ELENA", "FERNANDO", "SOFÍA"];
+        const apellidos = ["GARCÍA", "MARTÍNEZ", "LÓPEZ", "HERNÁNDEZ", "GONZÁLEZ", "PÉREZ", "RODRÍGUEZ", "SÁNCHEZ", "RAMÍREZ", "TORRES"];
+        const posiciones = ["GERENTE", "ANALISTA", "COORDINADOR", "DIRECTOR", "ESPECIALISTA", "ADMINISTRADOR", "SUPERVISOR", "CONSULTOR", "JEFE", "ASISTENTE"];
+        const areas = ["TI", "OPERACIONES", "FINANZAS", "RRHH", "VENTAS", "MARKETING", "LOGÍSTICA", "LEGAL", "ADMINISTRACIÓN", "CALIDAD"];
+        const marcas = ["Dell", "HP", "Lenovo", "Apple", "Microsoft"];
+        const modelos = {
+            "Dell": ["Latitude 3420", "Latitude 5430", "OptiPlex 7090", "Precision 3581"],
+            "HP": ["EliteDesk 800", "ProBook 450", "ZBook Firefly", "EliteBook 840"],
+            "Lenovo": ["ThinkPad X1", "ThinkCentre M70", "Legion 5 Pro"],
+            "Apple": ["MacBook Pro M2", "MacBook Air M3", "iMac 24\""],
+            "Microsoft": ["Surface Pro 9", "Surface Laptop 5"]
         };
-        inventory.push(testUser);
+        const ubicaciones = ["Corporativo", "Naucalpan", "Campo"];
+        const tipos = ["Laptop", "Desktop", "All-in-One"];
+        const procesadores = ["Intel Core i5-1135G7", "Intel Core i7-1265U", "Intel Core i5-1235U", "AMD Ryzen 5 5500U", "Apple M2"];
+        const rams = ["8 GB", "16 GB", "32 GB"];
+        const discos = ["256 GB SSD", "512 GB SSD", "1 TB SSD"];
+        
+        const random = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        const randomDate = () => {
+            const start = new Date(2022, 0, 1);
+            const end = new Date();
+            const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+            return date.toISOString().split('T')[0];
+        };
+        
+        for (let i = 1; i <= 10; i++) {
+            const nombre = random(nombres);
+            const apellido = random(apellidos);
+            const marca = random(marcas);
+            const modelo = random(modelos[marca]);
+            const ubicacion = random(ubicaciones);
+            const fechaCompra = randomDate();
+            
+            inventory.push({
+                id: generateId(),
+                resguardo: `SERV-2024-${String(i).padStart(3, '0')}`,
+                fullName: `${nombre} ${apellido} ${random(apellidos)}`,
+                position: `${random(posiciones)} DE ${random(areas)}`,
+                email: `${nombre.toLowerCase()}.${apellido.toLowerCase()}@servyre.com`,
+                extension: `${4000 + i}`,
+                department: random(areas),
+                address: ubicacion === "Corporativo" ? "TORRE CORPORATIVA" : ubicacion === "Naucalpan" ? "PLANTA NAUCALPAN" : "EXTERNO",
+                location: ubicacion,
+                deviceType: random(tipos),
+                brand: marca,
+                model: modelo,
+                serialNumber: `SN${marca.substring(0, 2).toUpperCase()}2024${String(i).padStart(4, '0')}`,
+                os: marca === "Apple" ? "macOS Sonoma" : "Windows 11 Pro",
+                pcName: `${random(areas).substring(0, 2)}-${nombre.substring(0, 3)}-LT${String(i).padStart(2, '0')}`,
+                processor: random(procesadores),
+                ram: random(rams),
+                storageCapacity: random(discos),
+                status: Math.random() > 0.2 ? "Activo" : (Math.random() > 0.5 ? "Mantenimiento" : "Baja"),
+                price: `$${(15000 + Math.floor(Math.random() * 35000)).toLocaleString()}.00`,
+                purchaseDate: fechaCompra,
+                warranty: 24 + Math.floor(Math.random() * 24),
+                periphBrand: random(marcas),
+                periphModel: `Monitor ${22 + Math.floor(Math.random() * 10)}\"`,
+                periphSerial: `MON-${String(i).padStart(4, '0')}`,
+                mouseExternal: Math.random() > 0.3 ? `MOUSE-${String(i).padStart(4, '0')}` : "",
+                lastMtto: randomDate(),
+                nextMtto: randomDate(),
+                conditions: "Equipo en buenas condiciones de operación",
+                incidentReport: "",
+                notes: `Usuario de prueba #${i} generado automáticamente`,
+                photos: ""
+            });
+        }
         saveToStorage();
+        console.log('✅ 10 usuarios de ejemplo agregados correctamente');
     }
     
     renderTable();
@@ -187,7 +222,11 @@ const renderTable = (data = inventory) => {
         tr.className = 'fade-in';
         tr.style.cursor = 'pointer';
 
-        const sc = item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : 'badge-danger';
+        const sc = item.status === 'Activo' ? 'badge-green' 
+            : item.status === 'Mantenimiento' ? 'badge-orange' 
+            : item.status === 'Cancelado' ? 'badge-gray' 
+            : item.status === 'Para piezas' ? 'badge-orange'
+            : 'badge-danger';
 
         tr.innerHTML = `
             <td><code>${sanitize(item.resguardo || '-')}</code></td>
@@ -203,7 +242,7 @@ const renderTable = (data = inventory) => {
             <td>${sanitize(item.pcName || '-')}</td>
             <td><code>${sanitize(item.serialNumber)}</code></td>
             <td><span class="badge badge-blue">${sanitize(item.location || '-')}</span></td>
-            <td><span class="badge ${sc}">${sanitize(item.status)}</span></td>
+            <td><span class="badge ${sc}">${sanitize(item.status || '-').toUpperCase()}</span></td>
             <td>
                 <div class="btn-group-glass">
                     <button class="glass-btn btn-row-edit" title="Editar"><i data-lucide="edit-2" style="width:14px"></i></button>
@@ -246,7 +285,7 @@ const viewAssetDetail = (id) => {
                 <h2 style="font-size: 1.8rem;">${sanitize(item.fullName)}</h2>
                 <p style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${sanitize(item.position)}</p>
                 <div style="margin-top: 1.5rem;">
-                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Baja' ? 'badge-danger' : 'badge-orange'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${sanitize(item.status)}</span>
+                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${sanitize(item.status || '-').toUpperCase()}</span>
                 </div>
                 <div style="margin-top: 2rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; font-size: 0.9rem;">
                     <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
@@ -1122,7 +1161,13 @@ function initApp() {
     safeOnClick('addItemBtn', () => openEditForm());
     safeOnClick('manageCatalogsBtn', () => { syncFormSelects(); catalogModalOverlay.classList.add('active'); });
     safeOnClick('closeModal', () => modalOverlay.classList.remove('active'));
-    safeOnClick('cancelBtn', () => modalOverlay.classList.remove('active'));
+    // cancelBtn eliminado - el modal se cierra con el botón X o haciendo clic fuera
+    
+    // Save Icon Button - Submit form programmatically
+    safeOnClick('saveBtnIcon', () => {
+        inventoryForm.dispatchEvent(new Event('submit'));
+    });
+    
     safeOnClick('closeDetailModal', () => detailModalOverlay.classList.remove('active'));
     safeOnClick('closeCatalogModal', () => catalogModalOverlay.classList.remove('active'));
     safeOnClick('finishCatalogBtn', () => catalogModalOverlay.classList.remove('active'));

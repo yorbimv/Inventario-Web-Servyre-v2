@@ -8,6 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <link rel="stylesheet" href="/src/style.css">
   <link rel="stylesheet" href="/src/css/dashboard.css">
+  <link rel="stylesheet" href="/node_modules/gridstack/dist/gridstack.min.css">
   <link rel="stylesheet" href="/src/css/dashboard-premium.css">
   <link rel="stylesheet" href="/src/css/logo-manager.css">
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -126,7 +127,12 @@
     <div class="modal premium-modal">
       <div class="modal-header">
         <h2 id="modalTitle">Nuevo Registro de IT</h2>
-        <button id="closeModal" class="close-btn">&times;</button>
+        <div class="modal-header-actions">
+          <button type="button" id="saveBtnIcon" class="save-btn-icon" title="Guardar">
+            <i data-lucide="save"></i>
+          </button>
+          <button id="closeModal" class="close-btn">&times;</button>
+        </div>
       </div>
       <form id="inventoryForm">
         <div class="modal-body-premium">
@@ -298,8 +304,7 @@
           </div>
         </div>
         <div class="modal-footer-premium">
-          <button type="button" id="cancelBtn" class="cancel-btn">Descartar</button>
-          <button type="submit" class="save-btn">Guardar Información</button>
+          <!-- Botones eliminados: Descartar y Guardar no tenían funcionalidad implementada -->
         </div>
       </form>
     </div>

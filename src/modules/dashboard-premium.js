@@ -1,8 +1,8 @@
 import Chart from 'chart.js/auto';
-import Sortable from 'sortablejs';
+import { GridStack } from 'gridstack';
 
 /**
- * Dashboard Premium - Sistema de widgets arrastrables con sincronización en tiempo real
+ * Dashboard Premium - Sistema de widgets arrastrables con GridStack
  */
 
 class DashboardManager {
@@ -11,7 +11,7 @@ class DashboardManager {
     this.container = document.getElementById(containerId);
     this.widgets = [];
     this.charts = {};
-    this.sortable = null;
+    this.grid = null;
     this.eventSource = null;
     this.layoutKey = 'dashboard-layout-v1';
     
@@ -34,22 +34,23 @@ class DashboardManager {
   render() {
     const kpiData = this.calculateKPIData();
     
+    const alerts = this.generateAlerts();
+    
     this.container.innerHTML = `
       <div class="dashboard-container">
-        ${this.renderToolbar()}
+        ${this.renderToolbar(alerts)}
         ${this.renderGlobalFilters()}
-        <div class="widgets-grid" id="widgetsGrid">
+        <div class="grid-stack" id="widgetsGrid">
           ${this.renderKPIWidgets(kpiData)}
           ${this.renderChartWidgets()}
           ${this.renderTableWidget()}
         </div>
-        ${this.renderAlertsPanel()}
-        ${this.renderUpdateIndicator()}
       </div>
     `;
 
     this.initCharts();
     this.animateWidgets();
+    this.initGridStack();
     
     // Renderizar iconos de Lucide
     if (window.lucide) {
@@ -60,7 +61,10 @@ class DashboardManager {
   /**
    * Toolbar superior
    */
-  renderToolbar() {
+  renderToolbar(alerts = []) {
+    const alertCount = alerts.length;
+    const hasAlerts = alertCount > 0;
+    
     return `
       <div class="dashboard-toolbar">
         <div class="toolbar-title">
@@ -68,7 +72,11 @@ class DashboardManager {
           Dashboard IT
         </div>
         <div class="toolbar-actions">
-          <button class="glass-btn" onclick="dashboard.resetLayout()" title="Restaurar layout">
+          <button class="glass-btn bell-btn ${hasAlerts ? 'has-alerts' : ''}" onclick="dashboard.showAlertsToast()" title="Ver alertas">
+            <i data-lucide="bell"></i>
+            ${hasAlerts ? `<span class="alert-badge">${alertCount}</span>` : ''}
+          </button>
+          <button class="glass-btn refresh-btn" onclick="dashboard.refresh()" title="Actualizar">
             <i data-lucide="refresh-cw"></i>
           </button>
           <button class="premium-btn primary" onclick="dashboard.exportDashboard()">
@@ -130,6 +138,50 @@ class DashboardManager {
   }
 
   /**
+   * Muestra las alertas como toast
+   */
+  showAlertsToast() {
+    const alerts = this.generateAlerts();
+    if (alerts.length === 0) {
+      return;
+    }
+    
+    let toast = document.getElementById('alertsToast');
+    if (toast) {
+      toast.remove();
+    }
+    
+    toast = document.createElement('div');
+    toast.id = 'alertsToast';
+    toast.className = 'alerts-toast';
+    toast.innerHTML = `
+      <div class="alerts-toast-header">
+        <i data-lucide="bell"></i>
+        <span>Alertas (${alerts.length})</span>
+        <button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;cursor:pointer;">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="alerts-toast-body">
+        ${alerts.map(alert => `
+          <div class="alert-item ${alert.type}">
+            <i data-lucide="${alert.icon}"></i>
+            <div>
+              <strong>${alert.title}</strong>
+              <p>${alert.description}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    document.body.appendChild(toast);
+    
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }
+
+  /**
    * Widgets de KPI
    */
   renderKPIWidgets(kpiData) {
@@ -160,7 +212,7 @@ class DashboardManager {
       },
       {
         id: 'kpi-maintenance',
-        icon: 'tool',
+        icon: 'wrench',
         value: kpiData.maintenance,
         label: 'En Mantenimiento',
         trend: { value: 2, direction: 'down' },
@@ -184,28 +236,37 @@ class DashboardManager {
       }
     ];
 
-    return kpis.map((kpi, index) => `
-      <div class="widget-container" data-widget-id="${kpi.id}">
-        <div class="dashboard-widget kpi-widget widget-animate">
-          <div class="drag-handle">
-            <i data-lucide="grip-vertical"></i>
-          </div>
-          <div class="kpi-header">
-            <div class="kpi-icon-wrapper" style="color: var(--${kpi.color})">
-              <i data-lucide="${kpi.icon}"></i>
-            </div>
-            ${kpi.trend ? `
-              <div class="kpi-trend ${kpi.trend.direction}">
-                <i data-lucide="trending-${kpi.trend.direction}"></i>
-                ${kpi.trend.value}%
+    const positions = [
+      { x: 0, y: 0, w: 1, h: 2 },
+      { x: 1, y: 0, w: 1, h: 2 },
+      { x: 2, y: 0, w: 1, h: 2 },
+      { x: 3, y: 0, w: 1, h: 2 },
+      { x: 0, y: 2, w: 1, h: 2 },
+      { x: 1, y: 2, w: 1, h: 2 },
+    ];
+
+    return kpis.map((kpi, index) => {
+      const pos = positions[index] || { x: 0, y: 0, w: 1, h: 2 };
+      return `
+        <div class="grid-stack-item" gs-id="${kpi.id}" gs-x="${pos.x}" gs-y="${pos.y}" gs-w="${pos.w}" gs-h="${pos.h}">
+          <div class="grid-stack-item-content dashboard-widget kpi-widget widget-animate">
+            <div class="kpi-header">
+              <div class="kpi-icon-wrapper" style="color: var(--${kpi.color})">
+                <i data-lucide="${kpi.icon}"></i>
               </div>
-            ` : ''}
+              ${kpi.trend ? `
+                <div class="kpi-trend ${kpi.trend.direction}">
+                  <i data-lucide="trending-${kpi.trend.direction}"></i>
+                  ${kpi.trend.value}%
+                </div>
+              ` : ''}
+            </div>
+            <div class="kpi-value">${kpi.value}</div>
+            <div class="kpi-label">${kpi.label}</div>
           </div>
-          <div class="kpi-value">${kpi.value}</div>
-          <div class="kpi-label">${kpi.label}</div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   /**
@@ -213,11 +274,8 @@ class DashboardManager {
    */
   renderChartWidgets() {
     return `
-      <div class="widget-container" data-widget-id="chart-status" style="grid-column: span 2;">
-        <div class="dashboard-widget chart-widget widget-animate">
-          <div class="drag-handle">
-            <i data-lucide="grip-vertical"></i>
-          </div>
+      <div class="grid-stack-item" gs-id="chart-status" gs-x="0" gs-y="4" gs-w="2" gs-h="4">
+        <div class="grid-stack-item-content dashboard-widget chart-widget widget-animate">
           <div class="chart-header">
             <div class="chart-title">Distribución por Estado</div>
           </div>
@@ -226,11 +284,8 @@ class DashboardManager {
           </div>
         </div>
       </div>
-      <div class="widget-container" data-widget-id="chart-brands">
-        <div class="dashboard-widget chart-widget widget-animate">
-          <div class="drag-handle">
-            <i data-lucide="grip-vertical"></i>
-          </div>
+      <div class="grid-stack-item" gs-id="chart-brands" gs-x="2" gs-y="4" gs-w="2" gs-h="4">
+        <div class="grid-stack-item-content dashboard-widget chart-widget widget-animate">
           <div class="chart-header">
             <div class="chart-title">Marcas</div>
           </div>
@@ -249,11 +304,8 @@ class DashboardManager {
     const recentItems = this.inventory.slice(0, 10);
     
     return `
-      <div class="widget-container table-widget" data-widget-id="table-recent">
-        <div class="dashboard-widget widget-animate">
-          <div class="drag-handle">
-            <i data-lucide="grip-vertical"></i>
-          </div>
+      <div class="grid-stack-item" gs-id="table-recent" gs-x="0" gs-y="8" gs-w="4" gs-h="4">
+        <div class="grid-stack-item-content dashboard-widget widget-animate">
           <div class="table-header">
             <div class="chart-title">Equipos Recientes</div>
             <button class="glass-btn" onclick="dashboard.viewAll()">
@@ -281,7 +333,7 @@ class DashboardManager {
                     <td>${item.location}</td>
                     <td>
                       <span class="badge badge-${this.getStatusColor(item.status)}">
-                        ${item.status}
+                        ${(item.status || '-').toUpperCase()}
                       </span>
                     </td>
                   </tr>
@@ -400,7 +452,7 @@ class DashboardManager {
     if (inMaintenance.length > 0) {
       alerts.push({
         type: 'info',
-        icon: 'tool',
+        icon: 'wrench',
         title: 'En mantenimiento',
         description: `${inMaintenance.length} equipos en servicio`
       });
@@ -515,32 +567,41 @@ class DashboardManager {
   }
 
   /**
-   * Inicializa drag & drop
+   * Inicializa drag & drop con redimensión por zona
    */
-  initDragAndDrop() {
-    const grid = document.getElementById('widgetsGrid');
-    if (grid) {
-      this.sortable = Sortable.create(grid, {
-        animation: 300,
-        handle: '.drag-handle',
-        ghostClass: 'sortable-ghost',
-        dragClass: 'dragging',
-        onEnd: (evt) => {
-          this.saveLayout();
-        }
-      });
-    }
+  initGridStack() {
+    const gridEl = document.getElementById('widgetsGrid');
+    if (!gridEl) return;
+
+    // Inicializar GridStack
+    this.grid = GridStack.init({
+      column: 4,
+      cellHeight: 80,
+      margin: 10,
+      animate: true,
+      float: true,
+      resizable: {
+        handles: 'se,sw,ne,nw,n,e,s,w'
+      },
+      draggable: {
+        handle: '.grid-stack-item-content'
+      }
+    }, gridEl);
+
+    // Evento cuando cambia el layout
+    this.grid.on('change', (event, items) => {
+      this.saveLayout();
+    });
   }
 
   /**
    * Guarda layout en localStorage
    */
   saveLayout() {
-    const grid = document.getElementById('widgetsGrid');
-    if (grid) {
-      const order = Array.from(grid.children).map(child => child.dataset.widgetId);
-      localStorage.setItem(this.layoutKey, JSON.stringify(order));
-    }
+    if (!this.grid) return;
+    
+    const layout = this.grid.save(false);
+    localStorage.setItem(this.layoutKey, JSON.stringify(layout));
   }
 
   /**
@@ -548,8 +609,9 @@ class DashboardManager {
    */
   loadLayout() {
     const saved = localStorage.getItem(this.layoutKey);
-    if (saved) {
-      this.widgetOrder = JSON.parse(saved);
+    if (saved && this.grid) {
+      const layout = JSON.parse(saved);
+      this.grid.load(layout);
     }
   }
 
@@ -559,7 +621,18 @@ class DashboardManager {
   resetLayout() {
     localStorage.removeItem(this.layoutKey);
     this.render();
-    this.initDragAndDrop();
+  }
+
+  /**
+   * Cambia el tamaño de un widget
+   */
+  changeWidgetSize(widgetId, span) {
+    const widget = this.grid?.getWidgetById(widgetId);
+    if (widget) {
+      widget.w(span);
+      this.grid?.compact();
+      this.saveLayout();
+    }
   }
 
   /**
@@ -1005,7 +1078,7 @@ class DashboardManager {
       'Mantenimiento': 'orange',
       'Baja': 'danger',
       'Cancelado': 'gray',
-      'Para piezas': 'warning'
+      'Para piezas': 'orange'
     };
     return colors[status] || 'gray';
   }
