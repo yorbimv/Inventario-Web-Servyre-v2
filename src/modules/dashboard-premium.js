@@ -26,6 +26,14 @@ class DashboardManager {
     this.initGridStack();
     this.initRealtimeSync();
     this.initEventListeners();
+    
+    // Event listener para el botón de alertas
+    document.addEventListener('click', (e) => {
+      const bellBtn = e.target.closest('.bell-btn');
+      if (bellBtn) {
+        this.showAlertsToast();
+      }
+    });
   }
 
   /**
@@ -72,7 +80,7 @@ class DashboardManager {
           Dashboard IT
         </div>
         <div class="toolbar-actions">
-          <button class="glass-btn bell-btn ${hasAlerts ? 'has-alerts' : ''}" onclick="dashboard.showAlertsToast()" title="Ver alertas">
+          <button class="glass-btn bell-btn ${hasAlerts ? 'has-alerts' : ''}" title="Ver alertas">
             <i data-lucide="bell"></i>
             ${hasAlerts ? `<span class="alert-badge">${alertCount}</span>` : ''}
           </button>
