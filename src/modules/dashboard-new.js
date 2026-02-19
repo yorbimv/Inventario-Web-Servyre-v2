@@ -14,6 +14,9 @@ export class DashboardNew {
 
     init() {
         this.applyTheme();
+        console.log('Dashboard New: Iniciando...');
+        console.log('Container:', this.container);
+        
         // Ocultar la sección de inventario antigua
         const inventorySection = document.getElementById('inventorySection');
         if (inventorySection) {
@@ -28,7 +31,9 @@ export class DashboardNew {
             console.error('Dashboard container not found!');
             return;
         }
+        console.log('Renderizando dashboard...');
         this.render();
+        console.log('Dashboard renderizado');
     }
 
     render() {
