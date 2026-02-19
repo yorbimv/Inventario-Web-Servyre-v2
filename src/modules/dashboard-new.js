@@ -19,6 +19,11 @@ export class DashboardNew {
         if (inventorySection) {
             inventorySection.style.display = 'none';
         }
+        // Ocultar la tabla de inventario
+        const inventoryTable = document.getElementById('inventoryTable');
+        if (inventoryTable) {
+            inventoryTable.style.display = 'none';
+        }
         if (!this.container) {
             console.error('Dashboard container not found!');
             return;
