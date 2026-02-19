@@ -4,29 +4,41 @@ Aplicación web premium para la gestión de activos tecnológicos de Servyre. De
 
 ## ✨ Características
 
-- **CRUD Completo**: Gestión de equipos (Nombre, Correo, Modelo, Serie, RAM, Disco, etc.).
+- **CRUD Completo**: Gestión de equipos con todos los campos relevantes (Nombre, Correo, Modelo, Serie, RAM, Disco, etc.)
+- **Dashboard Interactivo**: 
+  - KPIs visuales con contadores animados
+  - Gráficos de estado y ubicación
+  - Alertas flotantes para cambios de estado
+  - Tabla de inventario integrada
 - **Exportación Profesional**:
-  - 📊 Descarga en formato **Excel** (.xlsx) con un clic.
-  - 📄 Generación de reportes en **PDF** con tabla auto-ajustable.
-- **Búsqueda Inteligente**: Filtrado instantáneo por cualquier campo del inventario.
-- **Persistencia Local**: Los datos se guardan automáticamente en el navegador (LocalStorage).
-- **Diseño Premium**: Interfaz oscura elegante con soporte para iconos de Lucide y fuentes modernas.
+  - 📊 Descarga en formato **Excel** (.xlsx)
+  - 📄 Generación de reportes en **PDF** con tabla auto-ajustable
+  - 💾 Exportar/Importar JSON para respaldo
+- **Búsqueda Inteligente**: Filtrado instantáneo por cualquier campo del inventario
+- **Gestión de Catálogos**: Configuración de marcas, modelos y ubicaciones
+- **Persistencia Local**: Datos cifrados y guardados automáticamente en LocalStorage
+- **Diseño Premium**: Interfaz Glassmorphism con soporte para temas claro/oscuro
+- **Sistema de Alertas**: Notificaciones flotantes para cambios de estado de equipos
+- **Ordenamiento de Tablas**: Ordenar por columnas con indicadores visuales
+- **Importación Excel**: Carga masiva de registros desde Excel
 
 ## 🛠️ Tecnologías
 
-- **Core**: Vanilla JavaScript (ES6+), HTML5, CSS3.
-- **Bundler**: Vite.
-- **Gráficos**: Chart.js para dashboard interactivo.
+- **Core**: Vanilla JavaScript (ES6+), HTML5, CSS3
+- **Bundler**: Vite
+- **Gráficos**: Chart.js para dashboard interactivo
 - **Librerías**:
-  - `xlsx` para exportación a Excel.
-  - `jspdf` & `jspdf-autotable` para reportes PDF.
-  - `html2canvas` para captura de dashboard.
-  - `lucide-icons` para una estética visual superior.
+  - `xlsx` - Exportación Excel
+  - `jspdf` & `jspdf-autotable` - Reportes PDF
+  - `html2canvas` - Captura de dashboard
+  - `lucide-icons` - Iconos SVG
+  - `crypto-js` - Cifrado de datos
+  - `gridstack` - Widgets arrastrables
 
 ## 🚀 Instalación y Uso Local
 
-1. Asegúrate de tener [Node.js](https://nodejs.org/) instalado.
-2. Abre una terminal en la carpeta del proyecto.
+1. Asegúrate de tener [Node.js](https://nodejs.org/) instalado
+2. Abre una terminal en la carpeta del proyecto
 3. Instala las dependencias:
    ```bash
    npm install
@@ -35,31 +47,66 @@ Aplicación web premium para la gestión de activos tecnológicos de Servyre. De
    ```bash
    npm run dev
    ```
-5. Abre el navegador en `http://localhost:5173`.
+5. Abre el navegador en `http://localhost:5173`
 
-## 📂 Cómo subir a GitHub
+## 📋 Historial de Cambios
 
-Para subir este proyecto a tu cuenta de GitHub, sigue estos pasos:
+### v2.0 (Actual)
+- ✅ Ordenamiento por columnas en tabla de inventario con indicadores visuales
+- ✅ Sistema de alertas descartables individualmente con reaparición automática
+- ✅ Dashboard con tabla compacta de ubicaciones y lista jerárquica de modelos
+- ✅ Tarjetas visuales CSS en lugar de gráficos Chart.js
+- ✅ Tabla de inventario responsive con scroll horizontal
+- ✅ Alertas flotantes para cambios de estado de equipos
+- ✅ Descripción en tarjetas de ubicación y modelos
+- ✅ Historial de usuarios y campos IP en ejemplos
+- ✅ Reordenamiento de toolbar
+- ✅ Exportación JSON/CSV
+- ✅ Importación desde Excel con plantilla predefinida
+- ✅ Mejoras en renderizado de iconos Lucide
+- ✅ Scroll horizontal en tablas
 
-1. **Crea un repositorio nuevo** en GitHub (no incluyas README ni .gitignore).
-2. Abre la terminal en esta carpeta y ejecuta:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit: Inventario IT Servyre"
-   git branch -M main
-   git remote add origin https://github.com/TU_USUARIO/TU_REPOSITORIO.git
-   git push -u origin main
-   ```
+### v1.0
+- ✅ CRUD completo de activos IT
+- ✅ Dashboard con KPIs y gráficos
+- ✅ Búsqueda y filtrado
+- ✅ Exportación Excel y PDF
+- ✅ Persistencia local con cifrado
+- ✅ Catálogos configurables (marcas, modelos, ubicaciones)
+- ✅ Tema claro/oscuro
+- ✅ Diseño Glassmorphism
 
-## ☁️ Despliegue en Ubuntu (VPS/Servidor)
+## 📂 Estructura del Proyecto
 
-### Requisitos Previos
-- Ubuntu 20.04 o superior
-- Nginx instalado
-- Node.js 18+ (opcional, solo si usas build)
+```
+inventario-servyre/
+├── index.html              # Página principal
+├── package.json           # Dependencias
+├── src/
+│   ├── main.js           # Lógica principal
+│   ├── config.js         # Configuración
+│   ├── style.css         # Estilos globales
+│   ├── modules/
+│   │   ├── ui.js         # Elementos del DOM
+│   │   ├── utils.js      # Utilidades
+│   │   ├── state.js      # Estado global
+│   │   ├── storage.js    # Persistencia
+│   │   ├── catalog.js    # Catálogos
+│   │   ├── dashboard.js  # Dashboard básico
+│   │   ├── dashboard-premium.js  # Dashboard avanzado
+│   │   ├── export.js     # Exportación
+│   │   └── logo-manager.js      # Gestión de logos
+│   └── css/
+│       ├── dashboard.css
+│       ├── dashboard-premium.css
+│       ├── animations.css
+│       └── logo-manager.css
+└── dist/                 # Build de producción
+```
 
-### Método 1: Usando Build Estático (Recomendado)
+## ☁️ Despliegue en Servidor
+
+### Método 1: Build Estático (Recomendado)
 
 1. **Compila el proyecto:**
    ```bash
@@ -69,97 +116,34 @@ Para subir este proyecto a tu cuenta de GitHub, sigue estos pasos:
 
 2. **Copia los archivos al servidor:**
    ```bash
-   # Opción A: Si estás en el servidor
    sudo cp -r dist/* /var/www/inventario/
-   
-   # Opción B: Desde tu máquina local
-   scp -r dist/* usuario@tu-servidor:/var/www/inventario/
    ```
 
 3. **Configura Nginx:**
-   ```bash
-   sudo nano /etc/nginx/sites-available/inventario
-   ```
-   
-   Agrega esta configuración:
    ```nginx
    server {
        listen 80;
        server_name inventario.tudominio.com;
        root /var/www/inventario;
        index index.html;
-
        location / {
            try_files $uri $uri/ /index.html;
-       }
-
-       # Opcional: Cacheo de archivos estáticos
-       location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-           expires 1y;
-           add_header Cache-Control "public, immutable";
        }
    }
    ```
 
-4. **Activa el sitio:**
-   ```bash
-   sudo ln -s /etc/nginx/sites-available/inventario /etc/nginx/sites-enabled/
-   sudo nginx -t
-   sudo systemctl reload nginx
-   ```
-
-5. **Configura SSL (opcional con Let's Encrypt):**
-   ```bash
-   sudo apt install certbot python3-certbot-nginx
-   sudo certbot --nginx -d inventario.tudominio.com
-   ```
-
-### Método 2: Usando Vite Dev Server (Desarrollo)
-
-Si quieres ejecutar el servidor de desarrollo:
-
-1. **Instala Node.js:**
-   ```bash
-   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-   sudo apt install -y nodejs
-   ```
-
-2. **Ejecuta el servidor:**
-   ```bash
-   npm install
-   npm run dev -- --host
-   ```
-
-3. **Para producción con PM2:**
-   ```bash
-   sudo npm install -g pm2
-   pm2 start npm --name "inventario" -- run dev -- --host
-   pm2 save
-   sudo pm2 startup
-   ```
-
-### Método 3: Docker (Opcional)
-
-Crea un `Dockerfile`:
-```dockerfile
-FROM nginx:alpine
-COPY dist/ /usr/share/nginx/html/
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-Build y ejecuta:
+### Método 2: Docker
 ```bash
 docker build -t inventario-servyre .
 docker run -d -p 80:80 inventario-servyre
 ```
 
+## 🔧 Configuración
+
+- **Puerto dev:** 5173
+- **Theme:** Modo claro/oscuro (toggle en la UI)
+- **Cifrado:** AES con clave configurable en `src/config.js`
+
 ---
 
-## 🔧 Configuración Adicional
-
-- **Puerto por defecto:** 5173 (dev) / 80 (producción)
-- **Theme:** Soporta modo claro/oscuro (toggle en la UI)
-
----
-Desarrollado con ❤️ para Servyre.
+Desarrollado con ❤️ para Servyre IT
