@@ -1,7 +1,6 @@
 /**
  * Dashboard Personalizado - Simple y Funcional
  */
-import Chart from 'chart.js/auto';
 
 export function initDashboardPersonalizado(inventory, containerId = 'dashboardContainer') {
     const container = document.getElementById(containerId);
@@ -140,29 +139,66 @@ function renderKPICard(label, value, color, icon) {
 }
 
 function renderResumenView(inventory, kpis) {
-    // Inicializar gráficos después de que el HTML exista
-    requestAnimationFrame(() => {
-        setTimeout(() => initCharts(inventory), 150);
+    // Calcular estadísticas para las tarjetas
+    const ubicaciones = {};
+    inventory.forEach(i => {
+        const loc = i.location || 'Sin ubicación';
+        ubicaciones[loc] = (ubicaciones[loc] || 0) + 1;
     });
+    const ubicacionList = Object.entries(ubicaciones).sort((a, b) => b[1] - a[1]);
+
+    const modelsMap = {};
+    inventory.forEach(i => {
+        const model = `${i.brand || ''} ${i.model || ''}`.trim() || 'Sin modelo';
+        modelsMap[model] = (modelsMap[model] || 0) + 1;
+    });
+    const modeloList = Object.entries(modelsMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
     
     return `
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+            <!-- Ubicaciones -->
             <div style="background: var(--surface, #1e1e3f); border: 1px solid var(--border, #333); border-radius: 12px; padding: 1.5rem;">
                 <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
-                    <i data-lucide="map-pin" style="width: 18px; height: 18px; color: var(--primary, #FCD34D);"></i>
+                    <i data-lucide="map-pin" style="width: 18px; height: 18px; color: #3B82F6;"></i>
                     Equipos por Ubicación
                 </h3>
-                <div style="height: 280px;">
-                    <canvas id="ubicacionChart"></canvas>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    ${ubicacionList.map(([lugar, cantidad], idx) => `
+                        <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: var(--card-bg, #252547); border-radius: 8px;">
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: ${['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'][idx % 6]}20; display: flex; align-items: center; justify-content: center; color: ${['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'][idx % 6]}; font-weight: 700; font-size: 0.9rem;">
+                                ${cantidad}
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: var(--text, #fff); font-size: 0.9rem;">${lugar}</div>
+                                <div style="height: 6px; background: #333; border-radius: 3px; margin-top: 6px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${(cantidad / ubicacionList[0][1]) * 100}%; background: ${['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'][idx % 6]}; border-radius: 3px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
+
+            <!-- Modelos -->
             <div style="background: var(--surface, #1e1e3f); border: 1px solid var(--border, #333); border-radius: 12px; padding: 1.5rem;">
                 <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
-                    <i data-lucide="bar-chart-3" style="width: 18px; height: 18px; color: var(--primary, #FCD34D);"></i>
+                    <i data-lucide="monitor" style="width: 18px; height: 18px; color: #10B981;"></i>
                     Modelos Más Comunes
                 </h3>
-                <div style="height: 280px;">
-                    <canvas id="modelosChart"></canvas>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    ${modeloList.map(([modelo, cantidad], idx) => `
+                        <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: var(--card-bg, #252547); border-radius: 8px;">
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: #10B98120; display: flex; align-items: center; justify-content: center; color: #10B981; font-weight: 700; font-size: 0.9rem;">
+                                ${cantidad}
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: var(--text, #fff); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${modelo}</div>
+                                <div style="height: 6px; background: #333; border-radius: 3px; margin-top: 6px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${(cantidad / modeloList[0][1]) * 100}%; background: #10B981; border-radius: 3px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
         </div>
@@ -260,77 +296,4 @@ function getStatusBadge(status) {
         'Para piezas': 'badge-orange'
     };
     return badges[status] || 'badge-gray';
-}
-
-function initCharts(inventory) {
-    // Ubicación Chart
-    const ubicacionCtx = document.getElementById('ubicacionChart');
-    if (ubicacionCtx) {
-        const ubicaciones = {};
-        inventory.forEach(i => {
-            const loc = i.location || 'Sin ubicación';
-            ubicaciones[loc] = (ubicaciones[loc] || 0) + 1;
-        });
-
-        new Chart(ubicacionCtx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(ubicaciones),
-                datasets: [{
-                    label: 'Equipos',
-                    data: Object.values(ubicaciones),
-                    backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'],
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: '#9CA3AF' } },
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9CA3AF' } }
-                }
-            }
-        });
-    } else {
-        console.log('Canvas ubicacionChart no encontrado');
-    }
-
-    // Modelos Chart
-    const modelosCtx = document.getElementById('modelosChart');
-    if (modelosCtx) {
-        const modelsMap = {};
-        inventory.forEach(i => {
-            const model = `${i.brand || ''} ${i.model || ''}`.trim() || 'Sin modelo';
-            modelsMap[model] = (modelsMap[model] || 0) + 1;
-        });
-
-        const topModels = Object.entries(modelsMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
-
-        new Chart(modelosCtx, {
-            type: 'bar',
-            data: {
-                labels: topModels.map(m => m[0].substring(0, 15)),
-                datasets: [{
-                    label: 'Equipos',
-                    data: topModels.map(m => m[1]),
-                    backgroundColor: '#3B82F6',
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9CA3AF' } },
-                    y: { grid: { display: false }, ticks: { color: '#9CA3AF' } }
-                }
-            }
-        });
-    } else {
-        console.log('Canvas modelosChart no encontrado');
-    }
 }
