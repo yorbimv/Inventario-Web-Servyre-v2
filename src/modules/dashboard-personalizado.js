@@ -260,12 +260,11 @@ function renderInventarioView(inventory) {
                 </h3>
             </div>
             <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
+                <table style="width: 100%; border-collapse: collapse; min-width: 700px;">
                     <thead style="background: var(--card-bg, #252547);">
                         <tr>
                             <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Resg.</th>
                             <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Usuario</th>
-                            <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Equipo</th>
                             <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Marca/Modelo</th>
                             <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">PC</th>
                             <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Serie</th>
@@ -280,7 +279,6 @@ function renderInventarioView(inventory) {
                             <tr>
                                 <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.7rem; white-space: nowrap;">${item.resguardo || '-'}</td>
                                 <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-weight: 600; font-size: 0.75rem; white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis;">${item.fullName || '-'}</td>
-                                <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-size: 0.75rem; white-space: nowrap;">${item.deviceType || '-'}</td>
                                 <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-size: 0.7rem; white-space: nowrap; max-width: 100px; overflow: hidden; text-overflow: ellipsis;">${item.brand || '-'} ${item.model || ''}</td>
                                 <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.7rem; white-space: nowrap;">${item.pcName || '-'}</td>
                                 <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.7rem; white-space: nowrap;">${item.serialNumber || '-'}</td>
