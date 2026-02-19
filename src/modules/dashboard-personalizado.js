@@ -188,7 +188,7 @@ function renderResumenView(inventory, kpis) {
                     <i data-lucide="monitor" style="width: 18px; height: 18px; color: #10B981;"></i>
                     Modelos por Ubicación
                 </h3>
-                <div style="max-height: 400px; overflow-y: auto;">
+                <div>
                     ${Object.entries(modelosPorUbicacion).sort((a, b) => {
                         const totalA = Object.values(a[1]).reduce((sum, val) => sum + val, 0);
                         const totalB = Object.values(b[1]).reduce((sum, val) => sum + val, 0);
