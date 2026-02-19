@@ -158,10 +158,11 @@ function renderResumenView(inventory, kpis) {
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
             <!-- Ubicaciones -->
             <div style="background: var(--surface, #1e1e3f); border: 1px solid var(--border, #333); border-radius: 12px; padding: 1.5rem;">
-                <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
                     <i data-lucide="map-pin" style="width: 18px; height: 18px; color: #3B82F6;"></i>
                     Equipos por Ubicación
                 </h3>
+                <p style="margin: 0 0 1rem 0; font-size: 0.75rem; color: var(--text-dim, #666);">Cantidad de equipos distribuidos por sede o ubicación física</p>
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                     ${ubicacionList.map(([lugar, cantidad], idx) => `
                         <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: var(--card-bg, #252547); border-radius: 8px;">
@@ -181,10 +182,11 @@ function renderResumenView(inventory, kpis) {
 
             <!-- Modelos -->
             <div style="background: var(--surface, #1e1e3f); border: 1px solid var(--border, #333); border-radius: 12px; padding: 1.5rem;">
-                <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
                     <i data-lucide="monitor" style="width: 18px; height: 18px; color: #10B981;"></i>
                     Modelos Más Comunes
                 </h3>
+                <p style="margin: 0 0 1rem 0; font-size: 0.75rem; color: var(--text-dim, #666);">Top modelos de equipos con mayor cantidad en inventario</p>
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                     ${modeloList.map(([modelo, cantidad], idx) => `
                         <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: var(--card-bg, #252547); border-radius: 8px;">
