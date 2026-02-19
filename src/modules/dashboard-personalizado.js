@@ -9,11 +9,11 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
         return;
     }
 
+    // Guardar inventario globalmente para ordenamiento
+    window.dashboardInventory = inventory;
+
     // Estado del ordenamiento
-    window.dashboardSortState = {
-        ubicacion: { field: 'total', order: 'desc' },
-        red: { field: 'fullName', order: 'asc' }
-    };
+    window.redSortState = { field: null, order: 'asc' };
 
     // Calcular KPIs
     const kpis = {
@@ -96,6 +96,31 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
         }
     };
 }
+
+// Función global para ordenar la tabla Red
+window.sortRedTable = function(field) {
+    if (!window.redSortState) {
+        window.redSortState = { field: null, order: 'asc' };
+    }
+    
+    // Si se hace click en la misma columna, cambiar el orden
+    if (window.redSortState.field === field) {
+        window.redSortState.order = window.redSortState.order === 'asc' ? 'desc' : 'asc';
+    } else {
+        // Si es una columna nueva, ordenar ascendente
+        window.redSortState.field = field;
+        window.redSortState.order = 'asc';
+    }
+    
+    // Re-renderizar la vista
+    const content = document.getElementById('dashboardContent');
+    if (content && window.dashboardInventory) {
+        content.innerHTML = renderRedView(window.dashboardInventory);
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+};
 
 function renderKPICard(label, value, color, icon) {
     return `
@@ -249,7 +274,59 @@ function renderResumenView(inventory, kpis) {
 }
 
 function renderRedView(inventory) {
-    const conIP = inventory.filter(i => i.ipAddress);
+    let conIP = inventory.filter(i => i.ipAddress);
+    
+    // Aplicar ordenamiento si existe
+    const sortState = window.redSortState || { field: null, order: 'asc' };
+    if (sortState.field) {
+        conIP = [...conIP].sort((a, b) => {
+            let valA, valB;
+            
+            switch(sortState.field) {
+                case 'fullName':
+                    valA = (a.fullName || '').toLowerCase();
+                    valB = (b.fullName || '').toLowerCase();
+                    break;
+                case 'device':
+                    valA = ((a.deviceType || '') + ' ' + (a.brand || '')).toLowerCase();
+                    valB = ((b.deviceType || '') + ' ' + (b.brand || '')).toLowerCase();
+                    break;
+                case 'email':
+                    valA = (a.email || '').toLowerCase();
+                    valB = (b.email || '').toLowerCase();
+                    break;
+                case 'ip':
+                    // Ordenar IPs numéricamente
+                    valA = (a.ipAddress || '').split('.').map(Number);
+                    valB = (b.ipAddress || '').split('.').map(Number);
+                    for (let i = 0; i < 4; i++) {
+                        if (valA[i] !== valB[i]) {
+                            return sortState.order === 'asc' ? valA[i] - valB[i] : valB[i] - valA[i];
+                        }
+                    }
+                    return 0;
+                case 'type':
+                    valA = (a.ipType || 'DHCP').toLowerCase();
+                    valB = (b.ipType || 'DHCP').toLowerCase();
+                    break;
+                default:
+                    return 0;
+            }
+            
+            if (sortState.field !== 'ip') {
+                if (valA < valB) return sortState.order === 'asc' ? -1 : 1;
+                if (valA > valB) return sortState.order === 'asc' ? 1 : -1;
+                return 0;
+            }
+            return 0;
+        });
+    }
+    
+    // Función para obtener el indicador de ordenamiento
+    const getSortIndicator = (field) => {
+        if (sortState.field !== field) return '<span style="color: var(--text-dim); opacity: 0.3;">↕</span>';
+        return sortState.order === 'asc' ? '<span style="color: #10B981;">▲</span>' : '<span style="color: #F59E0B;">▼</span>';
+    };
     
     return `
         <div style="background: var(--surface, #1e1e3f); border: 1px solid var(--border, #333); border-radius: 12px; overflow: hidden;">
@@ -263,11 +340,11 @@ function renderRedView(inventory) {
                 <table style="width: 100%; border-collapse: collapse;">
                     <thead style="background: var(--card-bg, #252547); position: sticky; top: 0;">
                         <tr>
-                            <th style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Usuario</th>
-                            <th style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Equipo</th>
-                            <th style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Correo</th>
-                            <th style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">IP</th>
-                            <th style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Tipo</th>
+                            <th onclick="sortRedTable('fullName')" style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); cursor: pointer; user-select: none;">Usuario ${getSortIndicator('fullName')}</th>
+                            <th onclick="sortRedTable('device')" style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); cursor: pointer; user-select: none;">Equipo ${getSortIndicator('device')}</th>
+                            <th onclick="sortRedTable('email')" style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); cursor: pointer; user-select: none;">Correo ${getSortIndicator('email')}</th>
+                            <th onclick="sortRedTable('ip')" style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); cursor: pointer; user-select: none;">IP ${getSortIndicator('ip')}</th>
+                            <th onclick="sortRedTable('type')" style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); cursor: pointer; user-select: none;">Tipo ${getSortIndicator('type')}</th>
                         </tr>
                     </thead>
                     <tbody>
