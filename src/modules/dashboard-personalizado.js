@@ -1,6 +1,7 @@
 /**
  * Dashboard Personalizado - Simple y Funcional
  */
+import Chart from 'chart.js/auto';
 
 export function initDashboardPersonalizado(inventory, containerId = 'dashboardContainer') {
     const container = document.getElementById(containerId);
@@ -262,11 +263,6 @@ function getStatusBadge(status) {
 }
 
 function initCharts(inventory) {
-    if (typeof Chart === 'undefined') {
-        console.log('Chart no está disponible');
-        return;
-    }
-
     // Ubicación Chart
     const ubicacionCtx = document.getElementById('ubicacionChart');
     if (ubicacionCtx) {
