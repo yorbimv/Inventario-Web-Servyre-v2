@@ -9,6 +9,12 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
         return;
     }
 
+    // Estado del ordenamiento
+    window.dashboardSortState = {
+        ubicacion: { field: 'total', order: 'desc' },
+        red: { field: 'fullName', order: 'asc' }
+    };
+
     // Calcular KPIs
     const kpis = {
         total: inventory.length,
@@ -37,7 +43,7 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
                         <i data-lucide="home" style="width: 16px;"></i> Resumen
                     </button>
                     <button onclick="renderDashboardView('red')" class="glass-btn" style="padding: 0.5rem 1rem;">
-                        <i data-lucide="wifi" style="width: 16px;"></i> Red/IP
+                        <i data-lucide="wifi" style="width: 16px;"></i> Red
                     </button>
                 </div>
             </div>
@@ -143,7 +149,25 @@ function renderResumenView(inventory, kpis) {
         if (i.status === 'Activo') ubicaciones[loc].activos++;
         if (i.status === 'Mantenimiento') ubicaciones[loc].mantenimiento++;
     });
-    const ubicacionList = Object.entries(ubicaciones).sort((a, b) => b[1].total - a[1].total);
+    
+    // Ordenar según el estado actual
+    const sortState = window.dashboardSortState?.ubicacion || { field: 'total', order: 'desc' };
+    let ubicacionList = Object.entries(ubicaciones);
+    
+    ubicacionList.sort((a, b) => {
+        let valA, valB;
+        if (sortState.field === 'ubicacion') {
+            valA = a[0].toLowerCase();
+            valB = b[0].toLowerCase();
+        } else {
+            valA = a[1][sortState.field];
+            valB = b[1][sortState.field];
+        }
+        
+        if (valA < valB) return sortState.order === 'asc' ? -1 : 1;
+        if (valA > valB) return sortState.order === 'asc' ? 1 : -1;
+        return 0;
+    });
 
     // Calcular modelos por ubicación
     const modelosPorUbicacion = {};
@@ -235,25 +259,25 @@ function renderRedView(inventory) {
                     Equipos con IP Asignada (${conIP.length})
                 </h3>
             </div>
-            <div style="max-height: 500px; overflow-y: auto;">
+            <div>
                 <table style="width: 100%; border-collapse: collapse;">
                     <thead style="background: var(--card-bg, #252547); position: sticky; top: 0;">
                         <tr>
-                            <th style="padding: 0.875rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Usuario</th>
-                            <th style="padding: 0.875rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Equipo</th>
-                            <th style="padding: 0.875rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Correo</th>
-                            <th style="padding: 0.875rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">IP</th>
-                            <th style="padding: 0.875rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Tipo</th>
+                            <th style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Usuario</th>
+                            <th style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Equipo</th>
+                            <th style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Correo</th>
+                            <th style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">IP</th>
+                            <th style="padding: 0.875rem 1rem; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Tipo</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${conIP.map(item => `
                             <tr>
-                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-weight: 600;">${item.fullName || '-'}</td>
-                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333);">${item.deviceType || '-'} ${item.brand || ''}</td>
-                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-size: 0.85rem;">${item.email || '-'}</td>
-                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; color: var(--primary, #FCD34D); font-weight: 600;">${item.ipAddress}</td>
-                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333);">
+                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-weight: 600; text-align: center;">${item.fullName || '-'}</td>
+                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); text-align: center;">${item.deviceType || '-'} ${item.brand || ''}</td>
+                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-size: 0.85rem; text-align: center;">${item.email || '-'}</td>
+                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; color: var(--primary, #FCD34D); font-weight: 600; text-align: center;">${item.ipAddress}</td>
+                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); text-align: center;">
                                     <span class="badge ${item.ipType === 'IP Fija' ? 'badge-orange' : 'badge-green'}" style="font-size: 0.65rem;">
                                         ${item.ipType || 'DHCP'}
                                     </span>
