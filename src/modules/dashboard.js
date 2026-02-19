@@ -80,6 +80,241 @@ const getValueByField = (inventory, field) => {
     return data;
 };
 
+const renderKPIDetailsTable = (type, inventory) => {
+    let items = [];
+    let title = '';
+    let icon = '';
+    
+    const now = new Date();
+    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    
+    switch(type) {
+        case 'total':
+            items = inventory;
+            title = 'Todos los Activos';
+            icon = 'package';
+            break;
+        case 'activo':
+            items = inventory.filter(i => i.status === 'Activo');
+            title = 'Activos';
+            icon = 'check-circle';
+            break;
+        case 'mantenimiento':
+            items = inventory.filter(i => i.status === 'Mantenimiento');
+            title = 'En Mantenimiento';
+            icon = 'wrench';
+            break;
+        case 'baja':
+            items = inventory.filter(i => i.status === 'Baja');
+            title = 'De Baja';
+            icon = 'x-circle';
+            break;
+        case 'garantia':
+            items = inventory.filter(i => {
+                if (!i.warrantyEndDate) return false;
+                return new Date(i.warrantyEndDate) >= now;
+            });
+            title = 'En Garantía';
+            icon = 'shield-check';
+            break;
+        case 'garantia-vencida':
+            items = inventory.filter(i => {
+                if (!i.warrantyEndDate) return false;
+                return new Date(i.warrantyEndDate) < now;
+            });
+            title = 'Garantías Vencidas';
+            icon = 'alert-circle';
+            break;
+        case 'garantia-15':
+            items = inventory.filter(i => {
+                if (!i.warrantyEndDate) return false;
+                const diff = (new Date(i.warrantyEndDate) - now) / (1000 * 60 * 60 * 24);
+                return diff <= 15 && diff > 0;
+            });
+            title = 'Garantía por Vencer (15 días)';
+            icon = 'clock';
+            break;
+        case 'garantia-30':
+            items = inventory.filter(i => {
+                if (!i.warrantyEndDate) return false;
+                const diff = (new Date(i.warrantyEndDate) - now) / (1000 * 60 * 60 * 24);
+                return diff <= 30 && diff > 15;
+            });
+            title = 'Garantía por Vencer (16-30 días)';
+            icon = 'calendar';
+            break;
+        case 'garantia-60':
+            items = inventory.filter(i => {
+                if (!i.warrantyEndDate) return false;
+                const diff = (new Date(i.warrantyEndDate) - now) / (1000 * 60 * 60 * 24);
+                return diff <= 60 && diff > 30;
+            });
+            title = 'Garantía por Vencer (31-60 días)';
+            icon = 'check-circle';
+            break;
+        case 'mtto-proximo':
+            items = inventory.filter(i => {
+                if (!i.nextMtto) return false;
+                const mttoDate = new Date(i.nextMtto);
+                return mttoDate <= nextWeek && mttoDate >= now;
+            });
+            title = 'Próximo Mantenimiento';
+            icon = 'calendar';
+            break;
+        case 'mtto-vencido':
+            items = inventory.filter(i => {
+                if (!i.nextMtto) return false;
+                return new Date(i.nextMtto) < now;
+            });
+            title = 'Mantenimiento Vencido';
+            icon = 'alert-triangle';
+            break;
+        case 'mtto-mes':
+            items = inventory.filter(i => {
+                if (!i.nextMtto) return false;
+                const mttoDate = new Date(i.nextMtto);
+                const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                return mttoDate > nextWeek && mttoDate <= nextMonth;
+            });
+            title = 'Mantenimiento Este Mes';
+            icon = 'calendar';
+            break;
+        case 'mtto-futuro':
+            items = inventory.filter(i => {
+                if (!i.nextMtto) return false;
+                const mttoDate = new Date(i.nextMtto);
+                const next3Months = new Date(now.getFullYear(), now.getMonth() + 3, now.getDate());
+                return mttoDate > nextMonth && mttoDate <= next3Months;
+            });
+            title = 'Mantenimiento Próximos Meses';
+            icon = 'calendar-range';
+            break;
+    }
+    
+    if (items.length === 0) {
+        return `
+            <div class="kpi-detail-empty">
+                <i data-lucide="inbox"></i>
+                <p>No hay elementos en esta categoría</p>
+            </div>
+        `;
+    }
+    
+    return `
+        <div class="kpi-detail-table">
+            <table class="table-detail">
+                <thead>
+                    <tr>
+                        <th>Resguardo</th>
+                        <th>Equipo</th>
+                        <th>Marca</th>
+                        <th>Serie</th>
+                        <th>Usuario</th>
+                        <th>Ubicación</th>
+                        <th>Departamento</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${items.map(item => `
+                        <tr>
+                            <td><code>${item.resguardo || '-'}</code></td>
+                            <td>${item.deviceType || '-'}</td>
+                            <td>${item.brand || '-'}</td>
+                            <td>${item.serialNumber || '-'}</td>
+                            <td>${item.fullName || '-'}</td>
+                            <td>${item.location || '-'}</td>
+                            <td>${item.department || '-'}</td>
+                            <td><span class="badge-status badge-${item.status?.toLowerCase().replace(' ', '-')}">${item.status || '-'}</span></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+};
+
+const openKPIModal = (type, inventory, kpi) => {
+    let modalTitle = '';
+    let icon = '';
+    
+    switch(type) {
+        case 'total': modalTitle = 'Todos los Activos'; icon = 'package'; break;
+        case 'activo': modalTitle = 'Activos'; icon = 'check-circle'; break;
+        case 'mantenimiento': modalTitle = 'Equipos en Mantenimiento'; icon = 'wrench'; break;
+        case 'baja': modalTitle = 'Equipos de Baja'; icon = 'x-circle'; break;
+        case 'garantia': modalTitle = 'Equipos en Garantía'; icon = 'shield-check'; break;
+        case 'garantia-vencida': modalTitle = 'Garantías Vencidas'; icon = 'alert-circle'; break;
+        case 'garantia-15': modalTitle = 'Garantía por Vencer (15 días)'; icon = 'clock'; break;
+        case 'garantia-30': modalTitle = 'Garantía por Vencer (16-30 días)'; icon = 'calendar'; break;
+        case 'garantia-60': modalTitle = 'Garantía por Vencer (31-60 días)'; icon = 'check-circle'; break;
+        case 'mtto-proximo': modalTitle = 'Próximo Mantenimiento'; icon = 'calendar'; break;
+        case 'mtto-vencido': modalTitle = 'Mantenimiento Vencido'; icon = 'alert-triangle'; break;
+        case 'mtto-mes': modalTitle = 'Mantenimiento Este Mes'; icon = 'calendar'; break;
+        case 'mtto-futuro': modalTitle = 'Mantenimiento Próximos Meses'; icon = 'calendar-range'; break;
+        default: modalTitle = 'Detalles'; icon = 'info'; break;
+    }
+    
+    const modal = document.createElement('div');
+    modal.className = 'kpi-modal-overlay';
+    modal.innerHTML = `
+        <div class="kpi-modal">
+            <div class="kpi-modal-header">
+                <h2><i data-lucide="${icon}"></i> ${modalTitle}</h2>
+                <button class="kpi-modal-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="kpi-modal-body">
+                ${renderKPIDetailsTable(type, inventory)}
+            </div>
+            <div class="kpi-modal-footer">
+                <span class="kpi-modal-count">Total: ${inventory.filter(i => {
+    const now = new Date();
+    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                    switch(type) {
+                        case 'total': return true;
+                        case 'activo': return i.status === 'Activo';
+                        case 'mantenimiento': return i.status === 'Mantenimiento';
+                        case 'baja': return i.status === 'Baja';
+                        case 'garantia': return i.warrantyEndDate && new Date(i.warrantyEndDate) >= now;
+                        case 'garantia-vencida': return i.warrantyEndDate && new Date(i.warrantyEndDate) < now;
+                        case 'garantia-15': return i.warrantyEndDate && (new Date(i.warrantyEndDate) - now) / (1000 * 60 * 60 * 24) <= 15 && (new Date(i.warrantyEndDate) - now) / (1000 * 60 * 60 * 24) > 0;
+                        case 'garantia-30': return i.warrantyEndDate && (new Date(i.warrantyEndDate) - now) / (1000 * 60 * 60 * 24) <= 30 && (new Date(i.warrantyEndDate) - now) / (1000 * 60 * 60 * 24) > 15;
+                        case 'garantia-60': return i.warrantyEndDate && (new Date(i.warrantyEndDate) - now) / (1000 * 60 * 60 * 24) <= 60 && (new Date(i.warrantyEndDate) - now) / (1000 * 60 * 60 * 24) > 30;
+                        case 'mtto-proximo': return i.nextMtto && new Date(i.nextMtto) <= nextWeek && new Date(i.nextMtto) >= now;
+                        case 'mtto-vencido': return i.nextMtto && new Date(i.nextMtto) < now;
+                        case 'mtto-mes': return i.nextMtto && new Date(i.nextMtto) > nextWeek && new Date(i.nextMtto) <= nextMonth;
+                        case 'mtto-futuro': return i.nextMtto && new Date(i.nextMtto) > nextMonth && new Date(i.nextMtto) <= new Date(now.getFullYear(), now.getMonth() + 3, now.getDate());
+                        default: return false;
+                    }
+                }).length} registros</span>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+    
+    modal.querySelector('.kpi-modal-overlay').addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+    
+    modal.querySelector('.kpi-modal-close').addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+        }
+    }, { once: true });
+};
+
 const getTimelineData = (inventory) => {
     const data = {};
     inventory.forEach(item => {
@@ -105,6 +340,15 @@ const colors = {
 
 const chartColors = Object.values(colors);
 
+const initKPIClickEvents = (inventory) => {
+    document.querySelectorAll('.kpi-card.clickable').forEach(card => {
+        card.addEventListener('click', () => {
+            const kpiType = card.dataset.kpi;
+            openKPIModal(kpiType, inventory, getKPIData(inventory));
+        });
+    });
+};
+
 export const renderDashboard = (inventory, containerId = 'dashboardContainer') => {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -117,7 +361,7 @@ export const renderDashboard = (inventory, containerId = 'dashboardContainer') =
     container.innerHTML = `
         <div class="dashboard-premium">
             <div class="dashboard-actions">
-                <button class="premium-btn primary" id="exportDashboardPdf">
+                <button class="premium-btn primary ripple" id="exportDashboardPdf">
                     <i data-lucide="file-down"></i> Exportar PDF
                 </button>
             </div>
@@ -152,6 +396,7 @@ export const renderDashboard = (inventory, containerId = 'dashboardContainer') =
     initDashboardNavigation(inventory);
     initCharts(inventory);
     initExportButton();
+    initKPIClickEvents(inventory);
 
     if (window.lucide) window.lucide.createIcons();
 };
@@ -159,8 +404,8 @@ export const renderDashboard = (inventory, containerId = 'dashboardContainer') =
 const renderResumenSection = (kpi, inventory) => {
     return `
         <div class="dashboard-section active" id="section-resumen">
-            <div class="kpi-grid">
-                <div class="kpi-card">
+            <div class="kpi-grid stagger-fade-in">
+                <div class="kpi-card clickable" data-kpi="total">
                     <div class="kpi-header">
                         <div class="kpi-icon yellow"><i data-lucide="package"></i></div>
                         <div class="kpi-trend neutral"><i data-lucide="minus"></i> Total</div>
@@ -169,7 +414,7 @@ const renderResumenSection = (kpi, inventory) => {
                     <div class="kpi-label">Total Activos</div>
                     <div class="kpi-sublabel">Registrados en sistema</div>
                 </div>
-                <div class="kpi-card">
+                <div class="kpi-card clickable" data-kpi="activo">
                     <div class="kpi-header">
                         <div class="kpi-icon green"><i data-lucide="check-circle"></i></div>
                         <div class="kpi-trend up"><i data-lucide="trending-up"></i> ${Math.round((kpi.active / (kpi.total || 1)) * 100)}%</div>
@@ -178,7 +423,7 @@ const renderResumenSection = (kpi, inventory) => {
                     <div class="kpi-label">Activos</div>
                     <div class="kpi-sublabel">En funcionamiento</div>
                 </div>
-                <div class="kpi-card">
+                <div class="kpi-card clickable" data-kpi="mantenimiento">
                     <div class="kpi-header">
                         <div class="kpi-icon orange"><i data-lucide="wrench"></i></div>
                         <div class="kpi-trend neutral"><i data-lucide="activity"></i> ${kpi.maintenance}</div>
@@ -187,7 +432,7 @@ const renderResumenSection = (kpi, inventory) => {
                     <div class="kpi-label">En Mantenimiento</div>
                     <div class="kpi-sublabel">Requiere servicio</div>
                 </div>
-                <div class="kpi-card">
+                <div class="kpi-card clickable" data-kpi="baja">
                     <div class="kpi-header">
                         <div class="kpi-icon red"><i data-lucide="x-circle"></i></div>
                         <div class="kpi-trend down"><i data-lucide="trending-down"></i> ${kpi.baja}</div>
@@ -196,15 +441,15 @@ const renderResumenSection = (kpi, inventory) => {
                     <div class="kpi-label">De Baja</div>
                     <div class="kpi-sublabel">Inactivos/remplazados</div>
                 </div>
-                <div class="kpi-card">
+                <div class="kpi-card clickable" data-kpi="garantia">
                     <div class="kpi-header">
-                        <div class="kpi-icon blue"><i data-lucide="dollar-sign"></i></div>
+                        <div class="kpi-icon purple"><i data-lucide="shield-check"></i></div>
                     </div>
-                    <div class="kpi-value" data-counter="${kpi.totalValue}" data-currency="true">$0</div>
-                    <div class="kpi-label">Valor Total</div>
-                    <div class="kpi-sublabel">Inversión en activos</div>
+                    <div class="kpi-value" data-counter="${kpi.total}">0</div>
+                    <div class="kpi-label">En Garantía</div>
+                    <div class="kpi-sublabel">Con garantía activa</div>
                 </div>
-                <div class="kpi-card">
+                <div class="kpi-card clickable" data-kpi="mtto-proximo">
                     <div class="kpi-header">
                         <div class="kpi-icon purple"><i data-lucide="calendar"></i></div>
                         <div class="kpi-trend ${kpi.upcomingMtto > 0 ? 'warning' : 'neutral'}">${kpi.upcomingMtto}</div>
@@ -215,7 +460,7 @@ const renderResumenSection = (kpi, inventory) => {
                 </div>
             </div>
 
-            <div class="summary-cards">
+            <div class="summary-cards stagger-fade-in" style="animation-delay: 0.3s;">
                 <div class="summary-card">
                     <div class="summary-icon" style="background: rgba(59, 130, 246, 0.15); color: #3B82F6;">
                         <i data-lucide="building"></i>
@@ -329,7 +574,7 @@ const renderMantenimientoSection = (inventory) => {
     return `
         <div class="dashboard-section" id="section-mantenimiento">
             <div class="kpi-grid">
-                <div class="kpi-card" style="border-left: 4px solid #FF453A;">
+                <div class="kpi-card clickable" data-kpi="mtto-vencido" style="border-left: 4px solid #FF453A;">
                     <div class="kpi-header">
                         <div class="kpi-icon red"><i data-lucide="alert-circle"></i></div>
                     </div>
@@ -337,7 +582,7 @@ const renderMantenimientoSection = (inventory) => {
                     <div class="kpi-label">Vencidos</div>
                     <div class="kpi-sublabel">Mantenimiento atrasado</div>
                 </div>
-                <div class="kpi-card" style="border-left: 4px solid #FF9F0A;">
+                <div class="kpi-card clickable" data-kpi="mtto-proximo" style="border-left: 4px solid #FF9F0A;">
                     <div class="kpi-header">
                         <div class="kpi-icon orange"><i data-lucide="clock"></i></div>
                     </div>
@@ -345,7 +590,7 @@ const renderMantenimientoSection = (inventory) => {
                     <div class="kpi-label">Esta Semana</div>
                     <div class="kpi-sublabel">Próximos 7 días</div>
                 </div>
-                <div class="kpi-card" style="border-left: 4px solid #3B82F6;">
+                <div class="kpi-card clickable" data-kpi="mtto-mes" style="border-left: 4px solid #3B82F6;">
                     <div class="kpi-header">
                         <div class="kpi-icon blue"><i data-lucide="calendar"></i></div>
                     </div>
@@ -353,7 +598,7 @@ const renderMantenimientoSection = (inventory) => {
                     <div class="kpi-label">Este Mes</div>
                     <div class="kpi-sublabel">Próximos 30 días</div>
                 </div>
-                <div class="kpi-card" style="border-left: 4px solid #34C759;">
+                <div class="kpi-card clickable" data-kpi="mtto-futuro" style="border-left: 4px solid #34C759;">
                     <div class="kpi-header">
                         <div class="kpi-icon green"><i data-lucide="check-circle"></i></div>
                     </div>
@@ -553,28 +798,28 @@ const renderGarantiasSection = (inventory) => {
     return `
         <div class="dashboard-section" id="section-garantias">
             <div class="kpi-grid">
-                <div class="kpi-card" style="border-left: 4px solid #FF453A;">
+                <div class="kpi-card clickable" data-kpi="garantia-vencida" style="border-left: 4px solid #FF453A;">
                     <div class="kpi-header">
                         <div class="kpi-icon red"><i data-lucide="alert-circle"></i></div>
                     </div>
                     <div class="kpi-value">${vencidas.length}</div>
                     <div class="kpi-label">Garantías Vencidas</div>
                 </div>
-                <div class="kpi-card" style="border-left: 4px solid #FF9F0A;">
+                <div class="kpi-card clickable" data-kpi="garantia-15" style="border-left: 4px solid #FF9F0A;">
                     <div class="kpi-header">
                         <div class="kpi-icon orange"><i data-lucide="clock"></i></div>
                     </div>
                     <div class="kpi-value">${garantia15.length}</div>
                     <div class="kpi-label">15 días o menos</div>
                 </div>
-                <div class="kpi-card" style="border-left: 4px solid #FF9500;">
+                <div class="kpi-card clickable" data-kpi="garantia-30" style="border-left: 4px solid #FF9500;">
                     <div class="kpi-header">
                         <div class="kpi-icon" style="background: rgba(255, 149, 0, 0.15); color: #FF9500;"><i data-lucide="calendar"></i></div>
                     </div>
                     <div class="kpi-value">${garantia30.length}</div>
                     <div class="kpi-label">16-30 días</div>
                 </div>
-                <div class="kpi-card" style="border-left: 4px solid #34C759;">
+                <div class="kpi-card clickable" data-kpi="garantia-60" style="border-left: 4px solid #34C759;">
                     <div class="kpi-header">
                         <div class="kpi-icon green"><i data-lucide="check-circle"></i></div>
                     </div>
@@ -762,6 +1007,7 @@ const initDashboardNavigation = (inventory) => {
             
             initCharts(inventory, section);
             animateKPICounters();
+            initKPIClickEvents(inventory);
         });
     });
 };
@@ -778,6 +1024,8 @@ const animateKPICounters = () => {
         }
     });
 };
+
+// initKPIClickEvents moved to line 343
 
 const initCharts = (inventory, currentSection = 'resumen') => {
     const kpi = getKPIData(inventory);

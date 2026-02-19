@@ -707,6 +707,7 @@ input, select, textarea {
   font-family: inherit;
   font-size: 0.9rem;
   transition: all 0.2s ease;
+  position: relative;
 }
 
 [data-theme="light"] input, 
@@ -729,9 +730,20 @@ input::placeholder, textarea::placeholder {
 
 input:focus, select:focus, textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-glow);
+  box-shadow: 0 0 0 4px var(--primary-glow), 0 0 0 1px var(--primary);
   outline: none;
   background: var(--surface);
+  transform: translateY(-1px);
+}
+
+input:hover:not(:focus), select:hover:not(:focus), textarea:hover:not(:focus) {
+  border-color: var(--border-hover);
+}
+
+input:disabled, select:disabled, textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 select {
@@ -775,12 +787,31 @@ textarea {
   border: none;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.save-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .save-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--primary-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--primary-glow);
+}
+
+.save-btn:hover::before {
+  opacity: 1;
+}
+
+.save-btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .cancel-btn {
@@ -792,6 +823,32 @@ textarea {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cancel-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--card-bg);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: var(--card-bg);
+  color: var(--text);
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.cancel-btn:hover::before {
+  opacity: 1;
+}
+
+.cancel-btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .cancel-btn:hover {

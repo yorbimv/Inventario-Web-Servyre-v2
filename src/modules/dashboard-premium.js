@@ -87,7 +87,7 @@ class DashboardManager {
           <button class="glass-btn refresh-btn" onclick="dashboard.refresh()" title="Actualizar">
             <i data-lucide="refresh-cw"></i>
           </button>
-          <button class="premium-btn primary" onclick="dashboard.exportDashboard()">
+          <button class="premium-btn primary ripple" onclick="dashboard.exportDashboard()">
             <i data-lucide="download"></i>
             Exportar
           </button>
