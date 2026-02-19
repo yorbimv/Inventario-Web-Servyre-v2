@@ -34,6 +34,11 @@ export class DashboardNew {
         console.log('Renderizando dashboard...');
         this.render();
         console.log('Dashboard renderizado');
+        console.log('HTML generado:', this.container.innerHTML.substring(0, 500));
+        // Forzar visibilidad
+        this.container.style.display = 'block';
+        this.container.style.visibility = 'visible';
+        this.container.style.opacity = '1';
     }
 
     render() {
