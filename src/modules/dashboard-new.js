@@ -14,6 +14,11 @@ export class DashboardNew {
 
     init() {
         this.applyTheme();
+        // Ocultar la sección de inventario antigua
+        const inventorySection = document.getElementById('inventorySection');
+        if (inventorySection) {
+            inventorySection.style.display = 'none';
+        }
         if (!this.container) {
             console.error('Dashboard container not found!');
             return;
@@ -125,7 +130,7 @@ export class DashboardNew {
                     ${this.renderKPICard('maintenance', kpis.maintenance, 'En Mantenimiento', 'wrench', 'maintenance')}
                     ${this.renderKPICard('warranty', kpis.warranty, 'En Garantía', 'shield-check', 'warranty')}
                     ${this.renderKPICard('baja', kpis.baja, 'Dados de Baja', 'x-circle', 'baja')}
-                    ${this.renderKPICard('piezas', kpis.piezas, 'Para Piezas', 'parts', 'piezas')}
+                    ${this.renderKPICard('piezas', kpis.piezas, 'Para Piezas', 'cpu', 'piezas')}
                 </div>
                 
                 <div class="charts-row">
