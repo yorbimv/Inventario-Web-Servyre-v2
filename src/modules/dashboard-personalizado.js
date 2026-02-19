@@ -126,68 +126,92 @@ function renderKPICard(label, value, color, icon) {
 }
 
 function renderResumenView(inventory, kpis) {
-    // Calcular estadísticas para las tarjetas
+    // Calcular estadísticas por ubicación
     const ubicaciones = {};
     inventory.forEach(i => {
         const loc = i.location || 'Sin ubicación';
-        ubicaciones[loc] = (ubicaciones[loc] || 0) + 1;
+        if (!ubicaciones[loc]) {
+            ubicaciones[loc] = { total: 0, activos: 0, mantenimiento: 0 };
+        }
+        ubicaciones[loc].total++;
+        if (i.status === 'Activo') ubicaciones[loc].activos++;
+        if (i.status === 'Mantenimiento') ubicaciones[loc].mantenimiento++;
     });
-    const ubicacionList = Object.entries(ubicaciones).sort((a, b) => b[1] - a[1]);
+    const ubicacionList = Object.entries(ubicaciones).sort((a, b) => b[1].total - a[1].total);
 
-    const modelsMap = {};
+    // Calcular modelos por ubicación
+    const modelosPorUbicacion = {};
     inventory.forEach(i => {
+        const loc = i.location || 'Sin ubicación';
         const model = `${i.brand || ''} ${i.model || ''}`.trim() || 'Sin modelo';
-        modelsMap[model] = (modelsMap[model] || 0) + 1;
+        if (!modelosPorUbicacion[loc]) {
+            modelosPorUbicacion[loc] = {};
+        }
+        modelosPorUbicacion[loc][model] = (modelosPorUbicacion[loc][model] || 0) + 1;
     });
-    const modeloList = Object.entries(modelsMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
     
     return `
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
-            <!-- Ubicaciones -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.5rem;">
+            <!-- Tabla: Equipos por Ubicación -->
             <div style="background: var(--surface, #1e1e3f); border: 1px solid var(--border, #333); border-radius: 12px; padding: 1.5rem;">
-                <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
                     <i data-lucide="map-pin" style="width: 18px; height: 18px; color: #3B82F6;"></i>
                     Equipos por Ubicación
                 </h3>
-                <p style="margin: 0 0 1rem 0; font-size: 0.75rem; color: var(--text-dim, #666);">Cantidad de equipos distribuidos por sede o ubicación física</p>
-                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    ${ubicacionList.map(([lugar, cantidad], idx) => `
-                        <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: var(--card-bg, #252547); border-radius: 8px;">
-                            <div style="width: 36px; height: 36px; border-radius: 8px; background: ${['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'][idx % 6]}20; display: flex; align-items: center; justify-content: center; color: ${['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'][idx % 6]}; font-weight: 700; font-size: 0.9rem;">
-                                ${cantidad}
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600; color: var(--text, #fff); font-size: 0.9rem;">${lugar}</div>
-                                <div style="height: 6px; background: #333; border-radius: 3px; margin-top: 6px; overflow: hidden;">
-                                    <div style="height: 100%; width: ${(cantidad / ubicacionList[0][1]) * 100}%; background: ${['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'][idx % 6]}; border-radius: 3px;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 400px;">
+                        <thead style="background: var(--card-bg, #252547);">
+                            <tr>
+                                <th style="padding: 0.6rem 0.5rem; text-align: left; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Ubicación</th>
+                                <th style="padding: 0.6rem 0.5rem; text-align: center; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Total</th>
+                                <th style="padding: 0.6rem 0.5rem; text-align: center; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Activos</th>
+                                <th style="padding: 0.6rem 0.5rem; text-align: center; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Mtto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${ubicacionList.map(([lugar, stats]) => `
+                                <tr>
+                                    <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-light, #333); font-weight: 600; font-size: 0.85rem;">${lugar}</td>
+                                    <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-light, #333); text-align: center; font-size: 0.9rem; font-weight: 700; color: #3B82F6;">${stats.total}</td>
+                                    <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-light, #333); text-align: center; font-size: 0.85rem; color: #10B981;">${stats.activos}</td>
+                                    <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-light, #333); text-align: center; font-size: 0.85rem; color: ${stats.mantenimiento > 0 ? '#F59E0B' : 'var(--text-dim)'};">${stats.mantenimiento}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Modelos -->
+            <!-- Lista Jerárquica: Modelos por Ubicación -->
             <div style="background: var(--surface, #1e1e3f); border: 1px solid var(--border, #333); border-radius: 12px; padding: 1.5rem;">
-                <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
                     <i data-lucide="monitor" style="width: 18px; height: 18px; color: #10B981;"></i>
-                    Modelos Más Comunes
+                    Modelos por Ubicación
                 </h3>
-                <p style="margin: 0 0 1rem 0; font-size: 0.75rem; color: var(--text-dim, #666);">Top modelos de equipos con mayor cantidad en inventario</p>
-                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    ${modeloList.map(([modelo, cantidad], idx) => `
-                        <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: var(--card-bg, #252547); border-radius: 8px;">
-                            <div style="width: 36px; height: 36px; border-radius: 8px; background: #10B98120; display: flex; align-items: center; justify-content: center; color: #10B981; font-weight: 700; font-size: 0.9rem;">
-                                ${cantidad}
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600; color: var(--text, #fff); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${modelo}</div>
-                                <div style="height: 6px; background: #333; border-radius: 3px; margin-top: 6px; overflow: hidden;">
-                                    <div style="height: 100%; width: ${(cantidad / modeloList[0][1]) * 100}%; background: #10B981; border-radius: 3px;"></div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    ${Object.entries(modelosPorUbicacion).sort((a, b) => {
+                        const totalA = Object.values(a[1]).reduce((sum, val) => sum + val, 0);
+                        const totalB = Object.values(b[1]).reduce((sum, val) => sum + val, 0);
+                        return totalB - totalA;
+                    }).map(([ubicacion, modelos]) => {
+                        const modelosOrdenados = Object.entries(modelos).sort((a, b) => b[1] - a[1]).slice(0, 5);
+                        return `
+                            <div style="margin-bottom: 1rem; background: var(--card-bg, #252547); border-radius: 8px; padding: 0.75rem;">
+                                <div style="font-weight: 700; color: var(--text, #fff); font-size: 0.9rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: #3B82F6;">📍</span> ${ubicacion}
+                                    <span style="font-size: 0.75rem; color: var(--text-dim, #888); font-weight: 400;">(${Object.values(modelos).reduce((a, b) => a + b, 0)} equipos)</span>
+                                </div>
+                                <div style="padding-left: 1.5rem;">
+                                    ${modelosOrdenados.map(([modelo, cantidad], idx) => `
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0; font-size: 0.8rem; ${idx < modelosOrdenados.length - 1 ? 'border-bottom: 1px solid var(--border-light, #333);' : ''}">
+                                            <span style="color: var(--text-secondary, #ccc);">${idx + 1}. ${modelo}</span>
+                                            <span style="font-weight: 600; color: #10B981; background: #10B98120; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.75rem;">${cantidad}</span>
+                                        </div>
+                                    `).join('')}
                                 </div>
                             </div>
-                        </div>
-                    `).join('')}
+                        `;
+                    }).join('')}
                 </div>
             </div>
         </div>
