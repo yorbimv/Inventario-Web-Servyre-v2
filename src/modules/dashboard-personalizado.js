@@ -66,6 +66,12 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
             </div>
         </div>
     `;
+
+    // Inicializar iconos de Lucide después de renderizar
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+
     window.renderDashboardView = function(view) {
         const content = document.getElementById('dashboardContent');
         if (!content) return;
