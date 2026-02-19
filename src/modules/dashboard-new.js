@@ -130,9 +130,10 @@ export class DashboardNew {
 
     renderDashboard() {
         const kpis = this.calculateKPIs();
+        console.log('KPIs:', kpis);
         
         return `
-            <div class="dashboard-section">
+            <div class="dashboard-section" style="padding: 1.5rem;">
                 <div class="kpi-grid">
                     ${this.renderKPICard('total', kpis.total, 'Total Equipos', 'package', 'total')}
                     ${this.renderKPICard('active', kpis.active, 'Activos', 'check-circle', 'active')}
@@ -142,26 +143,26 @@ export class DashboardNew {
                     ${this.renderKPICard('piezas', kpis.piezas, 'Para Piezas', 'cpu', 'piezas')}
                 </div>
                 
-                <div class="charts-row">
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <div class="chart-title">
+                <div class="charts-row" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 1.5rem;">
+                    <div class="chart-container" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                        <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-light);">
+                            <div class="chart-title" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; color: var(--text);">
                                 <i data-lucide="pie-chart"></i>
                                 Estado de Equipos
                             </div>
                         </div>
-                        <div class="chart-canvas">
+                        <div class="chart-canvas" style="height: 280px;">
                             <canvas id="estadoChart"></canvas>
                         </div>
                     </div>
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <div class="chart-title">
+                    <div class="chart-container" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                        <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-light);">
+                            <div class="chart-title" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; color: var(--text);">
                                 <i data-lucide="bar-chart-3"></i>
                                 Modelos Más Comunes
                             </div>
                         </div>
-                        <div class="chart-canvas">
+                        <div class="chart-canvas" style="height: 280px;">
                             <canvas id="modelosChart"></canvas>
                         </div>
                     </div>
@@ -268,21 +269,21 @@ export class DashboardNew {
                     <table class="data-table" style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="background: var(--card-bg);">
-                                <th style="padding: 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border);">Serie</th>
                                 <th style="padding: 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border);">Usuario</th>
+                                <th style="padding: 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border);">Equipo</th>
+                                <th style="padding: 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border);">Correo</th>
                                 <th style="padding: 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border);">IP Asignada</th>
                                 <th style="padding: 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border);">Tipo</th>
-                                <th style="padding: 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border);">Ubicación</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${this.inventory.filter(i => i.ipAddress).slice(0, 20).map(item => `
+                            ${this.inventory.filter(i => i.ipAddress).slice(0, 30).map(item => `
                                 <tr>
-                                    <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light); font-family: monospace;">${item.serialNumber}</td>
-                                    <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light);">${item.fullName}</td>
-                                    <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light); font-family: monospace; color: var(--primary);">${item.ipAddress}</td>
+                                    <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light); font-weight: 600;">${item.fullName || '-'}</td>
+                                    <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light);">${item.deviceType || '-'} ${item.brand || ''}</td>
+                                    <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light); font-size: 0.85rem;">${item.email || '-'}</td>
+                                    <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light); font-family: monospace; color: var(--primary); font-weight: 600;">${item.ipAddress}</td>
                                     <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light);"><span class="badge ${item.ipType === 'IP Fija' ? 'badge-orange' : 'badge-green'}">${item.ipType || 'DHCP'}</span></td>
-                                    <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light);"><span class="badge badge-blue">${item.location}</span></td>
                                 </tr>
                             `).join('')}
                         </tbody>
