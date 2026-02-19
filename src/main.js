@@ -112,7 +112,7 @@ const loadData = () => {
     renderTable();
     updateStats();
     syncFormSelects();
-    initPremiumDashboard(inventory, 'dashboardContainer');
+    initDashboardNew(inventory, 'dashboardContainer');
 }
 
 function showExampleSelector() {
