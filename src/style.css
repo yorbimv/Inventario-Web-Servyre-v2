@@ -340,10 +340,15 @@ h1 span {
   overflow-x: auto;
 }
 
+#inventoryTable {
+  min-width: 900px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
 }
+
 
 th {
   background: var(--card-bg);
@@ -1819,4 +1824,12 @@ textarea {
     transform: translateX(100%);
     opacity: 0;
   }
+}
+
+#inventoryTable {
+  min-width: 900px;
+}
+
+#inventoryTable {
+  min-width: 900px;
 }
