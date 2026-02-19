@@ -259,27 +259,44 @@ function renderInventarioView(inventory) {
                     Inventario Completo (${inventory.length})
                 </h3>
             </div>
-            <div style="max-height: 500px; overflow-y: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
+            <div style="max-height: 500px; overflow-y: auto; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
                     <thead style="background: var(--card-bg, #252547); position: sticky; top: 0;">
                         <tr>
-                            <th style="padding: 0.875rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Resguardo</th>
-                            <th style="padding: 0.875rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Usuario</th>
-                            <th style="padding: 0.875rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Equipo</th>
-                            <th style="padding: 0.875rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Marca</th>
-                            <th style="padding: 0.875rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Ubicación</th>
-                            <th style="padding: 0.875rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333);">Estado</th>
+                            <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Resguardo</th>
+                            <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Usuario</th>
+                            <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Equipo</th>
+                            <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Marca/Modelo</th>
+                            <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Nombre PC</th>
+                            <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Serie</th>
+                            <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Ubicación</th>
+                            <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Estado</th>
+                            <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">IP</th>
+                            <th style="padding: 0.75rem 0.5rem; text-align: center; font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${inventory.slice(0, 50).map(item => `
                             <tr>
-                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.8rem;">${item.resguardo || '-'}</td>
-                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-weight: 600;">${item.fullName || '-'}</td>
-                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333);">${item.deviceType || '-'}</td>
-                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333);">${item.brand || '-'} ${item.model || ''}</td>
-                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333);"><span class="badge badge-blue" style="font-size: 0.65rem;">${item.location || '-'}</span></td>
-                                <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333);"><span class="badge ${getStatusBadge(item.status)}">${item.status || '-'}</span></td>
+                                <td style="padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.75rem; white-space: nowrap;">${item.resguardo || '-'}</td>
+                                <td style="padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-light, #333); font-weight: 600; font-size: 0.8rem; white-space: nowrap;">${item.fullName || '-'}</td>
+                                <td style="padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-light, #333); font-size: 0.8rem; white-space: nowrap;">${item.deviceType || '-'}</td>
+                                <td style="padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-light, #333); font-size: 0.8rem; white-space: nowrap;">${item.brand || '-'} ${item.model || ''}</td>
+                                <td style="padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.75rem; white-space: nowrap;">${item.pcName || '-'}</td>
+                                <td style="padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.75rem; white-space: nowrap;">${item.serialNumber || '-'}</td>
+                                <td style="padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-light, #333);"><span class="badge badge-blue" style="font-size: 0.6rem; padding: 0.2rem 0.4rem;">${item.location || '-'}</span></td>
+                                <td style="padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-light, #333);"><span class="badge ${getStatusBadge(item.status)}" style="font-size: 0.6rem; padding: 0.2rem 0.4rem;">${item.status || '-'}</span></td>
+                                <td style="padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.7rem; color: var(--primary, #FCD34D); white-space: nowrap;">${item.ipAddress || '-'}</td>
+                                <td style="padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-light, #333); text-align: center;">
+                                    <div style="display: flex; gap: 0.25rem; justify-content: center;">
+                                        <button onclick="window.openEditForm('${item.id}')" style="background: none; border: none; cursor: pointer; padding: 0.25rem; color: var(--primary, #3B82F6);" title="Editar">
+                                            <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                                        </button>
+                                        <button onclick="deleteItem('${item.id}')" style="background: none; border: none; cursor: pointer; padding: 0.25rem; color: var(--danger, #EF4444);" title="Eliminar">
+                                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
