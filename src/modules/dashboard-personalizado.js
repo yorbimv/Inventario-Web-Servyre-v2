@@ -150,11 +150,11 @@ function renderResumenView(inventory, kpis) {
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
             <div style="background: var(--surface, #1e1e3f); border: 1px solid var(--border, #333); border-radius: 12px; padding: 1.5rem;">
                 <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
-                    <i data-lucide="pie-chart" style="width: 18px; height: 18px; color: var(--primary, #FCD34D);"></i>
-                    Estado de Equipos
+                    <i data-lucide="map-pin" style="width: 18px; height: 18px; color: var(--primary, #FCD34D);"></i>
+                    Equipos por Ubicación
                 </h3>
                 <div style="height: 280px;">
-                    <canvas id="estadoChart"></canvas>
+                    <canvas id="ubicacionChart"></canvas>
                 </div>
             </div>
             <div style="background: var(--surface, #1e1e3f); border: 1px solid var(--border, #333); border-radius: 12px; padding: 1.5rem;">
@@ -267,35 +267,33 @@ function initCharts(inventory) {
     if (typeof Chart === 'undefined') return;
 
     setTimeout(() => {
-        // Estado Chart
-        const estadoCtx = document.getElementById('estadoChart');
-        if (estadoCtx) {
-            const estados = {
-                'Activo': inventory.filter(i => i.status === 'Activo').length,
-                'Mantenimiento': inventory.filter(i => i.status === 'Mantenimiento').length,
-                'Baja': inventory.filter(i => i.status === 'Baja').length,
-                'Para piezas': inventory.filter(i => i.status === 'Para piezas').length
-            };
+        // Ubicación Chart
+        const ubicacionCtx = document.getElementById('ubicacionChart');
+        if (ubicacionCtx) {
+            const ubicaciones = {};
+            inventory.forEach(i => {
+                const loc = i.location || 'Sin ubicación';
+                ubicaciones[loc] = (ubicaciones[loc] || 0) + 1;
+            });
 
-            new Chart(estadoCtx, {
-                type: 'doughnut',
+            new Chart(ubicacionCtx, {
+                type: 'bar',
                 data: {
-                    labels: Object.keys(estados),
+                    labels: Object.keys(ubicaciones),
                     datasets: [{
-                        data: Object.values(estados),
-                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#F97316'],
-                        borderWidth: 0
+                        label: 'Equipos',
+                        data: Object.values(ubicaciones),
+                        backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'],
+                        borderRadius: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '60%',
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: { color: '#9CA3AF', padding: 15, usePointStyle: true }
-                        }
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#9CA3AF' } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9CA3AF' } }
                     }
                 }
             });

@@ -306,7 +306,9 @@ function loadExample(exampleId) {
             conditions: estado === "Baja" ? "Equipo dado de baja por obsolescencia" : (estado === "Mantenimiento" ? "Equipo en taller para mantenimiento preventivo" : "Equipo en buenas condiciones de operación"),
             incidentReport: estado === "Mantenimiento" ? `Reporte #${Math.floor(Math.random() * 9999)} - Requiere servicio` : "",
             notes: `Ejemplo ${exampleId === 0 ? 'vacío' : 'predefinido #'+exampleId}`,
-            photos: ""
+            photos: "",
+            ipAddress: Math.random() > 0.3 ? `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}` : '',
+            ipType: Math.random() > 0.5 ? 'DHCP' : 'IP Fija'
         });
     }
     
@@ -1120,7 +1122,9 @@ importInput.onchange = (e) => {
                         conditions: row['Condiciones'] || '',
                         photos: row['Fotos'] || '',
                         status: 'Activo',
-                        notes: ''
+                        notes: '',
+                        ipAddress: row['IP'] || '',
+                        ipType: row['Tipo IP'] || ''
                     });
                     importedCount++;
                 });
