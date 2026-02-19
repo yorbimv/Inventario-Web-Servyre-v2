@@ -14,8 +14,6 @@ export class DashboardNew {
 
     init() {
         this.applyTheme();
-        console.log('Dashboard New: Iniciando...');
-        console.log('Container:', this.container);
         
         // Ocultar la sección de inventario antigua
         const inventorySection = document.getElementById('inventorySection');
@@ -31,14 +29,10 @@ export class DashboardNew {
             console.error('Dashboard container not found!');
             return;
         }
-        console.log('Renderizando dashboard...');
         this.render();
-        console.log('Dashboard renderizado');
-        console.log('HTML generado:', this.container.innerHTML.substring(0, 500));
         // Forzar visibilidad
         this.container.style.display = 'block';
         this.container.style.visibility = 'visible';
-        this.container.style.opacity = '1';
     }
 
     render() {
