@@ -39,9 +39,6 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
                     <button onclick="renderDashboardView('red')" class="glass-btn" style="padding: 0.5rem 1rem;">
                         <i data-lucide="wifi" style="width: 16px;"></i> Red/IP
                     </button>
-                    <button onclick="renderDashboardView('inventario')" class="glass-btn" style="padding: 0.5rem 1rem;">
-                        <i data-lucide="package" style="width: 16px;"></i> Inventario
-                    </button>
                 </div>
             </div>
 
@@ -69,13 +66,6 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
             </div>
         </div>
     `;
-
-    // Inicializar iconos
-    if (window.lucide) {
-        window.lucide.createIcons();
-    }
-
-    // Función global para cambiar vistas
     window.renderDashboardView = function(view) {
         const content = document.getElementById('dashboardContent');
         if (!content) return;
@@ -86,9 +76,6 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
                 break;
             case 'red':
                 content.innerHTML = renderRedView(inventory);
-                break;
-            case 'inventario':
-                content.innerHTML = renderInventarioView(inventory);
                 break;
         }
 
@@ -250,58 +237,6 @@ function renderRedView(inventory) {
     `;
 }
 
-function renderInventarioView(inventory) {
-    return `
-        <div style="background: var(--surface, #1e1e3f); border: 1px solid var(--border, #333); border-radius: 12px; overflow: hidden;">
-            <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border, #333);">
-                <h3 style="margin: 0; font-size: 1rem; color: var(--text-dim, #888); display: flex; align-items: center; gap: 0.5rem;">
-                    <i data-lucide="package" style="width: 18px; height: 18px; color: var(--primary, #FCD34D);"></i>
-                    Inventario Completo (${inventory.length})
-                </h3>
-            </div>
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; min-width: 700px;">
-                    <thead style="background: var(--card-bg, #252547);">
-                        <tr>
-                            <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Resg.</th>
-                            <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Usuario</th>
-                            <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Marca/Modelo</th>
-                            <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">PC</th>
-                            <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Serie</th>
-                            <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Ubicación</th>
-                            <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">Estado</th>
-                            <th style="padding: 0.6rem 0.4rem; text-align: left; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap;">IP</th>
-                            <th style="padding: 0.6rem 0.4rem; text-align: center; font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim, #888); border-bottom: 1px solid var(--border, #333); white-space: nowrap; width: 70px;">✏️</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${inventory.slice(0, 50).map(item => `
-                            <tr>
-                                <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.7rem; white-space: nowrap;">${item.resguardo || '-'}</td>
-                                <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-weight: 600; font-size: 0.75rem; white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis;">${item.fullName || '-'}</td>
-                                <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-size: 0.7rem; white-space: nowrap; max-width: 100px; overflow: hidden; text-overflow: ellipsis;">${item.brand || '-'} ${item.model || ''}</td>
-                                <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.7rem; white-space: nowrap;">${item.pcName || '-'}</td>
-                                <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.7rem; white-space: nowrap;">${item.serialNumber || '-'}</td>
-                                <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); white-space: nowrap;"><span class="badge badge-blue" style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">${item.location || '-'}</span></td>
-                                <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); white-space: nowrap;"><span class="badge ${getStatusBadge(item.status)}" style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">${item.status || '-'}</span></td>
-                                <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); font-family: monospace; font-size: 0.65rem; color: var(--primary, #FCD34D); white-space: nowrap;">${item.ipAddress || '-'}</td>
-                                <td style="padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--border-light, #333); text-align: center; width: 70px;">
-                                    <button onclick="window.openEditForm('${item.id}')" style="background: none; border: none; cursor: pointer; padding: 0.25rem; color: var(--primary, #3B82F6);" title="Editar">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                                    </button>
-                                    <button onclick="deleteItemFromDashboard('${item.id}')" style="background: none; border: none; cursor: pointer; padding: 0.25rem; color: var(--danger, #EF4444);" title="Eliminar">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                    </button>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-}
-
 function getStatusBadge(status) {
     const badges = {
         'Activo': 'badge-green',
@@ -312,23 +247,3 @@ function getStatusBadge(status) {
     };
     return badges[status] || 'badge-gray';
 }
-
-// Función global para eliminar desde el dashboard
-window.deleteItemFromDashboard = function(id) {
-    if (confirm('¿Está seguro de eliminar este registro?')) {
-        // Buscar y eliminar del inventario
-        const inventory = JSON.parse(localStorage.getItem('servyre_inventory') || '{"inventory":[]}').inventory || [];
-        const newInventory = inventory.filter(i => i.id !== id);
-        localStorage.setItem('servyre_inventory', JSON.stringify({
-            version: "2.0",
-            lastModified: new Date().toISOString(),
-            inventory: newInventory,
-            catalogs: JSON.parse(localStorage.getItem('servyre_inventory') || '{}').catalogs || {}
-        }));
-        
-        // Recargar dashboard
-        if (window.location) {
-            window.location.reload();
-        }
-    }
-};
