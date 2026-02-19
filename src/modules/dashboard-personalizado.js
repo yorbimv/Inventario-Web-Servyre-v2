@@ -75,9 +75,6 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
         window.lucide.createIcons();
     }
 
-    // Inicializar gráficos
-    initCharts(inventory);
-
     // Función global para cambiar vistas
     window.renderDashboardView = function(view) {
         const content = document.getElementById('dashboardContent');
@@ -97,10 +94,6 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
 
         if (window.lucide) {
             window.lucide.createIcons();
-        }
-
-        if (view === 'resumen') {
-            initCharts(inventory);
         }
     };
 }
@@ -146,6 +139,11 @@ function renderKPICard(label, value, color, icon) {
 }
 
 function renderResumenView(inventory, kpis) {
+    // Inicializar gráficos después de que el HTML exista
+    requestAnimationFrame(() => {
+        setTimeout(() => initCharts(inventory), 150);
+    });
+    
     return `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
             <div style="background: var(--surface, #1e1e3f); border: 1px solid var(--border, #333); border-radius: 12px; padding: 1.5rem;">
@@ -264,74 +262,79 @@ function getStatusBadge(status) {
 }
 
 function initCharts(inventory) {
-    if (typeof Chart === 'undefined') return;
+    if (typeof Chart === 'undefined') {
+        console.log('Chart no está disponible');
+        return;
+    }
 
-    setTimeout(() => {
-        // Ubicación Chart
-        const ubicacionCtx = document.getElementById('ubicacionChart');
-        if (ubicacionCtx) {
-            const ubicaciones = {};
-            inventory.forEach(i => {
-                const loc = i.location || 'Sin ubicación';
-                ubicaciones[loc] = (ubicaciones[loc] || 0) + 1;
-            });
+    // Ubicación Chart
+    const ubicacionCtx = document.getElementById('ubicacionChart');
+    if (ubicacionCtx) {
+        const ubicaciones = {};
+        inventory.forEach(i => {
+            const loc = i.location || 'Sin ubicación';
+            ubicaciones[loc] = (ubicaciones[loc] || 0) + 1;
+        });
 
-            new Chart(ubicacionCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(ubicaciones),
-                    datasets: [{
-                        label: 'Equipos',
-                        data: Object.values(ubicaciones),
-                        backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'],
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#9CA3AF' } },
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9CA3AF' } }
-                    }
+        new Chart(ubicacionCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(ubicaciones),
+                datasets: [{
+                    label: 'Equipos',
+                    data: Object.values(ubicaciones),
+                    backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#9CA3AF' } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9CA3AF' } }
                 }
-            });
-        }
+            }
+        });
+    } else {
+        console.log('Canvas ubicacionChart no encontrado');
+    }
 
-        // Modelos Chart
-        const modelosCtx = document.getElementById('modelosChart');
-        if (modelosCtx) {
-            const modelsMap = {};
-            inventory.forEach(i => {
-                const model = `${i.brand || ''} ${i.model || ''}`.trim() || 'Sin modelo';
-                modelsMap[model] = (modelsMap[model] || 0) + 1;
-            });
+    // Modelos Chart
+    const modelosCtx = document.getElementById('modelosChart');
+    if (modelosCtx) {
+        const modelsMap = {};
+        inventory.forEach(i => {
+            const model = `${i.brand || ''} ${i.model || ''}`.trim() || 'Sin modelo';
+            modelsMap[model] = (modelsMap[model] || 0) + 1;
+        });
 
-            const topModels = Object.entries(modelsMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
+        const topModels = Object.entries(modelsMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
 
-            new Chart(modelosCtx, {
-                type: 'bar',
-                data: {
-                    labels: topModels.map(m => m[0].substring(0, 15)),
-                    datasets: [{
-                        label: 'Equipos',
-                        data: topModels.map(m => m[1]),
-                        backgroundColor: '#3B82F6',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9CA3AF' } },
-                        y: { grid: { display: false }, ticks: { color: '#9CA3AF' } }
-                    }
+        new Chart(modelosCtx, {
+            type: 'bar',
+            data: {
+                labels: topModels.map(m => m[0].substring(0, 15)),
+                datasets: [{
+                    label: 'Equipos',
+                    data: topModels.map(m => m[1]),
+                    backgroundColor: '#3B82F6',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9CA3AF' } },
+                    y: { grid: { display: false }, ticks: { color: '#9CA3AF' } }
                 }
-            });
-        }
-    }, 100);
+            }
+        });
+    } else {
+        console.log('Canvas modelosChart no encontrado');
+    }
 }
