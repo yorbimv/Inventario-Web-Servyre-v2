@@ -11,9 +11,6 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
 
     // Guardar inventario globalmente para ordenamiento
     window.dashboardInventory = inventory;
-    
-    // Calcular alertas y guardar globalmente
-    window.alerts = window.generateAlerts ? window.generateAlerts(inventory) : [];
 
     // Estado del ordenamiento
     window.redSortState = { field: null, order: 'asc' };
@@ -32,6 +29,10 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
         ipFija: inventory.filter(i => i.ipType === 'IP Fija').length
     };
 
+    // Calcular alertas
+    const alerts = generateAlerts(inventory);
+    const hasAlerts = alerts.length > 0;
+
     // HTML del dashboard
     container.innerHTML = `
         <div class="personalized-dashboard" style="padding: 1.5rem;">
@@ -48,10 +49,10 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
                     <button onclick="renderDashboardView('red')" class="glass-btn" style="padding: 0.5rem 1rem;">
                         <i data-lucide="wifi" style="width: 16px;"></i> Red
                     </button>
-                    ${window.alerts ? `<button onclick="showAlertsToast()" class="glass-btn bell-btn ${window.alerts.length > 0 ? 'has-alerts' : ''}" style="padding: 0.5rem 1rem; position: relative;" title="Ver alertas">
+                    <button onclick="showAlertsToast()" class="glass-btn bell-btn ${hasAlerts ? 'has-alerts' : ''}" style="padding: 0.5rem 1rem; position: relative;" title="Ver alertas">
                         <i data-lucide="bell" style="width: 16px;"></i>
-                        ${window.alerts.length > 0 ? `<span class="alert-badge" style="position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;">${window.alerts.length}</span>` : ''}
-                    </button>` : ''}
+                        ${hasAlerts ? `<span class="alert-badge" style="position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;">${alerts.length}</span>` : ''}
+                    </button>
                 </div>
             </div>
 
@@ -84,6 +85,61 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
     if (window.lucide) {
         window.lucide.createIcons();
     }
+
+    // Escuchar actualizaciones del inventario
+    window.addEventListener('inventory-updated', () => {
+        // Recalcular KPIs con nuevos datos
+        const newInventory = window.dashboardInventory || [];
+        const newKpis = {
+            total: newInventory.length,
+            active: newInventory.filter(i => i.status === 'Activo').length,
+            maintenance: newInventory.filter(i => i.status === 'Mantenimiento').length,
+            warranty: newInventory.filter(i => i.warranty && parseInt(i.warranty) > 0).length,
+            baja: newInventory.filter(i => i.status === 'Baja').length,
+            piezas: newInventory.filter(i => i.status === 'Para piezas').length,
+            conIP: newInventory.filter(i => i.ipAddress).length,
+            sinIP: newInventory.length - newInventory.filter(i => i.ipAddress).length,
+            dhcp: newInventory.filter(i => i.ipType === 'DHCP' || !i.ipType).length,
+            ipFija: newInventory.filter(i => i.ipType === 'IP Fija').length
+        };
+        
+        // Actualizar botones de alertas en el header
+        const alerts = generateAlerts(newInventory);
+        const hasAlerts = alerts.length > 0;
+        
+        // Buscar y actualizar el botón de alertas
+        const bellBtn = document.querySelector('.bell-btn');
+        if (bellBtn) {
+            const badge = bellBtn.querySelector('.alert-badge');
+            if (hasAlerts) {
+                if (badge) {
+                    badge.textContent = alerts.length;
+                } else {
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'alert-badge';
+                    newBadge.style.cssText = 'position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;';
+                    newBadge.textContent = alerts.length;
+                    bellBtn.appendChild(newBadge);
+                }
+                bellBtn.classList.add('has-alerts');
+            } else {
+                if (badge) badge.remove();
+                bellBtn.classList.remove('has-alerts');
+            }
+        }
+        
+        // Actualizar KPIs en pantalla si existen
+        const kpiCards = document.querySelectorAll('.kpi-card-simple');
+        if (kpiCards.length >= 6) {
+            const values = [newKpis.total, newKpis.active, newKpis.maintenance, newKpis.warranty, newKpis.baja, newKpis.piezas];
+            kpiCards.forEach((card, index) => {
+                const valueEl = card.querySelector('div > div > div:first-child');
+                if (valueEl && values[index] !== undefined) {
+                    valueEl.textContent = values[index];
+                }
+            });
+        }
+    });
 
     window.renderDashboardView = function(view) {
         const content = document.getElementById('dashboardContent');
@@ -355,8 +411,8 @@ function renderRedView(inventory) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${conIP.map((item, index) => `
-                            <tr class="table-row-animate" style="--row-index: ${index}; animation-delay: ${index * 30}ms;">
+                        ${conIP.map(item => `
+                            <tr>
                                 <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-weight: 600; text-align: center;">${item.fullName || '-'}</td>
                                 <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); text-align: center;">${item.deviceType || '-'} ${item.brand || ''}</td>
                                 <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-size: 0.85rem; text-align: center;">${item.email || '-'}</td>
@@ -390,88 +446,81 @@ function getStatusBadge(status) {
 // FUNCIONES DE ALERTAS
 // ============================================
 
-window.generateAlerts = function(inventory) {
+function generateAlerts(inventory) {
     const alerts = [];
-    const now = new Date();
-    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    const dismissed = JSON.parse(localStorage.getItem('dismissedAlerts') || '{}');
+    const today = new Date();
+    const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
     
-    const isDismissed = (title) => dismissed[title];
-    
-    // Garantías por vencer
-    const warrantyExpiring = inventory.filter(i => {
-        if (!i.warrantyEndDate) return false;
-        const end = new Date(i.warrantyEndDate);
-        return end >= now && end <= thirtyDaysFromNow;
+    // Verificar garantías por vencer
+    inventory.forEach(item => {
+        if (item.warrantyEndDate) {
+            const warrantyEnd = new Date(item.warrantyEndDate);
+            if (warrantyEnd >= today && warrantyEnd <= thirtyDaysFromNow) {
+                const daysLeft = Math.ceil((warrantyEnd - today) / (1000 * 60 * 60 * 24));
+                alerts.push({
+                    type: 'warning',
+                    icon: 'shield-alert',
+                    title: 'Garantía por Vencer',
+                    description: `${item.serialNumber || item.deviceType} vence en ${daysLeft} días`,
+                    key: `warranty-${item.id}`
+                });
+            }
+        }
     });
     
-    if (warrantyExpiring.length > 0 && !isDismissed('Garantías por vencer')) {
-        alerts.push({
-            type: 'warning',
-            icon: 'shield-alert',
-            title: 'Garantías por vencer',
-            description: `${warrantyExpiring.length} equipos en los próximos 30 días`
-        });
-    }
-    
-    // Mantenimientos vencidos
-    const overdueMtto = inventory.filter(i => {
-        if (!i.nextMtto) return false;
-        return new Date(i.nextMtto) < now;
+    // Verificar mantenimiento próximo
+    inventory.forEach(item => {
+        if (item.nextMtto) {
+            const nextMtto = new Date(item.nextMtto);
+            if (nextMtto >= today && nextMtto <= thirtyDaysFromNow) {
+                const daysLeft = Math.ceil((nextMtto - today) / (1000 * 60 * 60 * 24));
+                alerts.push({
+                    type: 'info',
+                    icon: 'calendar',
+                    title: 'Mantenimiento Próximo',
+                    description: `${item.serialNumber || item.deviceType} en ${daysLeft} días`,
+                    key: `mtto-${item.id}`
+                });
+            }
+        }
     });
     
-    if (overdueMtto.length > 0 && !isDismissed('Mantenimientos vencidos')) {
-        alerts.push({
-            type: 'danger',
-            icon: 'alert-triangle',
-            title: 'Mantenimientos vencidos',
-            description: `${overdueMtto.length} equipos requieren atención`
-        });
-    }
-    
-    // Equipos en mantenimiento
-    const inMaintenance = inventory.filter(i => i.status === 'Mantenimiento');
-    if (inMaintenance.length > 0 && !isDismissed('En mantenimiento')) {
-        alerts.push({
-            type: 'info',
-            icon: 'wrench',
-            title: 'En mantenimiento',
-            description: `${inMaintenance.length} equipos en servicio`
-        });
-    }
-    
-    // Equipos sin IP
+    // Equipos sin IP asignada
     const sinIP = inventory.filter(i => !i.ipAddress && i.status === 'Activo');
-    if (sinIP.length > 0 && !isDismissed('Equipos sin IP')) {
+    if (sinIP.length > 0) {
         alerts.push({
             type: 'warning',
             icon: 'wifi-off',
             title: 'Equipos sin IP',
-            description: `${sinIP.length} equipos activos sin IP`
+            description: `${sinIP.length} equipos activos sin dirección IP asignada`,
+            key: 'sin-ip'
         });
     }
     
     // Equipos de baja
     const bajas = inventory.filter(i => i.status === 'Baja');
-    if (bajas.length > 0 && !isDismissed('Equipos de baja')) {
+    if (bajas.length > 0) {
         alerts.push({
             type: 'danger',
             icon: 'x-circle',
-            title: 'Equipos de baja',
-            description: `${bajas.length} equipos dados de baja`
+            title: 'Equipos de Baja',
+            description: `${bajas.length} equipos dados de baja`,
+            key: 'bajas'
         });
     }
     
     return alerts;
-};
+}
 
+// Función global para mostrar el toast de alertas
 window.showAlertsToast = function() {
     const inventory = window.dashboardInventory || [];
-    const alerts = window.generateAlerts(inventory);
+    const alerts = generateAlerts(inventory);
     
     const dismissed = JSON.parse(localStorage.getItem('dismissedAlerts') || '{}');
     const activeAlerts = alerts.filter(alert => !dismissed[alert.title]);
     
+    // Cerrar toast anterior si existe
     const existingToast = document.getElementById('alertsToastPersonalizado');
     if (existingToast) {
         existingToast.remove();
@@ -481,23 +530,6 @@ window.showAlertsToast = function() {
         alert('No hay alertas pendientes');
         return;
     }
-    
-    const toast = document.createElement('div');
-    toast.id = 'alertsToastPersonalizado';
-    toast.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        width: 380px;
-        max-height: 70vh;
-        background: var(--surface-opaque, #1e1e2e);
-        border: 1px solid var(--border, rgba(255,255,255,0.1));
-        border-radius: 16px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        z-index: 9999;
-        overflow: hidden;
-        animation: slideIn 0.3s ease;
-    `;
     
     const dismissAlert = (title) => {
         const dismissed = JSON.parse(localStorage.getItem('dismissedAlerts') || '{}');
@@ -529,6 +561,25 @@ window.showAlertsToast = function() {
             document.getElementById('alertsToastPersonalizado')?.remove();
         }
     };
+    
+    window.dismissAlert = dismissAlert;
+    
+    const toast = document.createElement('div');
+    toast.id = 'alertsToastPersonalizado';
+    toast.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        width: 380px;
+        max-height: 70vh;
+        background: var(--surface-opaque, #1e1e2e);
+        border: 1px solid var(--border, rgba(255,255,255,0.1));
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        z-index: 9999;
+        overflow: hidden;
+        animation: slideIn 0.3s ease;
+    `;
     
     toast.innerHTML = `
         <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg);">
@@ -563,9 +614,30 @@ window.showAlertsToast = function() {
     
     document.body.appendChild(toast);
     
-    window.dismissAlert = dismissAlert;
-    
     if (window.lucide) {
         window.lucide.createIcons();
     }
+    
+    // Cerrar al hacer click fuera
+    setTimeout(() => {
+        document.addEventListener('click', function closeAlert(e) {
+            if (!toast.contains(e.target) && !e.target.closest('.bell-btn')) {
+                toast.remove();
+                document.removeEventListener('click', closeAlert);
+            }
+        });
+    }, 100);
 };
+
+// Agregar estilos de animación si no existen
+if (!document.getElementById('alerts-toast-styles')) {
+    const style = document.createElement('style');
+    style.id = 'alerts-toast-styles';
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+}

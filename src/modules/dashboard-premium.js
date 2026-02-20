@@ -1151,13 +1151,120 @@ class DashboardManager {
   }
 
   /**
-   * Inicializa event listeners
+   * Inicializa los event listeners
    */
   initEventListeners() {
     // Escuchar eventos personalizados de actualización
     window.addEventListener('inventory-updated', () => {
       this.refresh();
     });
+
+    // Event listeners para widgets KPI clicables
+    document.addEventListener('click', (e) => {
+      const kpiWidget = e.target.closest('.kpi-widget');
+      if (kpiWidget) {
+        const widgetId = kpiWidget.closest('.grid-stack-item')?.getAttribute('gs-id');
+        if (widgetId) {
+          this.handleKpiClick(widgetId);
+        }
+      }
+    });
+  }
+
+  /**
+   * Maneja el clic en un widget KPI
+   */
+  handleKpiClick(widgetId) {
+    const kpiActions = {
+      'kpi-total': { title: 'Todos los Equipos', filter: 'all' },
+      'kpi-active': { title: 'Equipos Activos', filter: 'Activo' },
+      'kpi-maintenance': { title: 'En Mantenimiento', filter: 'Mantenimiento' },
+      'kpi-bajas': { title: 'Equipos de Baja', filter: 'Baja' },
+      'kpi-warranty': { title: 'Garantía por Vencer', filter: 'warranty' },
+      'kpi-value': { title: 'Valor Total', filter: 'all' }
+    };
+
+    const action = kpiActions[widgetId];
+    if (action) {
+      this.showKpiModal(action.title, action.filter);
+    }
+  }
+
+  /**
+   * Muestra modal con detalles del KPI
+   */
+  showKpiModal(title, filter) {
+    let filteredItems = this.inventory;
+    
+    if (filter === 'warranty') {
+      const today = new Date();
+      const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+      filteredItems = this.inventory.filter(item => {
+        if (!item.warrantyEndDate) return false;
+        const warrantyEnd = new Date(item.warrantyEndDate);
+        return warrantyEnd >= today && warrantyEnd <= thirtyDaysFromNow;
+      });
+    } else if (filter !== 'all') {
+      filteredItems = this.inventory.filter(item => item.status === filter);
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'kpi-modal-overlay';
+    modal.innerHTML = `
+      <div class="kpi-modal">
+        <div class="kpi-modal-header">
+          <h2><i data-lucide="info"></i> ${title}</h2>
+          <button class="kpi-modal-close" onclick="this.closest('.kpi-modal-overlay').remove()">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="kpi-modal-body">
+          <p style="margin-bottom: 1rem; color: var(--text-dim);">
+            Total: <strong style="color: var(--primary);">${filteredItems.length}</strong> equipos
+          </p>
+          ${filteredItems.length > 0 ? `
+            <div class="kpi-detail-table" style="max-height: 400px; overflow-y: auto;">
+              <table class="table-detail">
+                <thead>
+                  <tr>
+                    <th>Serie</th>
+                    <th>Usuario</th>
+                    <th>Equipo</th>
+                    <th>Marca</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${filteredItems.slice(0, 50).map(item => `
+                    <tr>
+                      <td><code>${item.serialNumber || '-'}</code></td>
+                      <td>${item.fullName || '-'}</td>
+                      <td>${item.deviceType || '-'}</td>
+                      <td>${item.brand || '-'}</td>
+                      <td><span class="badge-status badge-${item.status?.toLowerCase()}">${item.status || '-'}</span></td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              ${filteredItems.length > 50 ? `<p style="text-align: center; padding: 1rem; color: var(--text-dim);">Y ${filteredItems.length - 50} más...</p>` : ''}
+            </div>
+          ` : `
+            <div class="kpi-detail-empty">
+              <i data-lucide="inbox"></i>
+              <p>No hay equipos que mostrar</p>
+            </div>
+          `}
+        </div>
+        <div class="kpi-modal-footer">
+          <button class="save-btn" onclick="this.closest('.kpi-modal-overlay').remove()">Cerrar</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
   }
 
   /**
