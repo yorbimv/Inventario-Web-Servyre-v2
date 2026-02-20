@@ -1469,15 +1469,15 @@ inventoryForm.onsubmit = (e) => {
         const oldItem = inventory[idx];
         const oldStatus = oldItem?.status;
         const newStatus = itemData.status;
+        const resguardoLabel = itemData.resguardo || itemData.serialNumber || 'registro';
         
-        // Detectar cambio de estado
+        // Detectar cambio de estado - mostrar alerta especial
         if (oldStatus && oldStatus !== newStatus) {
             showStatusChangeAlert(oldStatus, newStatus, itemData.fullName || itemData.serialNumber);
-        } else {
-            // Si no hubo cambio de estado, mostrar notificación de actualización
-            const resguardoLabel = itemData.resguardo || itemData.serialNumber || 'registro';
-            showNotification(`Activo actualizado: ${resguardoLabel}`, 'info');
         }
+        
+        // Siempre mostrar notificación de actualización
+        showNotification(`Activo actualizado: ${resguardoLabel}`, 'info');
         
         // Detectar cambio de usuario y registrar en historial
         if (oldItem && oldItem.fullName !== itemData.fullName) {
@@ -1528,10 +1528,6 @@ inventoryForm.onsubmit = (e) => {
         
         // Copiar el activityLog del item anterior
         itemData.activityLog = oldItem?.activityLog || [];
-        
-        // Mostrar notificación de actualización
-        const resguardoLabel = itemData.resguardo || itemData.serialNumber || 'registro';
-        showNotification(`Activo actualizado: ${resguardoLabel}`, 'success');
         
         inventory[idx] = itemData;
         setTimeout(() => window.addToHistory?.('update', itemData, oldItem), 100);
