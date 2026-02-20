@@ -461,10 +461,11 @@ const renderTable = (data = inventory) => {
         tr.querySelector('.btn-row-delete').onclick = (e) => {
             e.stopPropagation();
             if (confirm(`¿Está seguro de eliminar el activo con serie ${item.serialNumber}?`)) {
+                const deletedItem = {...item};
                 inventory = inventory.filter(i => i.id !== item.id);
-    saveToStorage(); renderTable();
-    dispatchInventoryUpdate();
+                saveToStorage(); renderTable();
                 dispatchInventoryUpdate();
+                setTimeout(() => window.addToHistory?.('delete', deletedItem), 100);
             }
         };
 
@@ -789,6 +790,7 @@ const viewAssetDetail = (id) => {
             renderTable();
             detailModalOverlay.classList.remove('active');
             dispatchInventoryUpdate();
+            setTimeout(() => window.addToHistory?.('delete', logSaved), 100);
             
             showNotification(`Activo eliminado: ${resguardo}`, 'warning');
         }
@@ -1528,6 +1530,7 @@ inventoryForm.onsubmit = (e) => {
         showNotification(`Activo actualizado: ${resguardoLabel}`, 'success');
         
         inventory[idx] = itemData;
+        setTimeout(() => window.addToHistory?.('update', itemData, oldItem), 100);
     } else {
         // Para nuevos registros, inicializar historial con el primer usuario
         const today = new Date().toISOString().split('T')[0];
@@ -1552,6 +1555,7 @@ inventoryForm.onsubmit = (e) => {
         showNotification(`Nuevo activo registrado: ${resguardoLabel}`, 'success');
         
         inventory.unshift(itemData);
+        setTimeout(() => window.addToHistory?.('create', itemData), 100);
     }
 
     saveToStorage(); renderTable();

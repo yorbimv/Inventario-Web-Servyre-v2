@@ -585,18 +585,41 @@ window.showAlertsToast = function() {
         animation: slideIn 0.3s ease;
     `;
     
+    let activeTab = 'alerts';
+    
+    const switchTab = (tab) => {
+        activeTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.style.background = btn.dataset.tab === tab ? 'var(--primary)' : 'transparent';
+            btn.style.color = btn.dataset.tab === tab ? '#000' : 'var(--text-dim)';
+        });
+        document.getElementById('alertsContent').style.display = tab === 'alerts' ? 'block' : 'none';
+        document.getElementById('historyContent').style.display = tab === 'history' ? 'block' : 'none';
+        window.renderHistoryPanel();
+    };
+    
+    window.switchAlertTab = switchTab;
+    
     toast.innerHTML = `
         <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg);">
             <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: var(--text);">
                 <i data-lucide="bell" style="color: var(--primary);"></i>
-                <span>Alertas (<span class="alert-count">${activeAlerts.length}</span>)</span>
+                <span>Notificaciones</span>
             </div>
             <button onclick="this.closest('#alertsToastPersonalizado').remove()" style="background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0.25rem;">
                 <i data-lucide="x"></i>
             </button>
         </div>
-        <div style="max-height: calc(70vh - 60px); overflow-y: auto; padding: 0.5rem;">
-            ${activeAlerts.map(alert => `
+        <div style="display: flex; border-bottom: 1px solid var(--border);">
+            <button class="tab-btn" data-tab="alerts" onclick="switchAlertTab('alerts')" style="flex: 1; padding: 0.75rem; background: var(--primary); color: #000; border: none; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
+                Alertas (${activeAlerts.length})
+            </button>
+            <button class="tab-btn" data-tab="history" onclick="switchAlertTab('history')" style="flex: 1; padding: 0.75rem; background: transparent; color: var(--text-dim); border: none; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
+                Historial
+            </button>
+        </div>
+        <div id="alertsContent" style="max-height: calc(70vh - 130px); overflow-y: auto; padding: 0.5rem;">
+            ${activeAlerts.length === 0 ? '<div style="padding: 2rem; text-align: center; color: var(--text-dim);">No hay alertas pendientes</div>' : activeAlerts.map(alert => `
                 <div data-alert-title="${alert.title}" style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.25rem; background: ${alert.type === 'danger' ? 'rgba(239,68,68,0.1)' : alert.type === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)'};">
                     <i data-lucide="${alert.icon}" style="color: ${alert.type === 'danger' ? '#EF4444' : alert.type === 'warning' ? '#F59E0B' : '#3B82F6'}; flex-shrink: 0; margin-top: 2px;"></i>
                     <div style="flex: 1;">
@@ -608,6 +631,9 @@ window.showAlertsToast = function() {
                     </button>
                 </div>
             `).join('')}
+        </div>
+        <div id="historyContent" style="max-height: calc(70vh - 130px); overflow-y: auto; padding: 0.5rem; display: none;">
+            <div id="historyPanel"></div>
         </div>
         <div style="padding: 0.75rem 1rem; border-top: 1px solid var(--border); text-align: center;">
             <button onclick="localStorage.removeItem('dismissedAlerts'); window.showAlertsToast();" style="background: none; border: none; color: var(--text-dim); font-size: 0.75rem; cursor: pointer; text-decoration: underline;">
@@ -645,3 +671,118 @@ if (!document.getElementById('alerts-toast-styles')) {
     `;
     document.head.appendChild(style);
 }
+
+// ============================================
+// HISTORIAL DE ACCIONES CRUD
+// ============================================
+
+window.addToHistory = function(action, item, oldItem = null) {
+    const history = JSON.parse(localStorage.getItem('inventoryHistory') || '[]');
+    const historyItem = {
+        id: Date.now(),
+        action: action,
+        itemName: item.deviceType || item.serialNumber || item.fullName || 'Equipo',
+        itemId: item.id,
+        details: getActionDetails(action, item, oldItem),
+        timestamp: new Date().toISOString(),
+        user: 'Usuario'
+    };
+    
+    history.unshift(historyItem);
+    
+    if (history.length > 50) {
+        history.pop();
+    }
+    
+    localStorage.setItem('inventoryHistory', JSON.stringify(history));
+    
+    window.dispatchEvent(new CustomEvent('history-updated', { detail: historyItem }));
+};
+
+function getActionDetails(action, item, oldItem) {
+    switch(action) {
+        case 'create':
+            return `Equipo agregado: ${item.deviceType || 'Dispositivo'} - ${item.serialNumber || item.brand || ''}`;
+        case 'update':
+            if (oldItem) {
+                const changes = [];
+                if (oldItem.status !== item.status) changes.push(`Status: ${oldItem.status} → ${item.status}`);
+                if (oldItem.department !== item.department) changes.push(`Depto: ${oldItem.department} → ${item.department}`);
+                if (oldItem.fullName !== item.fullName) changes.push(`Usuario: ${oldItem.fullName} → ${item.fullName}`);
+                if (oldItem.ipAddress !== item.ipAddress) changes.push(`IP: ${oldItem.ipAddress || 'Sin IP'} → ${item.ipAddress || 'Sin IP'}`);
+                return changes.length > 0 ? changes.join(', ') : 'Actualización general';
+            }
+            return `Equipo actualizado: ${item.deviceType || 'Dispositivo'}`;
+        case 'delete':
+            return `Equipo eliminado: ${item.deviceType || 'Dispositivo'} - ${item.serialNumber || item.brand || ''}`;
+        default:
+            return '';
+    }
+}
+
+window.getHistory = function() {
+    return JSON.parse(localStorage.getItem('inventoryHistory') || '[]');
+};
+
+window.clearHistory = function() {
+    localStorage.removeItem('inventoryHistory');
+};
+
+window.renderHistoryPanel = function() {
+    const history = window.getHistory();
+    const panel = document.getElementById('historyPanel');
+    
+    if (!panel) return;
+    
+    const getActionIcon = (action) => {
+        const icons = { create: 'plus-circle', update: 'edit', delete: 'trash-2' };
+        return icons[action] || 'circle';
+    };
+    
+    const getActionColor = (action) => {
+        const colors = { create: '#10B981', update: '#3B82F6', delete: '#EF4444' };
+        return colors[action] || '#6B7280';
+    };
+    
+    const getActionLabel = (action) => {
+        const labels = { create: 'Creado', update: 'Actualizado', delete: 'Eliminado' };
+        return labels[action] || action;
+    };
+    
+    const formatTime = (timestamp) => {
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diff = now - date;
+        
+        if (diff < 60000) return 'Hace un momento';
+        if (diff < 3600000) return `Hace ${Math.floor(diff/60000)} min`;
+        if (diff < 86400000) return `Hace ${Math.floor(diff/3600000)} hrs`;
+        return date.toLocaleDateString('es');
+    };
+    
+    panel.innerHTML = history.length === 0 
+        ? '<div style="padding: 2rem; text-align: center; color: var(--text-dim);">No hay historial de acciones</div>'
+        : history.map(item => `
+            <div style="display: flex; gap: 0.75rem; padding: 0.75rem; border-bottom: 1px solid var(--border-light);">
+                <div style="color: ${getActionColor(item.action)}; flex-shrink: 0;">
+                    <i data-lucide="${getActionIcon(item.action)}" style="width: 18px; height: 18px;"></i>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                        <span style="font-weight: 600; font-size: 0.85rem; color: var(--text);">${item.itemName}</span>
+                        <span style="font-size: 0.7rem; color: var(--text-dim);">${formatTime(item.timestamp)}</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-dim);">${item.details}</div>
+                </div>
+            </div>
+        `).join('');
+    
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+};
+
+// Inicializar listener para actualizar historial
+window.addEventListener('history-updated', () => {
+    window.renderHistoryPanel?.();
+});
