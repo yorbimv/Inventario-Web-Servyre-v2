@@ -394,6 +394,9 @@ window.generateAlerts = function(inventory) {
     const alerts = [];
     const now = new Date();
     const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const dismissed = JSON.parse(localStorage.getItem('dismissedAlerts') || '{}');
+    
+    const isDismissed = (title) => dismissed[title];
     
     // Garantías por vencer
     const warrantyExpiring = inventory.filter(i => {
@@ -402,7 +405,7 @@ window.generateAlerts = function(inventory) {
         return end >= now && end <= thirtyDaysFromNow;
     });
     
-    if (warrantyExpiring.length > 0) {
+    if (warrantyExpiring.length > 0 && !isDismissed('Garantías por vencer')) {
         alerts.push({
             type: 'warning',
             icon: 'shield-alert',
@@ -417,7 +420,7 @@ window.generateAlerts = function(inventory) {
         return new Date(i.nextMtto) < now;
     });
     
-    if (overdueMtto.length > 0) {
+    if (overdueMtto.length > 0 && !isDismissed('Mantenimientos vencidos')) {
         alerts.push({
             type: 'danger',
             icon: 'alert-triangle',
@@ -428,7 +431,7 @@ window.generateAlerts = function(inventory) {
     
     // Equipos en mantenimiento
     const inMaintenance = inventory.filter(i => i.status === 'Mantenimiento');
-    if (inMaintenance.length > 0) {
+    if (inMaintenance.length > 0 && !isDismissed('En mantenimiento')) {
         alerts.push({
             type: 'info',
             icon: 'wrench',
@@ -439,7 +442,7 @@ window.generateAlerts = function(inventory) {
     
     // Equipos sin IP
     const sinIP = inventory.filter(i => !i.ipAddress && i.status === 'Activo');
-    if (sinIP.length > 0) {
+    if (sinIP.length > 0 && !isDismissed('Equipos sin IP')) {
         alerts.push({
             type: 'warning',
             icon: 'wifi-off',
@@ -450,7 +453,7 @@ window.generateAlerts = function(inventory) {
     
     // Equipos de baja
     const bajas = inventory.filter(i => i.status === 'Baja');
-    if (bajas.length > 0) {
+    if (bajas.length > 0 && !isDismissed('Equipos de baja')) {
         alerts.push({
             type: 'danger',
             icon: 'x-circle',
@@ -466,12 +469,15 @@ window.showAlertsToast = function() {
     const inventory = window.dashboardInventory || [];
     const alerts = window.generateAlerts(inventory);
     
+    const dismissed = JSON.parse(localStorage.getItem('dismissedAlerts') || '{}');
+    const activeAlerts = alerts.filter(alert => !dismissed[alert.title]);
+    
     const existingToast = document.getElementById('alertsToastPersonalizado');
     if (existingToast) {
         existingToast.remove();
     }
     
-    if (alerts.length === 0) {
+    if (activeAlerts.length === 0) {
         alert('No hay alertas pendientes');
         return;
     }
@@ -493,30 +499,72 @@ window.showAlertsToast = function() {
         animation: slideIn 0.3s ease;
     `;
     
+    const dismissAlert = (title) => {
+        const dismissed = JSON.parse(localStorage.getItem('dismissedAlerts') || '{}');
+        dismissed[title] = true;
+        localStorage.setItem('dismissedAlerts', JSON.stringify(dismissed));
+        
+        const alertItem = document.querySelector(`[data-alert-title="${title}"]`);
+        if (alertItem) {
+            alertItem.remove();
+        }
+        
+        const remainingAlerts = document.querySelectorAll('#alertsToastPersonalizado [data-alert-title]');
+        const countSpan = document.querySelector('#alertsToastPersonalizado .alert-count');
+        if (countSpan) {
+            countSpan.textContent = remainingAlerts.length;
+        }
+        
+        const bellBtn = document.querySelector('.bell-btn');
+        const badge = bellBtn?.querySelector('.alert-badge');
+        if (badge) {
+            badge.textContent = remainingAlerts.length;
+            if (remainingAlerts.length === 0) {
+                badge.remove();
+                bellBtn?.classList.remove('has-alerts');
+            }
+        }
+        
+        if (remainingAlerts.length === 0) {
+            document.getElementById('alertsToastPersonalizado')?.remove();
+        }
+    };
+    
     toast.innerHTML = `
         <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg);">
             <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: var(--text);">
                 <i data-lucide="bell" style="color: var(--primary);"></i>
-                <span>Alertas (${alerts.length})</span>
+                <span>Alertas (<span class="alert-count">${activeAlerts.length}</span>)</span>
             </div>
             <button onclick="this.closest('#alertsToastPersonalizado').remove()" style="background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0.25rem;">
                 <i data-lucide="x"></i>
             </button>
         </div>
         <div style="max-height: calc(70vh - 60px); overflow-y: auto; padding: 0.5rem;">
-            ${alerts.map(alert => `
-                <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.25rem; background: ${alert.type === 'danger' ? 'rgba(239,68,68,0.1)' : alert.type === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)'};">
+            ${activeAlerts.map(alert => `
+                <div data-alert-title="${alert.title}" style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.25rem; background: ${alert.type === 'danger' ? 'rgba(239,68,68,0.1)' : alert.type === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)'};">
                     <i data-lucide="${alert.icon}" style="color: ${alert.type === 'danger' ? '#EF4444' : alert.type === 'warning' ? '#F59E0B' : '#3B82F6'}; flex-shrink: 0; margin-top: 2px;"></i>
                     <div style="flex: 1;">
                         <div style="font-weight: 600; font-size: 0.85rem; color: var(--text); margin-bottom: 0.25rem;">${alert.title}</div>
                         <div style="font-size: 0.75rem; color: var(--text-dim);">${alert.description}</div>
                     </div>
+                    <button onclick="dismissAlert('${alert.title}')" title="Descartar alerta" style="background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0.25rem; opacity: 0.6; transition: opacity 0.2s;">
+                        <i data-lucide="x"></i>
+                    </button>
                 </div>
             `).join('')}
+        </div>
+        <div style="padding: 0.75rem 1rem; border-top: 1px solid var(--border); text-align: center;">
+            <button onclick="localStorage.removeItem('dismissedAlerts'); window.showAlertsToast();" style="background: none; border: none; color: var(--text-dim); font-size: 0.75rem; cursor: pointer; text-decoration: underline;">
+                Restablecer alertas
+            </button>
         </div>
     `;
     
     document.body.appendChild(toast);
+    
+    window.dismissAlert = dismissAlert;
+    
     if (window.lucide) {
         window.lucide.createIcons();
     }
