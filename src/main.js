@@ -1473,6 +1473,10 @@ inventoryForm.onsubmit = (e) => {
         // Detectar cambio de estado
         if (oldStatus && oldStatus !== newStatus) {
             showStatusChangeAlert(oldStatus, newStatus, itemData.fullName || itemData.serialNumber);
+        } else {
+            // Si no hubo cambio de estado, mostrar notificación de actualización
+            const resguardoLabel = itemData.resguardo || itemData.serialNumber || 'registro';
+            showNotification(`Activo actualizado: ${resguardoLabel}`, 'info');
         }
         
         // Detectar cambio de usuario y registrar en historial
