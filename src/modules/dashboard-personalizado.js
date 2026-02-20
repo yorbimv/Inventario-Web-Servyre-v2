@@ -599,7 +599,7 @@ window.showAlertsToast = function() {
                         <div style="font-weight: 600; font-size: 0.85rem; color: var(--text); margin-bottom: 0.25rem;">${alert.title}</div>
                         <div style="font-size: 0.75rem; color: var(--text-dim);">${alert.description}</div>
                     </div>
-                    <button onclick="dismissAlert('${alert.title}')" title="Descartar alerta" style="background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0.25rem; opacity: 0.6; transition: opacity 0.2s;">
+                    <button onclick="event.stopPropagation(); dismissAlert('${alert.title}')" title="Descartar alerta" style="background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0.25rem; opacity: 0.6; transition: opacity 0.2s;">
                         <i data-lucide="x"></i>
                     </button>
                 </div>
