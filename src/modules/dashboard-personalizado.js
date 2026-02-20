@@ -29,9 +29,11 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
         ipFija: inventory.filter(i => i.ipType === 'IP Fija').length
     };
 
-    // Calcular alertas
-    const alerts = generateAlerts(inventory);
-    const hasAlerts = alerts.length > 0;
+    // Calcular alertas (filtrar las dismissadas)
+    const dismissed = JSON.parse(localStorage.getItem('dismissedAlerts') || '{}');
+    const allAlerts = generateAlerts(inventory);
+    const activeAlerts = allAlerts.filter(alert => !dismissed[alert.title]);
+    const hasAlerts = activeAlerts.length > 0;
 
     // HTML del dashboard
     container.innerHTML = `
@@ -51,7 +53,7 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
                     </button>
                     <button onclick="showAlertsToast()" class="glass-btn bell-btn ${hasAlerts ? 'has-alerts' : ''}" style="padding: 0.5rem 1rem; position: relative;" title="Ver alertas">
                         <i data-lucide="bell" style="width: 16px;"></i>
-                        ${hasAlerts ? `<span class="alert-badge" style="position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;">${alerts.length}</span>` : ''}
+                        ${hasAlerts ? `<span class="alert-badge" style="position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;">${activeAlerts.length}</span>` : ''}
                     </button>
                 </div>
             </div>
@@ -103,9 +105,11 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
             ipFija: newInventory.filter(i => i.ipType === 'IP Fija').length
         };
         
-        // Actualizar botones de alertas en el header
-        const alerts = generateAlerts(newInventory);
-        const hasAlerts = alerts.length > 0;
+        // Actualizar botones de alertas en el header (filtrar dismissadas)
+        const dismissedUpdate = JSON.parse(localStorage.getItem('dismissedAlerts') || '{}');
+        const allAlertsUpdate = generateAlerts(newInventory);
+        const activeAlertsUpdate = allAlertsUpdate.filter(alert => !dismissedUpdate[alert.title]);
+        const hasAlerts = activeAlertsUpdate.length > 0;
         
         // Buscar y actualizar el botón de alertas
         const bellBtn = document.querySelector('.bell-btn');
@@ -113,12 +117,12 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
             const badge = bellBtn.querySelector('.alert-badge');
             if (hasAlerts) {
                 if (badge) {
-                    badge.textContent = alerts.length;
+                    badge.textContent = activeAlertsUpdate.length;
                 } else {
                     const newBadge = document.createElement('span');
                     newBadge.className = 'alert-badge';
                     newBadge.style.cssText = 'position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;';
-                    newBadge.textContent = alerts.length;
+                    newBadge.textContent = activeAlertsUpdate.length;
                     bellBtn.appendChild(newBadge);
                 }
                 bellBtn.classList.add('has-alerts');
