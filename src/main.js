@@ -36,7 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// --- CONFIGURATION & STATE ---
+// Helper para分发 evento de actualización del inventario
+const dispatchInventoryUpdate = () => {
+    window.dispatchEvent(new CustomEvent('inventory-updated', { detail: { timestamp: Date.now() } }));
+};
 const MASTER_KEY = CONFIG.MASTER_KEY;
 const STORAGE_KEY = CONFIG.STORAGE_KEY;
 
@@ -459,7 +462,9 @@ const renderTable = (data = inventory) => {
             e.stopPropagation();
             if (confirm(`¿Está seguro de eliminar el activo con serie ${item.serialNumber}?`)) {
                 inventory = inventory.filter(i => i.id !== item.id);
-                saveToStorage(); renderTable();
+    saveToStorage(); renderTable();
+    dispatchInventoryUpdate();
+                dispatchInventoryUpdate();
             }
         };
 
@@ -535,6 +540,23 @@ const viewAssetDetail = (id) => {
                 <div class="info-card"><label>Último Manto.</label><div class="value">${sanitize(item.lastMtto || '-')}</div></div>
                 <div class="info-card"><label>Próximo Manto.</label><div class="value" style="color:var(--primary)">${sanitize(item.nextMtto || '-')}</div></div>
 
+                <!-- Garantía Extendida -->
+                <div class="info-card" style="grid-column: span 2; border-left: 3px solid var(--success);">
+                    <label>Garantía Extendida</label>
+                    <div class="value" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <div>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">Vencimiento: </span>
+                            <span style="font-weight: 600;">${sanitize(item.purchaseDate ? (() => {
+                                const p = new Date(item.purchaseDate);
+                                const w = parseInt(item.warranty) || 12;
+                                p.setMonth(p.getMonth() + w);
+                                return p.toISOString().split('T')[0];
+                            })() : '-')}</span>
+                        </div>
+                        ${renderWarrantyBadge(item.purchaseDate, item.warranty)}
+                    </div>
+                </div>
+
                 <div class="info-card" style="grid-column: span 2;">
                     <label>Reporte de Incidentes / Condiciones</label>
                     <div class="value" style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.4;">
@@ -584,7 +606,7 @@ const viewAssetDetail = (id) => {
                 if (history.length === 0) return '';
                 
                 return `
-                    <div class="user-history-section" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                    <div class="user-history-section" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); grid-column: span 2;">
                         <h3 style="margin-bottom: 1rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.5rem;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                             Historial de Usuarios
@@ -626,10 +648,43 @@ const viewAssetDetail = (id) => {
                     </div>
                 `;
             })()}
+            
+            <!-- Historial de Actividad (Activity Log) -->
+            ${(() => {
+                const activityLog = item.activityLog || [];
+                if (activityLog.length === 0) return '';
+                
+                return `
+                    <div class="activity-log-section">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            Historial de Actividad
+                        </h3>
+                        <div class="activity-log-list">
+                            ${activityLog.map(log => {
+                                const display = formatActivityLogForDisplay(log);
+                                return `
+                                    <div class="activity-log-item">
+                                        <div class="activity-log-icon ${display.iconClass}">${display.icon}</div>
+                                        <div class="activity-log-content">
+                                            <div class="activity-log-description">${display.description}</div>
+                                            <div class="activity-log-meta">${display.date} a las ${display.time}</div>
+                                            ${display.fieldLabel ? `<span class="activity-log-field">${display.fieldLabel}</span>` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            })()}
         </div>
     `;
 
     detailModalOverlay.classList.add('active');
+
+    // Inicializar iconos Lucide
+    if (window.lucide) window.lucide.createIcons();
 
     // Button Listeners in Detail
     document.getElementById('editFromDetailBtn').onclick = () => {
@@ -717,6 +772,26 @@ const viewAssetDetail = (id) => {
         doc.text('Sistema de Gestión de Activos IT - Servyre', 105, 285, { align: 'center' });
 
         doc.save(`Ficha_Resguardo_${item.serialNumber || 'IT'}.pdf`);
+    };
+    
+    // Botón Eliminar
+    document.getElementById('deleteFromDetailBtn').onclick = () => {
+        const resguardo = item.resguardo || item.serialNumber || 'este activo';
+        if (confirm(`¿Está seguro de eliminar el activo "${item.fullName || resguardo}"?\n\nSerie: ${item.serialNumber}\nResguardo: ${item.resguardo || 'N/A'}\n\n⚠️ Esta acción no se puede deshacer.`)) {
+            // Agregar log de eliminación antes de eliminar
+            addActivityLog(item, 'DELETE', null, null, null);
+            
+            // Guardar el log antes de eliminar (necesario porque después el item ya no existe)
+            const logSaved = { ...item };
+            
+            inventory = inventory.filter(i => i.id !== item.id);
+            saveToStorage();
+            renderTable();
+            detailModalOverlay.classList.remove('active');
+            dispatchInventoryUpdate();
+            
+            showNotification(`Activo eliminado: ${resguardo}`, 'warning');
+        }
     };
 };
 
@@ -1047,6 +1122,159 @@ function showNotification(message, type = 'info') {
 }
 
 // ============================================================================
+// SISTEMA DE ACTIVITY LOG (Historial de cambios)
+// ============================================================================
+function generateLogId() {
+    return 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+function addActivityLog(item, action, fieldChanged = null, oldValue = null, newValue = null) {
+    if (!item.activityLog) {
+        item.activityLog = [];
+    }
+    
+    const logEntry = {
+        id: generateLogId(),
+        timestamp: new Date().toISOString(),
+        action: action,
+        fieldChanged: fieldChanged,
+        oldValue: oldValue,
+        newValue: newValue
+    };
+    
+    // Agregar al inicio del array (más reciente primero)
+    item.activityLog.unshift(logEntry);
+    
+    // Mantener solo los últimos 10 registros
+    if (item.activityLog.length > 10) {
+        item.activityLog = item.activityLog.slice(0, 10);
+    }
+    
+    return logEntry;
+}
+
+function formatActivityLogForDisplay(logEntry) {
+    const date = new Date(logEntry.timestamp);
+    const dateStr = date.toLocaleDateString('es-MX', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+    });
+    const timeStr = date.toLocaleTimeString('es-MX', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+    
+    const icons = {
+        'CREATE': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+        'UPDATE': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>',
+        'DELETE': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
+    };
+    
+    const fieldLabels = {
+        'status': 'Estado',
+        'fullName': 'Usuario',
+        'location': 'Ubicación',
+        'brand': 'Marca',
+        'model': 'Modelo',
+        'serialNumber': 'Serie',
+        'resguardo': 'Resguardo',
+        'department': 'Departamento',
+        'position': 'Puesto',
+        'deviceType': 'Tipo equipo',
+        'price': 'Precio',
+        'purchaseDate': 'Fecha compra',
+        'warranty': 'Garantía',
+        'ipAddress': 'IP'
+    };
+    
+    let description = '';
+    
+    if (logEntry.action === 'CREATE') {
+        description = 'Registro creado';
+    } else if (logEntry.action === 'DELETE') {
+        description = 'Registro eliminado';
+    } else if (logEntry.action === 'UPDATE' && logEntry.fieldChanged) {
+        const fieldLabel = fieldLabels[logEntry.fieldChanged] || logEntry.fieldChanged;
+        description = `Cambio en ${fieldLabel}`;
+        if (logEntry.oldValue && logEntry.newValue) {
+            description += `: ${logEntry.oldValue} → ${logEntry.newValue}`;
+        }
+    }
+    
+    return {
+        icon: icons[logEntry.action],
+        iconClass: logEntry.action.toLowerCase(),
+        description: description,
+        date: dateStr,
+        time: timeStr,
+        fieldLabel: logEntry.fieldChanged ? (fieldLabels[logEntry.fieldChanged] || logEntry.fieldChanged) : null
+    };
+}
+
+// ============================================================================
+// SISTEMA DE GARANTÍA EXTENDIDA
+// ============================================================================
+function calculateWarrantyInfo(purchaseDate, warrantyMonths) {
+    if (!purchaseDate || !warrantyMonths) {
+        return { endDate: null, daysRemaining: null, status: 'unknown' };
+    }
+    
+    const purchase = new Date(purchaseDate);
+    const endDate = new Date(purchase);
+    endDate.setMonth(endDate.getMonth() + parseInt(warrantyMonths));
+    
+    const today = new Date();
+    const diffTime = endDate - today;
+    const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    let status = 'valid';
+    if (daysRemaining < 0) {
+        status = 'expired';
+    } else if (daysRemaining <= 30) {
+        status = 'warning';
+    }
+    
+    return {
+        endDate: endDate.toISOString().split('T')[0],
+        daysRemaining: daysRemaining,
+        status: status
+    };
+}
+
+function renderWarrantyBadge(purchaseDate, warrantyMonths) {
+    const info = calculateWarrantyInfo(purchaseDate, warrantyMonths);
+    
+    if (!info.endDate) {
+        return '<span class="warranty-badge" style="background: var(--card-bg); color: var(--text-muted);">Sin garantía</span>';
+    }
+    
+    const statusLabels = {
+        'valid': 'Vigente',
+        'expired': 'Vencida',
+        'warning': 'Por vencer'
+    };
+    
+    const badgeHtml = `
+        <span class="warranty-badge ${info.status}">
+            ${info.status === 'valid' ? '✓' : info.status === 'warning' ? '⚠' : '✕'}
+            ${statusLabels[info.status]}
+        </span>
+    `;
+    
+    const daysText = info.daysRemaining > 0 
+        ? `${info.daysRemaining} días restantes` 
+        : `Hace ${Math.abs(info.daysRemaining)} días`;
+    
+    return `
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            ${badgeHtml}
+            <span class="warranty-days">${daysText}</span>
+        </div>
+    `;
+}
+
+// ============================================================================
 // CÓDIGO PRINCIPAL - Se ejecuta después de DOMContentLoaded
 // ============================================================================
 
@@ -1176,6 +1404,7 @@ importInput.onchange = (e) => {
                 });
                 saveToStorage();
                 renderTable();
+                dispatchInventoryUpdate();
                 alert(`¡Éxito! Se importaron ${importedCount} registros correctamente.`);
             }
         };
@@ -1280,8 +1509,23 @@ inventoryForm.onsubmit = (e) => {
             itemData.userHistory = oldItem.userHistory;
         }
         
-        // Mostrar alerta de modificación exitosa
-        showModificationAlert(itemData.serialNumber);
+        // DETECTAR CAMBIOS PARA EL LOG DE ACTIVIDAD
+        if (oldItem) {
+            const fieldsToTrack = ['status', 'fullName', 'location', 'brand', 'model', 'serialNumber', 'resguardo', 'department', 'position', 'deviceType', 'price', 'purchaseDate', 'warranty', 'ipAddress'];
+            
+            fieldsToTrack.forEach(field => {
+                if (oldItem[field] !== itemData[field]) {
+                    addActivityLog(oldItem, 'UPDATE', field, oldItem[field], itemData[field]);
+                }
+            });
+        }
+        
+        // Copiar el activityLog del item anterior
+        itemData.activityLog = oldItem?.activityLog || [];
+        
+        // Mostrar notificación de actualización
+        const resguardoLabel = itemData.resguardo || itemData.serialNumber || 'registro';
+        showNotification(`Activo actualizado: ${resguardoLabel}`, 'success');
         
         inventory[idx] = itemData;
     } else {
@@ -1299,8 +1543,14 @@ inventoryForm.onsubmit = (e) => {
             }
         }];
         
-        // Mostrar alerta de nuevo registro
-        showNewRecordAlert(itemData.serialNumber);
+        // Inicializar log de actividad para nuevo registro
+        itemData.activityLog = [];
+        addActivityLog(itemData, 'CREATE', null, null, null);
+        
+        // Mostrar notificación de nuevo registro
+        const resguardoLabel = itemData.resguardo || itemData.serialNumber || 'registro';
+        showNotification(`Nuevo activo registrado: ${resguardoLabel}`, 'success');
+        
         inventory.unshift(itemData);
     }
 
@@ -1308,7 +1558,7 @@ inventoryForm.onsubmit = (e) => {
     modalOverlay.classList.remove('active');
 };
 
-// Función para mostrar alerta de cambio de estado
+// Función para mostrar alerta de cambio de estado (usando notificaciones flotantes)
 function showStatusChangeAlert(oldStatus, newStatus, itemName) {
     const statusColors = {
         'Activo': '#10B981',
@@ -1318,65 +1568,10 @@ function showStatusChangeAlert(oldStatus, newStatus, itemName) {
         'Para piezas': '#F97316'
     };
     
-    const alertDiv = document.createElement('div');
-    alertDiv.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        background: rgba(26, 26, 46, 0.98);
-        border: 2px solid ${statusColors[newStatus] || '#3B82F6'};
-        border-radius: 12px;
-        padding: 1rem 1.5rem;
-        z-index: 2000;
-        animation: slideIn 0.3s ease;
-        max-width: 350px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    `;
+    const message = `${oldStatus} → ${newStatus} (${itemName || 'Equipo'})`;
     
-    alertDiv.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="
-                width: 40px; height: 40px;
-                background: ${statusColors[newStatus] || '#3B82F6'};
-                border-radius: 50%;
-                display: flex; align-items: center; justify-content: center;
-                color: white; font-weight: bold;
-            ">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-            </div>
-            <div>
-                <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">
-                    Estado actualizado
-                </div>
-                <div style="font-size: 0.8rem; color: #9CA3AF;">
-                    <span style="color: ${statusColors[oldStatus]}; text-decoration: line-through;">${oldStatus}</span>
-                    →
-                    <span style="color: ${statusColors[newStatus]}; font-weight: bold;">${newStatus}</span>
-                </div>
-                <div style="font-size: 0.75rem; color: #6B7280; margin-top: 4px;">
-                    ${itemName || 'Equipo'}
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(alertDiv);
-    
-    // Agregar animación CSS si no existe
-    if (!document.getElementById('statusAlertStyle')) {
-        const style = document.createElement('style');
-        style.id = 'statusAlertStyle';
-        style.textContent = `
-            @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        `;
-        document.head.appendChild(style);
-    }
-    
-    // Auto-remover después de 5 segundos
-    setTimeout(() => {
-        alertDiv.style.animation = 'slideIn 0.3s ease reverse';
-        setTimeout(() => alertDiv.remove(), 300);
-    }, 5000);
+    // Usar showNotification para consistencia con las demás alertas
+    showNotification(`Estado actualizado: ${message}`, 'info');
     
     // Guardar cambio de estado en localStorage
     const statusChanges = JSON.parse(localStorage.getItem('statusChanges')) || [];
@@ -1391,11 +1586,6 @@ function showStatusChangeAlert(oldStatus, newStatus, itemName) {
         statusChanges.splice(0, statusChanges.length - 10);
     }
     localStorage.setItem('statusChanges', JSON.stringify(statusChanges));
-    
-    // Actualizar el dashboard si existe
-    if (window.dashboard) {
-        window.dashboard.render();
-    }
 }
 
 // Función para mostrar alerta de modificación exitosa
@@ -1416,6 +1606,19 @@ function showModificationAlert(serialNumber) {
     `;
     
     alertDiv.innerHTML = `
+        <button onclick="this.parentElement.remove()" style="
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: white;
+            opacity: 0.7;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            padding: 0;
+        ">&times;</button>
         <div style="display: flex; align-items: center; gap: 12px;">
             <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -1454,6 +1657,19 @@ function showNewRecordAlert(serialNumber) {
     `;
     
     alertDiv.innerHTML = `
+        <button onclick="this.parentElement.remove()" style="
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: white;
+            opacity: 0.7;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            padding: 0;
+        ">&times;</button>
         <div style="display: flex; align-items: center; gap: 12px;">
             <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>

@@ -29,6 +29,10 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
         ipFija: inventory.filter(i => i.ipType === 'IP Fija').length
     };
 
+    // Calcular alertas
+    const alerts = generateAlerts(inventory);
+    const hasAlerts = alerts.length > 0;
+
     // HTML del dashboard
     container.innerHTML = `
         <div class="personalized-dashboard" style="padding: 1.5rem;">
@@ -38,12 +42,16 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
                     <i data-lucide="layout-dashboard" style="vertical-align: middle; margin-right: 0.5rem;"></i>
                     Dashboard
                 </h2>
-                <div style="display: flex; gap: 0.5rem;">
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
                     <button onclick="renderDashboardView('resumen')" class="glass-btn" style="padding: 0.5rem 1rem;">
                         <i data-lucide="home" style="width: 16px;"></i> Resumen
                     </button>
                     <button onclick="renderDashboardView('red')" class="glass-btn" style="padding: 0.5rem 1rem;">
                         <i data-lucide="wifi" style="width: 16px;"></i> Red
+                    </button>
+                    <button onclick="showAlertsToast()" class="glass-btn bell-btn ${hasAlerts ? 'has-alerts' : ''}" style="padding: 0.5rem 1rem; position: relative;" title="Ver alertas">
+                        <i data-lucide="bell" style="width: 16px;"></i>
+                        ${hasAlerts ? `<span class="alert-badge" style="position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;">${alerts.length}</span>` : ''}
                     </button>
                 </div>
             </div>
@@ -77,6 +85,61 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
     if (window.lucide) {
         window.lucide.createIcons();
     }
+
+    // Escuchar actualizaciones del inventario
+    window.addEventListener('inventory-updated', () => {
+        // Recalcular KPIs con nuevos datos
+        const newInventory = window.dashboardInventory || [];
+        const newKpis = {
+            total: newInventory.length,
+            active: newInventory.filter(i => i.status === 'Activo').length,
+            maintenance: newInventory.filter(i => i.status === 'Mantenimiento').length,
+            warranty: newInventory.filter(i => i.warranty && parseInt(i.warranty) > 0).length,
+            baja: newInventory.filter(i => i.status === 'Baja').length,
+            piezas: newInventory.filter(i => i.status === 'Para piezas').length,
+            conIP: newInventory.filter(i => i.ipAddress).length,
+            sinIP: newInventory.length - newInventory.filter(i => i.ipAddress).length,
+            dhcp: newInventory.filter(i => i.ipType === 'DHCP' || !i.ipType).length,
+            ipFija: newInventory.filter(i => i.ipType === 'IP Fija').length
+        };
+        
+        // Actualizar botones de alertas en el header
+        const alerts = generateAlerts(newInventory);
+        const hasAlerts = alerts.length > 0;
+        
+        // Buscar y actualizar el botón de alertas
+        const bellBtn = document.querySelector('.bell-btn');
+        if (bellBtn) {
+            const badge = bellBtn.querySelector('.alert-badge');
+            if (hasAlerts) {
+                if (badge) {
+                    badge.textContent = alerts.length;
+                } else {
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'alert-badge';
+                    newBadge.style.cssText = 'position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;';
+                    newBadge.textContent = alerts.length;
+                    bellBtn.appendChild(newBadge);
+                }
+                bellBtn.classList.add('has-alerts');
+            } else {
+                if (badge) badge.remove();
+                bellBtn.classList.remove('has-alerts');
+            }
+        }
+        
+        // Actualizar KPIs en pantalla si existen
+        const kpiCards = document.querySelectorAll('.kpi-card-simple');
+        if (kpiCards.length >= 6) {
+            const values = [newKpis.total, newKpis.active, newKpis.maintenance, newKpis.warranty, newKpis.baja, newKpis.piezas];
+            kpiCards.forEach((card, index) => {
+                const valueEl = card.querySelector('div > div > div:first-child');
+                if (valueEl && values[index] !== undefined) {
+                    valueEl.textContent = values[index];
+                }
+            });
+        }
+    });
 
     window.renderDashboardView = function(view) {
         const content = document.getElementById('dashboardContent');
@@ -377,4 +440,160 @@ function getStatusBadge(status) {
         'Para piezas': 'badge-orange'
     };
     return badges[status] || 'badge-gray';
+}
+
+// ============================================
+// FUNCIONES DE ALERTAS
+// ============================================
+
+function generateAlerts(inventory) {
+    const alerts = [];
+    const today = new Date();
+    const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    
+    // Verificar garantías por vencer
+    inventory.forEach(item => {
+        if (item.warrantyEndDate) {
+            const warrantyEnd = new Date(item.warrantyEndDate);
+            if (warrantyEnd >= today && warrantyEnd <= thirtyDaysFromNow) {
+                const daysLeft = Math.ceil((warrantyEnd - today) / (1000 * 60 * 60 * 24));
+                alerts.push({
+                    type: 'warning',
+                    icon: 'shield-alert',
+                    title: 'Garantía por Vencer',
+                    description: `${item.serialNumber || item.deviceType} vence en ${daysLeft} días`,
+                    key: `warranty-${item.id}`
+                });
+            }
+        }
+    });
+    
+    // Verificar mantenimiento próximo
+    inventory.forEach(item => {
+        if (item.nextMtto) {
+            const nextMtto = new Date(item.nextMtto);
+            if (nextMtto >= today && nextMtto <= thirtyDaysFromNow) {
+                const daysLeft = Math.ceil((nextMtto - today) / (1000 * 60 * 60 * 24));
+                alerts.push({
+                    type: 'info',
+                    icon: 'calendar',
+                    title: 'Mantenimiento Próximo',
+                    description: `${item.serialNumber || item.deviceType} en ${daysLeft} días`,
+                    key: `mtto-${item.id}`
+                });
+            }
+        }
+    });
+    
+    // Equipos sin IP asignada
+    const sinIP = inventory.filter(i => !i.ipAddress && i.status === 'Activo');
+    if (sinIP.length > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'wifi-off',
+            title: 'Equipos sin IP',
+            description: `${sinIP.length} equipos activos sin dirección IP asignada`,
+            key: 'sin-ip'
+        });
+    }
+    
+    // Equipos de baja
+    const bajas = inventory.filter(i => i.status === 'Baja');
+    if (bajas.length > 0) {
+        alerts.push({
+            type: 'danger',
+            icon: 'x-circle',
+            title: 'Equipos de Baja',
+            description: `${bajas.length} equipos dados de baja`,
+            key: 'bajas'
+        });
+    }
+    
+    return alerts;
+}
+
+// Función global para mostrar el toast de alertas
+window.showAlertsToast = function() {
+    const inventory = window.dashboardInventory || [];
+    const alerts = generateAlerts(inventory);
+    
+    // Cerrar toast anterior si existe
+    const existingToast = document.getElementById('alertsToastPersonalizado');
+    if (existingToast) {
+        existingToast.remove();
+    }
+    
+    if (alerts.length === 0) {
+        showNotification('No hay alertas pendientes', 'info');
+        return;
+    }
+    
+    const toast = document.createElement('div');
+    toast.id = 'alertsToastPersonalizado';
+    toast.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        width: 380px;
+        max-height: 70vh;
+        background: var(--surface-opaque, #1e1e2e);
+        border: 1px solid var(--border, rgba(255,255,255,0.1));
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        z-index: 9999;
+        overflow: hidden;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    toast.innerHTML = `
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg);">
+            <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: var(--text);">
+                <i data-lucide="bell" style="color: var(--primary);"></i>
+                <span>Alertas (${alerts.length})</span>
+            </div>
+            <button onclick="this.closest('#alertsToastPersonalizado').remove()" style="background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0.25rem;">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div style="max-height: calc(70vh - 60px); overflow-y: auto; padding: 0.5rem;">
+            ${alerts.map(alert => `
+                <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.25rem; transition: background 0.2s; background: ${alert.type === 'danger' ? 'rgba(239,68,68,0.1)' : alert.type === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)'};">
+                    <i data-lucide="${alert.icon}" style="color: ${alert.type === 'danger' ? '#EF4444' : alert.type === 'warning' ? '#F59E0B' : '#3B82F6'}; flex-shrink: 0; margin-top: 2px;"></i>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 0.85rem; color: var(--text); margin-bottom: 0.25rem;">${alert.title}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-dim);">${alert.description}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+    
+    // Cerrar al hacer click fuera
+    setTimeout(() => {
+        document.addEventListener('click', function closeAlert(e) {
+            if (!toast.contains(e.target) && !e.target.closest('.bell-btn')) {
+                toast.remove();
+                document.removeEventListener('click', closeAlert);
+            }
+        });
+    }, 100);
+};
+
+// Agregar estilos de animación si no existen
+if (!document.getElementById('alerts-toast-styles')) {
+    const style = document.createElement('style');
+    style.id = 'alerts-toast-styles';
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
 }
