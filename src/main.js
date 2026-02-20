@@ -346,6 +346,7 @@ function loadExample(exampleId) {
     if (modal) modal.remove();
     
     // Guardar directamente en localStorage con los datos generados
+    alert(`Ejemplo #${exampleId} cargado con ${inventory.length} equipos`);
     const dataToSave = {
         version: "2.0",
         lastModified: new Date().toISOString(),
@@ -1080,18 +1081,28 @@ if (exportBackupBtn) {
 
 // Función para mostrar notificaciones premium
 function showNotification(message, type = 'info') {
+    console.log('showNotification llamada:', message, type);
+    
     let container = document.querySelector('.toast-container');
     if (!container) {
         container = document.createElement('div');
         container.className = 'toast-container';
+        container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;';
         document.body.appendChild(container);
     }
 
+    const colors = {
+        success: '#10B981',
+        error: '#EF4444',
+        warning: '#F59E0B',
+        info: '#3B82F6'
+    };
+
     const icons = {
-        success: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
-        error: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
-        warning: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
-        info: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
     };
 
     const titles = {
@@ -1102,25 +1113,58 @@ function showNotification(message, type = 'info') {
     };
 
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.style.cssText = `
+        background: linear-gradient(135deg, #1e1e2e 0%, #2d2d3f 100%);
+        border: 1px solid ${colors[type]};
+        border-left: 4px solid ${colors[type]};
+        border-radius: 12px;
+        padding: 16px 20px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 300px;
+        max-width: 400px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        animation: slideInRight 0.3s ease;
+        font-family: 'Inter', sans-serif;
+    `;
+    
     toast.innerHTML = `
-        <div class="toast-icon ${type}">${icons[type]}</div>
-        <div class="toast-content">
-            <div class="toast-title">${titles[type]}</div>
-            <div class="toast-message">${message}</div>
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: ${colors[type]}20; display: flex; align-items: center; justify-content: center; color: ${colors[type]}; font-weight: bold; font-size: 16px; flex-shrink: 0;">
+            ${icons[type]}
         </div>
-        <button class="toast-close" onclick="this.parentElement.remove()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-        <div class="toast-progress"></div>
+        <div style="flex: 1;">
+            <div style="font-weight: 600; font-size: 14px; color: ${colors[type]}; margin-bottom: 2px;">${titles[type]}</div>
+            <div style="font-size: 13px; color: #e0e0e0;">${message}</div>
+        </div>
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #888; cursor: pointer; font-size: 18px; padding: 4px;">✕</button>
     `;
 
     container.appendChild(toast);
+    console.log('Toast creado y añadido');
 
     setTimeout(() => {
-        toast.classList.add('removing');
-        setTimeout(() => toast.remove(), 250);
+        toast.style.animation = 'slideOutRight 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
     }, 4000);
+}
+
+// Agregar animaciones si no existen
+if (!document.getElementById('notification-animations')) {
+    const style = document.createElement('style');
+    style.id = 'notification-animations';
+    style.textContent = `
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 // ============================================================================
