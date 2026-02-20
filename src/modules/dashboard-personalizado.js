@@ -530,10 +530,7 @@ window.showAlertsToast = function() {
         existingToast.remove();
     }
     
-    if (activeAlerts.length === 0) {
-        alert('No hay alertas pendientes');
-        return;
-    }
+    // Siempre mostrar el toast, incluso si no hay alertas
     
     const dismissAlert = (title) => {
         const dismissed = JSON.parse(localStorage.getItem('dismissedAlerts') || '{}');
