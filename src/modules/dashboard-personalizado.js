@@ -348,8 +348,8 @@ function renderRedView(inventory) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${conIP.map(item => `
-                            <tr>
+                        ${conIP.map((item, index) => `
+                            <tr class="table-row-animate" style="--row-index: ${index}; animation-delay: ${index * 30}ms;">
                                 <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-weight: 600; text-align: center;">${item.fullName || '-'}</td>
                                 <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); text-align: center;">${item.deviceType || '-'} ${item.brand || ''}</td>
                                 <td style="padding: 0.875rem 1rem; border-bottom: 1px solid var(--border-light, #333); font-size: 0.85rem; text-align: center;">${item.email || '-'}</td>

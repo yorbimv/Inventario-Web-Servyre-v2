@@ -488,18 +488,44 @@
 
 
 /* ============================================
-   SMOOTH TRANSITIONS - Utility Classes
+   SMOOTH TRANSITIONS - Utility Classes (Unified Timing)
    ============================================ */
-.transition-all { transition: all 0.3s ease; }
-.transition-fast { transition: all 0.15s ease; }
-.transition-slow { transition: all 0.5s ease; }
+.transition-all { transition: all 0.3s var(--ease-out, ease); }
+.transition-fast { transition: all 0.15s var(--ease-snappy, ease); }
+.transition-slow { transition: all 0.5s var(--ease-in-out, ease); }
 
-.transition-colors { transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
-.transition-transform { transition: transform 0.2s ease; }
-.transition-opacity { transition: opacity 0.2s ease; }
-.transition-shadow { transition: box-shadow 0.2s ease; }
+.transition-colors { transition: color 0.2s var(--ease-out), background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out); }
+.transition-transform { transition: transform 0.2s var(--ease-out); }
+.transition-opacity { transition: opacity 0.2s var(--ease-out); }
+.transition-shadow { transition: box-shadow 0.2s var(--ease-out); }
 
 .duration-100 { transition-duration: 100ms; }
 .duration-200 { transition-duration: 200ms; }
 .duration-300 { transition-duration: 300ms; }
 .duration-500 { transition-duration: 500ms; }
+
+/* Hover States Consistency */
+.glass-btn:hover, .premium-btn:hover, .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow-sm, 0 0 20px rgba(252, 211, 77, 0.1));
+}
+
+.glass-btn:active, .premium-btn:active, .action-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ============================================
+   PREFERENCES - Reduced Motion (Accessibility)
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .animate__animated { animation: none !important; }
+    .kpi-card { animation: none !important; opacity: 1 !important; transform: none !important; }
+    .skeleton::after { animation: none !important; }
+    .ripple::after { animation: none !important; }
+}

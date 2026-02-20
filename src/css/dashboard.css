@@ -1129,3 +1129,28 @@
 .dashboard-skeleton {
     pointer-events: none;
 }
+
+
+/* ============================================
+   STAGGER ANIMATIONS - Table Rows
+   ============================================ */
+.table-row-animate {
+    opacity: 0;
+    animation: rowSlideIn 0.4s var(--ease-out, cubic-bezier(0.25, 0.46, 0.45, 0.94)) forwards;
+}
+
+@keyframes rowSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.table-row-animate:hover {
+    background: var(--card-bg, rgba(255, 255, 255, 0.03));
+    transition: background 0.2s ease;
+}
