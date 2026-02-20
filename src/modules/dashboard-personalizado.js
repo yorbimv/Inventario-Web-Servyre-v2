@@ -11,6 +11,9 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
 
     // Guardar inventario globalmente para ordenamiento
     window.dashboardInventory = inventory;
+    
+    // Calcular alertas y guardar globalmente
+    window.alerts = window.generateAlerts ? window.generateAlerts(inventory) : [];
 
     // Estado del ordenamiento
     window.redSortState = { field: null, order: 'asc' };
@@ -38,13 +41,17 @@ export function initDashboardPersonalizado(inventory, containerId = 'dashboardCo
                     <i data-lucide="layout-dashboard" style="vertical-align: middle; margin-right: 0.5rem;"></i>
                     Dashboard
                 </h2>
-                <div style="display: flex; gap: 0.5rem;">
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
                     <button onclick="renderDashboardView('resumen')" class="glass-btn" style="padding: 0.5rem 1rem;">
                         <i data-lucide="home" style="width: 16px;"></i> Resumen
                     </button>
                     <button onclick="renderDashboardView('red')" class="glass-btn" style="padding: 0.5rem 1rem;">
                         <i data-lucide="wifi" style="width: 16px;"></i> Red
                     </button>
+                    ${window.alerts ? `<button onclick="showAlertsToast()" class="glass-btn bell-btn ${window.alerts.length > 0 ? 'has-alerts' : ''}" style="padding: 0.5rem 1rem; position: relative;" title="Ver alertas">
+                        <i data-lucide="bell" style="width: 16px;"></i>
+                        ${window.alerts.length > 0 ? `<span class="alert-badge" style="position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;">${window.alerts.length}</span>` : ''}
+                    </button>` : ''}
                 </div>
             </div>
 
@@ -378,3 +385,139 @@ function getStatusBadge(status) {
     };
     return badges[status] || 'badge-gray';
 }
+
+// ============================================
+// FUNCIONES DE ALERTAS
+// ============================================
+
+window.generateAlerts = function(inventory) {
+    const alerts = [];
+    const now = new Date();
+    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    
+    // Garantías por vencer
+    const warrantyExpiring = inventory.filter(i => {
+        if (!i.warrantyEndDate) return false;
+        const end = new Date(i.warrantyEndDate);
+        return end >= now && end <= thirtyDaysFromNow;
+    });
+    
+    if (warrantyExpiring.length > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'shield-alert',
+            title: 'Garantías por vencer',
+            description: `${warrantyExpiring.length} equipos en los próximos 30 días`
+        });
+    }
+    
+    // Mantenimientos vencidos
+    const overdueMtto = inventory.filter(i => {
+        if (!i.nextMtto) return false;
+        return new Date(i.nextMtto) < now;
+    });
+    
+    if (overdueMtto.length > 0) {
+        alerts.push({
+            type: 'danger',
+            icon: 'alert-triangle',
+            title: 'Mantenimientos vencidos',
+            description: `${overdueMtto.length} equipos requieren atención`
+        });
+    }
+    
+    // Equipos en mantenimiento
+    const inMaintenance = inventory.filter(i => i.status === 'Mantenimiento');
+    if (inMaintenance.length > 0) {
+        alerts.push({
+            type: 'info',
+            icon: 'wrench',
+            title: 'En mantenimiento',
+            description: `${inMaintenance.length} equipos en servicio`
+        });
+    }
+    
+    // Equipos sin IP
+    const sinIP = inventory.filter(i => !i.ipAddress && i.status === 'Activo');
+    if (sinIP.length > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'wifi-off',
+            title: 'Equipos sin IP',
+            description: `${sinIP.length} equipos activos sin IP`
+        });
+    }
+    
+    // Equipos de baja
+    const bajas = inventory.filter(i => i.status === 'Baja');
+    if (bajas.length > 0) {
+        alerts.push({
+            type: 'danger',
+            icon: 'x-circle',
+            title: 'Equipos de baja',
+            description: `${bajas.length} equipos dados de baja`
+        });
+    }
+    
+    return alerts;
+};
+
+window.showAlertsToast = function() {
+    const inventory = window.dashboardInventory || [];
+    const alerts = window.generateAlerts(inventory);
+    
+    const existingToast = document.getElementById('alertsToastPersonalizado');
+    if (existingToast) {
+        existingToast.remove();
+    }
+    
+    if (alerts.length === 0) {
+        alert('No hay alertas pendientes');
+        return;
+    }
+    
+    const toast = document.createElement('div');
+    toast.id = 'alertsToastPersonalizado';
+    toast.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        width: 380px;
+        max-height: 70vh;
+        background: var(--surface-opaque, #1e1e2e);
+        border: 1px solid var(--border, rgba(255,255,255,0.1));
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        z-index: 9999;
+        overflow: hidden;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    toast.innerHTML = `
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg);">
+            <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: var(--text);">
+                <i data-lucide="bell" style="color: var(--primary);"></i>
+                <span>Alertas (${alerts.length})</span>
+            </div>
+            <button onclick="this.closest('#alertsToastPersonalizado').remove()" style="background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0.25rem;">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div style="max-height: calc(70vh - 60px); overflow-y: auto; padding: 0.5rem;">
+            ${alerts.map(alert => `
+                <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.25rem; background: ${alert.type === 'danger' ? 'rgba(239,68,68,0.1)' : alert.type === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)'};">
+                    <i data-lucide="${alert.icon}" style="color: ${alert.type === 'danger' ? '#EF4444' : alert.type === 'warning' ? '#F59E0B' : '#3B82F6'}; flex-shrink: 0; margin-top: 2px;"></i>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 0.85rem; color: var(--text); margin-bottom: 0.25rem;">${alert.title}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-dim);">${alert.description}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+};
