@@ -1147,7 +1147,7 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         toast.style.animation = 'slideOutRight 0.3s ease forwards';
         setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    }, 5000);
 }
 
 // Agregar animaciones si no existen
