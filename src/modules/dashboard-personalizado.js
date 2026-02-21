@@ -629,8 +629,33 @@ window.showAlertsToast = function() {
                 </div>
             `).join('')}
         </div>
-        <div id="historyContent" style="max-height: calc(70vh - 130px); overflow-y: auto; padding: 0.5rem; display: none;">
-            <div id="historyPanel"></div>
+        <div id="historyContent" style="max-height: calc(70vh - 130px); overflow: hidden; padding: 0; display: none; flex-direction: column;">
+            <!-- Buscador -->
+            <div style="padding: 0.75rem; border-bottom: 1px solid var(--border);">
+                <input type="text" id="historySearch" placeholder="Buscar equipo, resguardo..." 
+                    style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 0.8rem;"
+                    oninput="window.renderHistoryPanel()">
+            </div>
+            <!-- Filtros -->
+            <div style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); display: flex; gap: 0.5rem;">
+                <select id="historyFilter" onchange="window.renderHistoryPanel()"
+                    style="flex: 1; padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font-size: 0.75rem;">
+                    <option value="all">Todos</option>
+                    <option value="create">Creados</option>
+                    <option value="update">Actualizados</option>
+                    <option value="delete">Eliminados</option>
+                </select>
+                <span style="font-size: 0.7rem; color: var(--text-dim); align-self: center;">
+                    <span id="historyCount">0</span> regs
+                </span>
+            </div>
+            <!-- Lista -->
+            <div id="historyPanel" style="flex: 1; overflow-y: auto; padding: 0.5rem;"></div>
+            <!-- Botones -->
+            <div style="padding: 0.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem;">
+                <button onclick="window.exportHistoryJSON()" style="flex: 1; padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font-size: 0.7rem; cursor: pointer;">📥 JSON</button>
+                <button onclick="window.exportHistoryCSV()" style="flex: 1; padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font-size: 0.7rem; cursor: pointer;">📊 CSV</button>
+            </div>
         </div>
         <div style="padding: 0.75rem 1rem; border-top: 1px solid var(--border); text-align: center;">
             <button onclick="localStorage.removeItem('dismissedAlerts'); window.showAlertsToast();" style="background: none; border: none; color: var(--text-dim); font-size: 0.75rem; cursor: pointer; text-decoration: underline;">
@@ -670,8 +695,13 @@ if (!document.getElementById('alerts-toast-styles')) {
 }
 
 // ============================================
+// ============================================
 // HISTORIAL DE ACCIONES CRUD
 // ============================================
+
+// Constantes para backup
+const LAST_BACKUP_KEY = 'lastHistoryBackup';
+const BACKUP_INTERVAL = 24 * 60 * 60 * 1000; // 24 horas
 
 window.addToHistory = function(action, item, oldItem = null) {
     const history = JSON.parse(localStorage.getItem('inventoryHistory') || '[]');
@@ -680,6 +710,7 @@ window.addToHistory = function(action, item, oldItem = null) {
         action: action,
         itemName: item.deviceType || item.serialNumber || item.fullName || 'Equipo',
         itemId: item.id,
+        itemResguardo: item.resguardo || item.serialNumber || '',
         details: getActionDetails(action, item, oldItem),
         timestamp: new Date().toISOString(),
         user: 'Usuario'
@@ -687,31 +718,191 @@ window.addToHistory = function(action, item, oldItem = null) {
     
     history.unshift(historyItem);
     
-    if (history.length > 50) {
-        history.pop();
-    }
-    
+    // Sin límite - historial ilimitado
     localStorage.setItem('inventoryHistory', JSON.stringify(history));
+    
+    // Verificar backup automático cada 24hrs
+    checkAutoBackup();
     
     window.dispatchEvent(new CustomEvent('history-updated', { detail: historyItem }));
 };
 
+// Función de backup automático
+function checkAutoBackup() {
+    const lastBackup = localStorage.getItem(LAST_BACKUP_KEY);
+    const now = Date.now();
+    
+    if (!lastBackup || (now - parseInt(lastBackup)) > BACKUP_INTERVAL) {
+        saveHistoryToMonthlyFile();
+        localStorage.setItem(LAST_BACKUP_KEY, now.toString());
+    }
+}
+
+// Guardar en archivo mensual
+function saveHistoryToMonthlyFile() {
+    const history = JSON.parse(localStorage.getItem('inventoryHistory') || '[]');
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const monthKey = `inventoryHistory_${year}_${month}`;
+    
+    // Guardar en archivo del mes actual
+    localStorage.setItem(monthKey, JSON.stringify(history));
+    
+    // También guardar como historial actual
+    localStorage.setItem('inventoryHistory_current', JSON.stringify(history));
+    
+    console.log(`Backup de historial guardado: ${monthKey} (${history.length} registros)`);
+}
+
+// Obtener todos los historiales mensuales
+window.getAllHistoryFiles = function() {
+    const files = [];
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    
+    // Buscar archivos de los últimos 12 meses
+    for (let i = 0; i < 12; i++) {
+        const date = new Date(currentYear, currentMonth - 1 - i, 1);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const key = `inventoryHistory_${year}_${month}`;
+        const data = localStorage.getItem(key);
+        
+        if (data) {
+            const history = JSON.parse(data);
+            if (history.length > 0) {
+                files.push({
+                    key: key,
+                    year: year,
+                    month: month,
+                    label: `${getMonthName(parseInt(month))} ${year}`,
+                    count: history.length,
+                    data: history
+                });
+            }
+        }
+    }
+    
+    return files;
+};
+
+function getMonthName(month) {
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    return months[month - 1];
+}
+
+// Exportar a JSON
+window.exportHistoryJSON = function() {
+    const history = window.getHistory();
+    const dataStr = JSON.stringify(history, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const now = new Date();
+    const fileName = `historial_inventario_${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}.json`;
+    downloadBlob(blob, fileName);
+};
+
+// Exportar a CSV
+window.exportHistoryCSV = function() {
+    const history = window.getHistory();
+    const headers = ['Fecha', 'Hora', 'Acción', 'Equipo', 'Resguardo', 'Detalles', 'Usuario'];
+    const rows = history.map(h => {
+        const date = new Date(h.timestamp);
+        return [
+            date.toLocaleDateString('es'),
+            date.toLocaleTimeString('es'),
+            h.action,
+            h.itemName,
+            h.itemResguardo || '',
+            (h.details || '').replace(/,/g, ';'),
+            h.user
+        ];
+    });
+    
+    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const now = new Date();
+    const fileName = `historial_inventario_${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}.csv`;
+    downloadBlob(blob, fileName);
+};
+
+function downloadBlob(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 function getActionDetails(action, item, oldItem) {
+    const fieldLabels = {
+        fullName: 'Usuario',
+        location: 'Ubicación',
+        address: 'Dirección',
+        department: 'Depto',
+        position: 'Puesto',
+        extension: 'Ext',
+        email: 'Correo',
+        resguardo: 'Resguardo',
+        deviceType: 'Tipo',
+        brand: 'Marca',
+        model: 'Modelo',
+        serialNumber: 'Serie',
+        mouseExternal: 'Mouse',
+        os: 'Sistema',
+        pcName: 'PC',
+        processor: 'Procesador',
+        ram: 'RAM',
+        storageCapacity: 'Disco',
+        status: 'Estado',
+        price: 'Precio',
+        purchaseDate: 'Fecha Compra',
+        warranty: 'Garantía',
+        warrantyEndDate: 'Fin Garantía',
+        hdmiAdapter: 'HDMI',
+        otroAccesorio: 'Accesorio',
+        periphBrand: 'MarcaPerif',
+        periphModel: 'ModeloPerif',
+        periphSerial: 'SeriePerif',
+        incidentReport: 'Incidencia',
+        lastMtto: 'Último Mtto',
+        nextMtto: 'Próximo Mtto',
+        conditions: 'Condiciones',
+        ipAddress: 'IP',
+        ipType: 'TipoIP'
+    };
+    
     switch(action) {
         case 'create':
-            return `Equipo agregado: ${item.deviceType || 'Dispositivo'} - ${item.serialNumber || item.brand || ''}`;
+            const resguardoCreate = item.resguardo || item.serialNumber || 'Sin número';
+            return `Nuevo ${item.deviceType || 'equipo'}: ${resguardoCreate}`;
+            
         case 'update':
             if (oldItem) {
                 const changes = [];
-                if (oldItem.status !== item.status) changes.push(`Status: ${oldItem.status} → ${item.status}`);
-                if (oldItem.department !== item.department) changes.push(`Depto: ${oldItem.department} → ${item.department}`);
-                if (oldItem.fullName !== item.fullName) changes.push(`Usuario: ${oldItem.fullName} → ${item.fullName}`);
-                if (oldItem.ipAddress !== item.ipAddress) changes.push(`IP: ${oldItem.ipAddress || 'Sin IP'} → ${item.ipAddress || 'Sin IP'}`);
-                return changes.length > 0 ? changes.join(', ') : 'Actualización general';
+                
+                Object.keys(item).forEach(key => {
+                    if (oldItem[key] !== item[key] && fieldLabels[key]) {
+                        const oldVal = oldItem[key] || '(vacío)';
+                        const newVal = item[key] || '(vacío)';
+                        changes.push(`${fieldLabels[key]}: ${oldVal} → ${newVal}`);
+                    }
+                });
+                
+                if (changes.length === 0) return 'Actualización general';
+                if (changes.length <= 3) return changes.join(', ');
+                return `${changes[0]}, ${changes[1]}, ${changes[2]}... (+${changes.length - 3})`;
             }
-            return `Equipo actualizado: ${item.deviceType || 'Dispositivo'}`;
+            return `Actualizado`;
+            
         case 'delete':
-            return `Equipo eliminado: ${item.deviceType || 'Dispositivo'} - ${item.serialNumber || item.brand || ''}`;
+            const resguardoDel = item.resguardo || item.serialNumber || 'Sin número';
+            return `Eliminado: ${resguardoDel}`;
+            
         default:
             return '';
     }
@@ -728,8 +919,27 @@ window.clearHistory = function() {
 window.renderHistoryPanel = function() {
     const history = window.getHistory();
     const panel = document.getElementById('historyPanel');
+    const searchInput = document.getElementById('historySearch');
+    const filterSelect = document.getElementById('historyFilter');
     
     if (!panel) return;
+    
+    let filteredHistory = [...history];
+    
+    // Aplicar filtro de búsqueda
+    if (searchInput && searchInput.value) {
+        const search = searchInput.value.toLowerCase();
+        filteredHistory = filteredHistory.filter(item => 
+            item.itemName.toLowerCase().includes(search) ||
+            (item.itemResguardo || '').toLowerCase().includes(search) ||
+            (item.details || '').toLowerCase().includes(search)
+        );
+    }
+    
+    // Aplicar filtro por tipo de acción
+    if (filterSelect && filterSelect.value && filterSelect.value !== 'all') {
+        filteredHistory = filteredHistory.filter(item => item.action === filterSelect.value);
+    }
     
     const getActionIcon = (action) => {
         const icons = { create: 'plus-circle', update: 'edit', delete: 'trash-2' };
@@ -757,10 +967,12 @@ window.renderHistoryPanel = function() {
         return date.toLocaleDateString('es');
     };
     
-    panel.innerHTML = history.length === 0 
-        ? '<div style="padding: 2rem; text-align: center; color: var(--text-dim);">No hay historial de acciones</div>'
-        : history.map(item => `
-            <div style="display: flex; gap: 0.75rem; padding: 0.75rem; border-bottom: 1px solid var(--border-light);">
+    panel.innerHTML = filteredHistory.length === 0 
+        ? `<div style="padding: 2rem; text-align: center; color: var(--text-dim);">
+            ${history.length === 0 ? 'No hay historial de acciones' : 'No se encontraron resultados'}
+           </div>`
+        : filteredHistory.map(item => `
+            <div style="display: flex; gap: 0.75rem; padding: 0.75rem; border-bottom: 1px solid var(--border-light); transition: background 0.2s;" class="history-item">
                 <div style="color: ${getActionColor(item.action)}; flex-shrink: 0;">
                     <i data-lucide="${getActionIcon(item.action)}" style="width: 18px; height: 18px;"></i>
                 </div>
@@ -774,6 +986,12 @@ window.renderHistoryPanel = function() {
             </div>
         `).join('');
     
+    // Actualizar contador
+    const countEl = document.getElementById('historyCount');
+    if (countEl) {
+        countEl.textContent = `${filteredHistory.length} / ${history.length}`;
+    }
+    
     if (window.lucide) {
         window.lucide.createIcons();
     }
@@ -783,3 +1001,46 @@ window.renderHistoryPanel = function() {
 window.addEventListener('history-updated', () => {
     window.renderHistoryPanel?.();
 });
+
+// Crear UI mejorada del panel de historial
+window.createHistoryUI = function() {
+    return `
+        <div style="display: flex; flex-direction: column; height: 100%;">
+            <!-- Buscador y filtros -->
+            <div style="padding: 1rem; border-bottom: 1px solid var(--border); display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <input type="text" id="historySearch" placeholder="Buscar..." 
+                    style="flex: 1; min-width: 150px; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 0.85rem;"
+                    oninput="window.renderHistoryPanel()">
+                <select id="historyFilter" onchange="window.renderHistoryPanel()"
+                    style="padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 0.85rem;">
+                    <option value="all">Todos</option>
+                    <option value="create">Creados</option>
+                    <option value="update">Actualizados</option>
+                    <option value="delete">Eliminados</option>
+                </select>
+            </div>
+            
+            <!-- Info del historial -->
+            <div style="padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-dim);">
+                <span>Registros: <strong id="historyCount">0</strong></span>
+                <span>📅 Backup automático cada 24hrs</span>
+            </div>
+            
+            <!-- Lista de historial -->
+            <div id="historyPanel" style="flex: 1; overflow-y: auto;"></div>
+            
+            <!-- Botones de exportación -->
+            <div style="padding: 1rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                <button onclick="window.exportHistoryJSON()" class="glass-btn" style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                    📥 JSON
+                </button>
+                <button onclick="window.exportHistoryCSV()" class="glass-btn" style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                    📊 CSV
+                </button>
+                <button onclick="if(confirm('¿Limpiar todo el historial?')) { localStorage.removeItem('inventoryHistory'); window.renderHistoryPanel(); }" class="glass-btn" style="padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--danger);">
+                    🗑️ Limpiar
+                </button>
+            </div>
+        </div>
+    `;
+};
