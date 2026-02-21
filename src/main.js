@@ -793,7 +793,7 @@ const viewAssetDetail = (id) => {
             dispatchInventoryUpdate();
             setTimeout(() => window.addToHistory?.('delete', logSaved), 100);
             
-            showNotification(`Activo eliminado: ${resguardo}`, 'warning');
+            showNotification(`Registro eliminado: ${resguardo}`, 'warning');
         }
     };
 };
@@ -1515,13 +1515,12 @@ inventoryForm.onsubmit = (e) => {
         const newStatus = itemData.status;
         const resguardoLabel = itemData.resguardo || itemData.serialNumber || 'registro';
         
-        // Detectar cambio de estado - mostrar alerta especial
+        // Detectar cambio de estado - mostrar solo UNA notificación
         if (oldStatus && oldStatus !== newStatus) {
-            showStatusChangeAlert(oldStatus, newStatus, itemData.fullName || itemData.serialNumber);
+            showNotification(`Estado: ${oldStatus} → ${newStatus} (${resguardoLabel})`, 'warning');
+        } else {
+            showNotification(`Registro actualizado: ${resguardoLabel}`, 'info');
         }
-        
-        // Siempre mostrar notificación de actualización
-        showNotification(`Activo actualizado: ${resguardoLabel}`, 'info');
         
         // Detectar cambio de usuario y registrar en historial
         if (oldItem && oldItem.fullName !== itemData.fullName) {
@@ -1596,7 +1595,7 @@ inventoryForm.onsubmit = (e) => {
         
         // Mostrar notificación de nuevo registro
         const resguardoLabel = itemData.resguardo || itemData.serialNumber || 'registro';
-        showNotification(`Nuevo activo registrado: ${resguardoLabel}`, 'success');
+        showNotification(`Nuevo equipo registrado: ${resguardoLabel}`, 'success');
         
         inventory.unshift(itemData);
         setTimeout(() => window.addToHistory?.('create', itemData), 100);
