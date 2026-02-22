@@ -305,7 +305,7 @@ function loadExample(exampleId) {
         
         inventory.push({
             id: generateId(),
-            resguardo: `SERV-${anioCompra}-${String(i).padStart(3, '0')}`,
+            resguardo: `SERV-${String(i + 1).padStart(4, '0')}`,
             fullName: `${nombre} ${apellido} ${random(apellidos)}`,
             position: `${random(posiciones)} DE ${random(areas)}`,
             email: `${nombre.toLowerCase()}.${apellido.toLowerCase()}@servyre.com`,
@@ -1516,10 +1516,11 @@ inventoryForm.onsubmit = (e) => {
         const resguardoLabel = itemData.resguardo || itemData.serialNumber || 'registro';
         
         // Detectar cambio de estado - mostrar solo UNA notificación
+        const displayResguardo = resguardoLabel || 'Sin resguardo';
         if (oldStatus && oldStatus !== newStatus) {
-            showNotification(`Estado: ${oldStatus} → ${newStatus} (${resguardoLabel})`, 'warning');
+            showNotification(`${displayResguardo}: Estado ${oldStatus} → ${newStatus}`, 'warning');
         } else {
-            showNotification(`Registro actualizado: ${resguardoLabel}`, 'info');
+            showNotification(`Registro actualizado: ${displayResguardo}`, 'info');
         }
         
         // Detectar cambio de usuario y registrar en historial

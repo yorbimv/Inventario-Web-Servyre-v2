@@ -710,7 +710,7 @@ window.addToHistory = function(action, item, oldItem = null) {
         action: action,
         itemName: item.deviceType || item.serialNumber || item.fullName || 'Equipo',
         itemId: item.id,
-        itemResguardo: item.resguardo || item.serialNumber || '',
+        itemResguardo: item.resguardo || item.serialNumber || 'Sin resguardo',
         details: getActionDetails(action, item, oldItem),
         timestamp: new Date().toISOString(),
         user: 'Usuario'
