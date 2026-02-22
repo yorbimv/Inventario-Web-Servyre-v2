@@ -498,8 +498,8 @@ const viewAssetDetail = (id) => {
     if (!item) return;
 
     const initials = item.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    const empty = (val) => val && val.trim() ? sanitize(val) : '<span class="empty-field">-</span>';
-    const emptyText = (val) => val && val.trim() ? sanitize(val) : 'Sin registro';
+    const empty = (val) => val !== undefined && val !== null && String(val).trim() ? sanitize(val) : '<span class="empty-field">-</span>';
+    const emptyText = (val) => val !== undefined && val !== null && String(val).trim() ? sanitize(val) : 'Sin registro';
 
     detailModalBody.innerHTML = `
         <div class="asset-passport-premium animate__animated animate__zoomIn">
