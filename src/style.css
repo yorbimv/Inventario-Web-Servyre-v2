@@ -380,6 +380,246 @@ h1 span {
   height: 16px;
 }
 
+/* Import Modal */
+.import-modal {
+  max-width: 600px;
+}
+
+.import-description {
+  text-align: center;
+  padding: 1rem;
+}
+
+.import-description-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  color: var(--primary);
+}
+
+.import-description h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.import-description p {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+}
+
+.import-formats {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.import-format-badge {
+  background: var(--card-bg);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--primary);
+}
+
+.import-rules {
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.import-rules h4 {
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.import-rules ul {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  padding-left: 1.25rem;
+}
+
+.import-rules li {
+  margin-bottom: 0.25rem;
+}
+
+.import-modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+/* Import Summary */
+.import-summary {
+  padding: 0.5rem;
+}
+
+.import-summary-title {
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.import-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.import-summary-card {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.import-summary-card.new {
+  border: 1px solid var(--success);
+}
+
+.import-summary-card.same {
+  border: 1px solid var(--text-dim);
+}
+
+.import-summary-card.changed {
+  border: 1px solid var(--warning);
+}
+
+.import-summary-number {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.import-summary-card.new .import-summary-number {
+  color: var(--success);
+}
+
+.import-summary-card.same .import-summary-number {
+  color: var(--text-dim);
+}
+
+.import-summary-card.changed .import-summary-number {
+  color: var(--warning);
+}
+
+.import-summary-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.import-total {
+  text-align: center;
+  padding: 0.75rem;
+  background: var(--surface);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+/* Conflict Modal */
+.conflict-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.conflict-item {
+  background: var(--surface);
+  border: 1px solid var(--warning);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.conflict-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.conflict-resguardo {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.conflict-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.conflict-btn {
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.conflict-btn:hover {
+  border-color: var(--primary);
+}
+
+.conflict-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.conflict-comparison {
+  font-size: 0.75rem;
+}
+
+.conflict-row {
+  display: flex;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.conflict-row:last-child {
+  border-bottom: none;
+}
+
+.conflict-field {
+  flex: 1;
+  color: var(--text-dim);
+}
+
+.conflict-current {
+  flex: 1;
+  color: var(--text);
+}
+
+.conflict-new {
+  flex: 1;
+  color: var(--warning);
+}
+
+.conflict-new.changed {
+  color: var(--danger);
+}
+
+.apply-all-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--surface);
+  border-radius: 8px;
+  margin: 1rem 0;
+  font-size: 0.85rem;
+}
+
 /* Tooltip */
 .has-tooltip {
   position: relative;

@@ -1261,60 +1261,77 @@ function renderWarrantyBadge(purchaseDate, warrantyMonths) {
 // ============================================================================
 
 // Create Excel Template
+const importModal = document.getElementById('importModal');
+const importModalBody = document.getElementById('importModalBody');
+let pendingImportData = [];
+let importConflicts = [];
+let applyToAllConflicts = false;
+
+window.closeImportModal = () => {
+    importModal?.classList.remove('active');
+};
+
 document.getElementById('importDataBtn').onclick = () => {
-    const currentCount = inventory.length;
-    const mensaje = `IMPORTAR DATOS
-
-Esta accion importara datos desde un archivo Excel (.xlsx/.xls) o JSON.
-
-- Los registros se AGREGARAN al inventario existente
-- Los datos actuales NO seran eliminados
-- Inventario actual: ${currentCount} registros
-
-¿Desea continuar?`;
-
-    if (confirm(mensaje)) {
-        importInput.click();
-    }
+    importModalBody.innerHTML = `
+        <div class="import-description">
+            <i data-lucide="file-up" class="import-description-icon"></i>
+            <h3>¿Qué es lo que va a pasar?</h3>
+            <p>Sube un archivo Excel (.xlsx, .xls) o JSON con los registros que deseas agregar.</p>
+            <div class="import-formats">
+                <span class="import-format-badge">.xlsx</span>
+                <span class="import-format-badge">.xls</span>
+                <span class="import-format-badge">.json</span>
+            </div>
+            <div class="import-rules">
+                <h4>¿Cómo se manejarán los registros?</h4>
+                <ul>
+                    <li><strong>✅ Registro nuevo:</strong> Se agregará al inventario</li>
+                    <li><strong>⏭️ Registro idéntico:</strong> Se omitirá (ya existe igual)</li>
+                    <li><strong>⚠️ Registro con cambios:</strong> Se te preguntará qué hacer</li>
+                </ul>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-dim);">
+                <strong>Referencia:</strong> El campo "Resguardo" es único por registro.
+            </p>
+        </div>
+        <div class="import-modal-buttons">
+            <button class="cancel-btn" onclick="closeImportModal()">Cancelar</button>
+            <button class="save-btn" onclick="document.getElementById('importInput').click()">
+                <i data-lucide="folder-open"></i> Seleccionar archivo
+            </button>
+        </div>
+    `;
+    importModal.classList.add('active');
+    if (window.lucide) window.lucide.createIcons();
 };
 
 importInput.onchange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
+    closeImportModal();
+    
+    const processFile = (records) => {
+        pendingImportData = records;
+        
+        const analysis = analyzeImportData(records);
+        
+        if (analysis.conflicts.length === 0) {
+            executeImport(analysis);
+        } else {
+            showConflictsModal(analysis);
+        }
+    };
+    
     if (file.name.endsWith('.json')) {
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
                 const imported = JSON.parse(event.target.result);
                 if (imported.inventory) {
-                    // Agregar o actualizar registros
-                    const beforeCount = inventory.length;
-                    let newCount = 0;
-                    let updateCount = 0;
-                    
-                    imported.inventory.forEach(item => {
-                        const index = inventory.findIndex(i => i.id === item.id);
-                        if (index >= 0) {
-                            // Actualizar registro existente (no hacer nada)
-                            updateCount++;
-                        } else {
-                            // Agregar nuevo registro
-                            inventory.push(item);
-                            newCount++;
-                        }
-                    });
-                    const afterCount = inventory.length;
-                    saveToStorage();
-                    renderTable();
-                    updateStats();
-                    
-                    let msg = '';
-                    if (newCount > 0) msg += `${newCount} nuevo(s) `;
-                    if (updateCount > 0) msg += `${updateCount} existente(s) no modificado(s)`;
-                    showNotification(`Importacion completada. ${msg}. Total: ${afterCount}`, 'success');
+                    const records = imported.inventory.map(item => normalizeImportRecord(item));
+                    processFile(records);
                 } else {
-                    showNotification('El archivo JSON no contiene inventario valido', 'error');
+                    showNotification('El archivo JSON no contiene inventario válido', 'error');
                 }
             } catch (err) { 
                 showNotification('Error al procesar el archivo JSON: ' + err.message, 'error'); 
@@ -1322,64 +1339,257 @@ importInput.onchange = (e) => {
         };
         reader.readAsText(file);
     } else {
-        // Advanced Excel Import
         const reader = new FileReader();
         reader.onload = (event) => {
             const data = new Uint8Array(event.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
             const json = XLSX.utils.sheet_to_json(sheet);
-
-            if (confirm(`Se han detectado ${json.length} registros. ¿Desea importarlos al inventario actual?`)) {
-                let importedCount = 0;
-                json.forEach(row => {
-                    inventory.push({
-                        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-                        fullName: row['Nombre Completo'] || 'N/A',
-                        location: row['Ubicación'] || 'Corporativo',
-                        address: row['Direccion'] || '',
-                        department: row['Departamento'] || 'General',
-                        position: row['Puesto'] || '',
-                        extension: row['Extension'] || '',
-                        email: row['Correo'] || '',
-                        resguardo: row['Resguardo'] || '',
-                        deviceType: row['Equipo'] || 'Laptop',
-                        brand: row['Marca'] || '',
-                        model: row['Modelo'] || '',
-                        serialNumber: row['Serie'] || 'SN-' + Date.now().toString().slice(-6),
-                        mouseExternal: row['Mouse externo (Laptop)'] || '',
-                        os: row['Sistema Operativo'] || '',
-                        pcName: row['Nombre PC'] || '',
-                        processor: row['Procesador'] || '',
-                        ram: row['RAM'] || '8 GB',
-                        storageCapacity: row['Disco duro'] || '256 GB SSD',
-                        price: row['Precio unitario'] || '',
-                        purchaseDate: row['Fecha de Compra'] || '',
-                        periphBrand: row['Marca (Monitor/Accesorio)'] || '',
-                        periphModel: row['Modelo (Monitor/Accesorio)'] || '',
-                        periphSerial: row['Serie (Monitor/Accesorio)'] || '',
-                        incidentReport: row['Reporte (Incidentes)'] || '',
-                        lastMtto: row['Ultima Fecha de Mtto.'] || '',
-                        nextMtto: row['Proxima Fecha de Mtto.'] || '',
-                        conditions: row['Condiciones'] || '',
-                        photos: row['Fotos'] || '',
-                        status: 'Activo',
-                        notes: '',
-                        ipAddress: row['IP'] || '',
-                        ipType: row['Tipo IP'] || ''
-                    });
-                    importedCount++;
-                });
-                saveToStorage();
-                renderTable();
-                dispatchInventoryUpdate();
-                alert(`¡Éxito! Se importaron ${importedCount} registros correctamente.`);
-            }
+            
+            const records = json.map(row => normalizeImportRecordFromExcel(row));
+            processFile(records);
         };
-        reader.readAsArrayBuffer(file);
+        reader.readAsText(file);
     }
     e.target.value = '';
 };
+
+function normalizeImportRecord(item) {
+    return {
+        resguardo: item.resguardo || item.Resguardo || '',
+        fullName: item.fullName || item['Nombre Completo'] || item.Nombre || '',
+        location: item.location || item.Ubicación || item['Ubicacion'] || '',
+        address: item.address || item.Direccion || item['Dirección'] || '',
+        department: item.department || item.Departamento || '',
+        position: item.position || item.Puesto || '',
+        extension: item.extension || item.Extensión || item.Extension || '',
+        email: item.email || item.Correo || '',
+        deviceType: item.deviceType || item.Equipo || '',
+        brand: item.brand || item.Marca || '',
+        model: item.model || item.Modelo || '',
+        serialNumber: item.serialNumber || item.Serie || '',
+        mouseExternal: item.mouseExternal || item['Mouse externo (Laptop)'] || '',
+        os: item.os || item['Sistema Operativo'] || '',
+        pcName: item.pcName || item['Nombre PC'] || '',
+        processor: item.processor || item.Procesador || '',
+        ram: item.ram || item.RAM || '',
+        storageCapacity: item.storageCapacity || item['Disco duro'] || '',
+        price: item.price || item['Precio unitario'] || '',
+        purchaseDate: item.purchaseDate || item['Fecha de Compra'] || '',
+        periphBrand: item.periphBrand || item['Marca (Monitor/Accesorio)'] || '',
+        periphModel: item.periphModel || item['Modelo (Monitor/Accesorio)'] || '',
+        periphSerial: item.periphSerial || item['Serie (Monitor/Accesorio)'] || '',
+        incidentReport: item.incidentReport || item['Reporte (Incidentes)'] || '',
+        lastMtto: item.lastMtto || item['Ultima Fecha de Mtto.'] || '',
+        nextMtto: item.nextMtto || item['Proxima Fecha de Mtto.'] || '',
+        conditions: item.conditions || item.Condiciones || '',
+        photos: item.photos || item.Fotos || '',
+        status: item.status || 'Activo',
+        notes: item.notes || '',
+        ipAddress: item.ipAddress || item.IP || '',
+        ipType: item.ipType || item['Tipo IP'] || ''
+    };
+}
+
+function normalizeImportRecordFromExcel(row) {
+    return normalizeImportRecord(row);
+}
+
+function analyzeImportData(records) {
+    const newRecords = [];
+    const sameRecords = [];
+    const conflicts = [];
+    
+    records.forEach(record => {
+        if (!record.resguardo) return;
+        
+        const existingIndex = inventory.findIndex(i => 
+            i.resguardo && i.resguardo.toLowerCase() === record.resguardo.toLowerCase()
+        );
+        
+        if (existingIndex === -1) {
+            newRecords.push(record);
+        } else {
+            const existing = inventory[existingIndex];
+            const differences = compareRecords(existing, record);
+            
+            if (differences.length === 0) {
+                sameRecords.push(record);
+            } else {
+                conflicts.push({
+                    resguardo: record.resguardo,
+                    current: existing,
+                    imported: record,
+                    differences: differences,
+                    action: null
+                });
+            }
+        }
+    });
+    
+    return { newRecords, sameRecords, conflicts };
+}
+
+function compareRecords(current, imported) {
+    const differences = [];
+    const fieldsToCompare = [
+        'fullName', 'location', 'address', 'department', 'position',
+        'extension', 'email', 'deviceType', 'brand', 'model',
+        'serialNumber', 'mouseExternal', 'os', 'pcName', 'processor',
+        'ram', 'storageCapacity', 'price', 'purchaseDate', 'periphBrand',
+        'periphModel', 'periphSerial', 'incidentReport', 'lastMtto',
+        'nextMtto', 'conditions', 'photos', 'status', 'ipAddress', 'ipType'
+    ];
+    
+    fieldsToCompare.forEach(field => {
+        const currentVal = (current[field] || '').toString().trim();
+        const importedVal = (imported[field] || '').toString().trim();
+        
+        if (currentVal !== importedVal) {
+            differences.push({
+                field: field,
+                current: currentVal || '(vacío)',
+                imported: importedVal || '(vacío)'
+            });
+        }
+    });
+    
+    return differences;
+}
+
+function showConflictsModal(analysis) {
+    importConflicts = analysis.conflicts.map(c => ({...c, action: null}));
+    applyToAllConflicts = false;
+    
+    const renderConflicts = () => {
+        const conflictsHtml = importConflicts.map((conflict, idx) => {
+            const diffRows = conflict.differences.slice(0, 5).map(d => `
+                <div class="conflict-row">
+                    <span class="conflict-field">${d.field}:</span>
+                    <span class="conflict-current">${d.current}</span>
+                    <span class="conflict-new">${d.imported}</span>
+                </div>
+            `).join('');
+            
+            const moreCount = conflict.differences.length - 5;
+            const moreHtml = moreCount > 0 ? `<div class="conflict-row" style="color: var(--text-dim);">...y ${moreCount} más</div>` : '';
+            
+            return `
+                <div class="conflict-item" data-idx="${idx}">
+                    <div class="conflict-header">
+                        <span class="conflict-resguardo">${conflict.resguardo}</span>
+                        <div class="conflict-actions">
+                            <button class="conflict-btn ${conflict.action === 'keep' ? 'active' : ''}" onclick="setConflictAction(${idx}, 'keep')">Mantener actual</button>
+                            <button class="conflict-btn ${conflict.action === 'update' ? 'active' : ''}" onclick="setConflictAction(${idx}, 'update')">Actualizar</button>
+                            <button class="conflict-btn ${conflict.action === 'ignore' ? 'active' : ''}" onclick="setConflictAction(${idx}, 'ignore')">Ignorar</button>
+                        </div>
+                    </div>
+                    <div class="conflict-comparison">
+                        ${diffRows}${moreHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        importModalBody.innerHTML = `
+            <div class="import-summary">
+                <div class="import-summary-title">
+                    <i data-lucide="alert-triangle" style="color: var(--warning);"></i>
+                    Se detectaron ${analysis.conflicts.length} registros con cambios
+                </div>
+                <div class="apply-all-checkbox">
+                    <input type="checkbox" id="applyToAllConflicts" ${applyToAllConflicts ? 'checked' : ''} onchange="toggleApplyToAll(this.checked)">
+                    <label for="applyToAllConflicts">Aplicar misma decisión a todos los conflictos</label>
+                </div>
+                <div class="conflict-list">${conflictsHtml}</div>
+            </div>
+            <div class="import-modal-buttons">
+                <button class="cancel-btn" onclick="closeImportModal()">Cancelar</button>
+                <button class="save-btn" onclick="executeImportWithConflicts()">
+                    <i data-lucide="check"></i> Confirmar importación
+                </button>
+            </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+    };
+    
+    renderConflicts();
+}
+
+window.setConflictAction = (idx, action) => {
+    importConflicts[idx].action = action;
+    
+    if (applyToAllConflicts) {
+        importConflicts.forEach((c, i) => {
+            if (i !== idx) c.action = action;
+        });
+    }
+    
+    showConflictsModal({ conflicts: importConflicts });
+};
+
+window.toggleApplyToAll = (checked) => {
+    applyToAllConflicts = checked;
+};
+
+window.executeImportWithConflicts = () => {
+    const analysis = {
+        newRecords: [],
+        sameRecords: [],
+        conflicts: importConflicts
+    };
+    
+    inventory.forEach(item => {
+        const conflict = importConflicts.find(c => 
+            c.resguardo.toLowerCase() === (item.resguardo || '').toLowerCase()
+        );
+        if (conflict) {
+            if (conflict.action === 'update') {
+                Object.assign(item, conflict.imported);
+            }
+        }
+    });
+    
+    pendingImportData.forEach(record => {
+        const exists = inventory.findIndex(i => 
+            i.resguardo && i.resguardo.toLowerCase() === record.resguardo.toLowerCase()
+        );
+        if (exists === -1) {
+            analysis.newRecords.push(record);
+        }
+    });
+    
+    executeImport(analysis);
+};
+
+function executeImport(analysis) {
+    const beforeCount = inventory.length;
+    
+    analysis.newRecords.forEach(record => {
+        inventory.push({
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+            ...record
+        });
+    });
+    
+    const afterCount = inventory.length;
+    saveToStorage();
+    renderTable();
+    updateStats();
+    
+    let summaryMsg = '';
+    if (analysis.newRecords.length > 0) summaryMsg += `✅ ${analysis.newRecords.length} nuevo(s) `;
+    if (analysis.sameRecords?.length > 0) summaryMsg += `⏭️ ${analysis.sameRecords.length} idéntico(s) omitido(s) `;
+    if (analysis.conflicts?.length > 0) {
+        const kept = analysis.conflicts.filter(c => c.action === 'keep' || (!c.action && applyToAllConflicts)).length;
+        const updated = analysis.conflicts.filter(c => c.action === 'update').length;
+        const ignored = analysis.conflicts.filter(c => c.action === 'ignore').length;
+        if (kept > 0) summaryMsg += `💾 ${kept} actualizado(s) `;
+        if (ignored > 0) summaryMsg += `⏭️ ${ignored} ignorado(s) `;
+    }
+    
+    showNotification(`Importación completada. ${summaryMsg}Total: ${afterCount} registros`, 'success');
+}
 
 // --- EVENTS ---
 brandInput.onchange = updateModelsDropdown;

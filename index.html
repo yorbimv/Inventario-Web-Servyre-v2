@@ -126,6 +126,19 @@
 
     <input type="file" id="importInput" style="display: none;" accept=".json,.xlsx,.xls">
 
+    <!-- IMPORT MODAL -->
+    <div id="importModal" class="modal-overlay glass-blur">
+      <div class="modal import-modal">
+        <div class="modal-header">
+          <h2><i data-lucide="upload-cloud"></i> Cargar Archivo</h2>
+          <button class="close-btn" onclick="closeImportModal()">&times;</button>
+        </div>
+        <div class="modal-body-premium" id="importModalBody">
+          <!-- Content injected by JS -->
+        </div>
+      </div>
+    </div>
+
     <footer class="system-footer">
       <p>
         <span class="footer-brand">SERVYRE IT</span> - Gestion de Activos - <span class="footer-version">V2.0</span>
