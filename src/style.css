@@ -121,8 +121,8 @@ body::-webkit-scrollbar {
   background: var(--surface-glass);
   border: 1px solid var(--border);
   border-radius: 24px;
-  padding: 2rem 3rem;
-  margin-bottom: 2rem;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1rem;
   box-shadow: var(--shadow);
   transition: all 0.4s ease;
 }
@@ -1872,7 +1872,7 @@ textarea {
 /* Main Content with Sidebar */
 .main-content-with-sidebar {
   margin-left: 60px;
-  padding: 1.5rem;
+  padding: 0.5rem 1.5rem 1.5rem;
   min-height: 100vh;
   transition: margin-left 0.3s ease;
 }
