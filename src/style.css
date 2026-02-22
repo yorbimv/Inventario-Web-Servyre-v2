@@ -1503,67 +1503,174 @@ textarea {
   word-break: break-all;
 }
 
-/* New Option C Styles - Compact Header */
-.detail-header-compact {
+/* New Option A Styles - Floating Avatar */
+.detail-header-floating {
   display: flex;
-  gap: 1.5rem;
+  justify-content: space-between;
+  align-items: flex-start;
   background: var(--surface);
   border: 1px solid var(--border-light);
   border-radius: 16px;
   padding: 1.25rem;
+  position: relative;
 }
 
-.detail-header-left {
-  flex-shrink: 0;
-}
-
-.detail-header-left .user-avatar-premium {
-  margin-bottom: 0;
-}
-
-.detail-header-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.compact-row {
+.header-floating-left {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.compact-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-dim);
-  font-weight: 600;
-  min-width: 70px;
+.user-avatar-sm {
+  width: 60px;
+  height: 60px;
+  font-size: 1.5rem;
 }
 
-.compact-value {
-  font-size: 0.85rem;
-  font-weight: 600;
+.user-basic-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 1.25rem;
+  font-weight: 700;
   color: var(--text);
 }
 
-.compact-email {
-  color: var(--primary);
+.user-position {
   font-size: 0.8rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
-.compact-resguardo {
-  font-size: 1rem;
+.header-floating-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.resguardo-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.resguardo-label-top {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.resguardo-number {
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--primary);
   letter-spacing: 0.03em;
 }
 
-.compact-row .badge {
-  margin-left: auto;
+/* Contact Section */
+.contact-section {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  margin-top: 0.75rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.contact-item i {
+  width: 16px;
+  height: 16px;
+  color: var(--text-dim);
+}
+
+.contact-item span:first-of-type {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* Equipo Section */
+.equipo-section {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-top: 0.75rem;
+}
+
+.equipo-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  margin-bottom: 0.75rem;
+}
+
+.equipo-header i {
+  width: 16px;
+  height: 16px;
+}
+
+.equipo-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.equipo-tipo {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.equipo-marca {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.equipo-specs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem 1rem;
+}
+
+.spec-item {
+  display: flex;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.spec-label {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.spec-value {
+  color: var(--text);
+  font-weight: 600;
 }
 
 /* Profile Sections */
@@ -1646,22 +1753,29 @@ textarea {
 
 /* Responsive */
 @media (max-width: 600px) {
-  .detail-header-compact {
+  .detail-header-floating {
     flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .header-floating-right {
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    text-align: center;
+    width: 100%;
   }
   
-  .detail-header-left .user-avatar-premium {
-    margin-bottom: 1rem;
+  .resguardo-display {
+    align-items: flex-start;
   }
   
-  .compact-row {
-    justify-content: center;
+  .contact-section {
+    flex-direction: column;
+    gap: 0.5rem;
   }
   
-  .compact-row .badge {
-    margin-left: 0.5rem;
+  .equipo-specs {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

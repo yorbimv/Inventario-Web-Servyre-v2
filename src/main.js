@@ -503,32 +503,50 @@ const viewAssetDetail = (id) => {
 
 detailModalBody.innerHTML = `
         <div class="asset-passport-premium animate__animated animate__zoomIn">
-            <div class="detail-header-compact">
-                <div class="detail-header-left">
-                    <div class="user-avatar-premium">${initials}</div>
+            <div class="detail-header-floating">
+                <div class="header-floating-left">
+                    <div class="user-avatar-premium user-avatar-sm">${initials}</div>
+                    <div class="user-basic-info">
+                        <span class="user-name">${sanitize(item.fullName)}</span>
+                        <span class="user-position">${sanitize(item.position)}</span>
+                    </div>
                 </div>
-                <div class="detail-header-right">
-                    <div class="compact-row">
-                        <span class="compact-label">Nombre:</span>
-                        <span class="compact-value">${sanitize(item.fullName)}</span>
+                <div class="header-floating-right">
+                    <div class="resguardo-display">
+                        <span class="resguardo-label-top">RESGUARDO</span>
+                        <span class="resguardo-number">${sanitize(item.resguardo || 'PENDIENTE')}</span>
                     </div>
-                    <div class="compact-row">
-                        <span class="compact-label">Cargo:</span>
-                        <span class="compact-value">${sanitize(item.position)}</span>
-                    </div>
-                    <div class="compact-row">
-                        <span class="compact-label">Correo:</span>
-                        <span class="compact-value compact-email">${item.email ? item.email.toLowerCase() : '-'}</span>
-                    </div>
-                    <div class="compact-row">
-                        <span class="compact-label">Ubicación:</span>
-                        <span class="compact-value">${empty(item.location)} ${item.address ? ' > ' + empty(item.address) : ''}</span>
-                    </div>
-                    <div class="compact-row">
-                        <span class="compact-label">Resguardo:</span>
-                        <span class="compact-value compact-resguardo">${sanitize(item.resguardo || 'PENDIENTE')}</span>
-                        <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}">${sanitize(item.status || '-').toUpperCase()}</span>
-                    </div>
+                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}">${sanitize(item.status || '-').toUpperCase()}</span>
+                </div>
+            </div>
+            
+            <div class="contact-section">
+                <div class="contact-item">
+                    <i data-lucide="mail"></i>
+                    <span>${item.email ? item.email.toLowerCase() : '-'}</span>
+                </div>
+                <div class="contact-item">
+                    <i data-lucide="map-pin"></i>
+                    <span>${empty(item.location)}${item.address ? ' > ' + empty(item.address) : ''}</span>
+                </div>
+            </div>
+            
+            <div class="equipo-section">
+                <div class="equipo-header">
+                    <i data-lucide="laptop"></i>
+                    <span>EQUIPO</span>
+                </div>
+                <div class="equipo-main">
+                    <span class="equipo-tipo">${empty(item.deviceType)}</span>
+                    <span class="equipo-marca">${empty(item.brand)} ${empty(item.model)}</span>
+                </div>
+                <div class="equipo-specs">
+                    <div class="spec-item"><span class="spec-label">Serie:</span><span class="spec-value">${empty(item.serialNumber)}</span></div>
+                    <div class="spec-item"><span class="spec-label">Host:</span><span class="spec-value">${empty(item.pcName)}</span></div>
+                    <div class="spec-item"><span class="spec-label">CPU:</span><span class="spec-value">${empty(item.processor)}</span></div>
+                    <div class="spec-item"><span class="spec-label">RAM:</span><span class="spec-value">${empty(item.ram)}</span></div>
+                    <div class="spec-item"><span class="spec-label">Disco:</span><span class="spec-value">${empty(item.storageCapacity)}</span></div>
+                    <div class="spec-item"><span class="spec-label">IP:</span><span class="spec-value">${empty(item.ipAddress)}</span></div>
                 </div>
             </div>
                             <div class="key-field">
