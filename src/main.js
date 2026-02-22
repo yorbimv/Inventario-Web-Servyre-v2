@@ -1700,14 +1700,75 @@ function showNewRecordAlert(serialNumber) {
 }
 
 searchInput.oninput = (e) => {
-    const q = e.target.value.toLowerCase();
-    renderTable(inventory.filter(i =>
-        i.fullName.toLowerCase().includes(q) ||
-        i.serialNumber.toLowerCase().includes(q) ||
-        i.location.toLowerCase().includes(q) ||
-        i.department.toLowerCase().includes(q)
-    ));
+    applyFilters();
 };
+
+const filterStatus = document.getElementById('filterStatus');
+const filterLocation = document.getElementById('filterDepartment');
+const filterDepartment = document.getElementById('filterLocation');
+const filterDeviceType = document.getElementById('filterDeviceType');
+const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
+function applyFilters() {
+    const q = searchInput.value.toLowerCase();
+    const statusVal = filterStatus?.value || '';
+    const locationVal = filterLocation?.value || '';
+    const departmentVal = filterDepartment?.value || '';
+    const deviceTypeVal = filterDeviceType?.value || '';
+    
+    const filtered = inventory.filter(i => {
+        const matchSearch = !q || 
+            (i.fullName && i.fullName.toLowerCase().includes(q)) ||
+            (i.serialNumber && i.serialNumber.toLowerCase().includes(q)) ||
+            (i.location && i.location.toLowerCase().includes(q)) ||
+            (i.department && i.department.toLowerCase().includes(q)) ||
+            (i.brand && i.brand.toLowerCase().includes(q)) ||
+            (i.model && i.model.toLowerCase().includes(q)) ||
+            (i.pcName && i.pcName.toLowerCase().includes(q)) ||
+            (i.resguardo && i.resguardo.toLowerCase().includes(q));
+        
+        const matchStatus = !statusVal || i.status === statusVal;
+        const matchLocation = !locationVal || i.location === locationVal;
+        const matchDepartment = !departmentVal || i.department === departmentVal;
+        const matchDeviceType = !deviceTypeVal || i.deviceType === deviceTypeVal;
+        
+        return matchSearch && matchStatus && matchLocation && matchDepartment && matchDeviceType;
+    });
+    
+    renderTable(filtered);
+}
+
+function populateFilterOptions() {
+    const locations = [...new Set(inventory.map(i => i.location).filter(Boolean))].sort();
+    const departments = [...new Set(inventory.map(i => i.department).filter(Boolean))].sort();
+    
+    if (filterLocation) {
+        filterLocation.innerHTML = '<option value="">Todas las Ubicaciones</option>' + 
+            locations.map(l => `<option value="${l}">${l}</option>`).join('');
+    }
+    if (filterDepartment) {
+        filterDepartment.innerHTML = '<option value="">Todos los Departamentos</option>' + 
+            departments.map(d => `<option value="${d}">${d}</option>`).join('');
+    }
+}
+
+if (filterStatus) filterStatus.onchange = applyFilters;
+if (filterLocation) filterLocation.onchange = applyFilters;
+if (filterDepartment) filterDepartment.onchange = applyFilters;
+if (filterDeviceType) filterDeviceType.onchange = applyFilters;
+
+if (clearFiltersBtn) {
+    clearFiltersBtn.onclick = () => {
+        searchInput.value = '';
+        if (filterStatus) filterStatus.value = '';
+        if (filterLocation) filterLocation.value = '';
+        if (filterDepartment) filterDepartment.value = '';
+        if (filterDeviceType) filterDeviceType.value = '';
+        applyFilters();
+    };
+}
+
+populateFilterOptions();
 
 // Global Actions - moved to initApp()
 

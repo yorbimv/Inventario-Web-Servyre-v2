@@ -70,6 +70,36 @@
               <i data-lucide="plus-circle"></i> <span>Nuevo Registro</span>
             </button>
           </div>
+          <div class="filters-row">
+            <select id="filterStatus" class="filter-select">
+              <option value="">Todos los Estados</option>
+              <option value="Activo">Activo</option>
+              <option value="Mantenimiento">Mantenimiento</option>
+              <option value="Baja">Baja</option>
+              <option value="Cancelado">Cancelado</option>
+              <option value="Para piezas">Para piezas</option>
+            </select>
+            <select id="filterLocation" class="filter-select">
+              <option value="">Todas las Ubicaciones</option>
+            </select>
+            <select id="filterDepartment" class="filter-select">
+              <option value="">Todos los Departamentos</option>
+            </select>
+            <select id="filterDeviceType" class="filter-select">
+              <option value="">Todos los Tipos</option>
+              <option value="Laptop">Laptop</option>
+              <option value="Desktop">Desktop</option>
+              <option value="Servidor">Servidor</option>
+              <option value="Monitor">Monitor</option>
+              <option value="Impresora">Impresora</option>
+              <option value="Celular">Celular</option>
+              <option value="Tablet">Tablet</option>
+              <option value="Otro">Otro</option>
+            </select>
+            <button id="clearFiltersBtn" class="glass-btn" title="Limpiar filtros">
+              <i data-lucide="x-circle"></i>
+            </button>
+          </div>
           <div class="actions-row">
             <div class="btn-group-glass" style="margin-left: auto;">
               <button id="manageCatalogsBtn" class="glass-btn" title="Configuracion">
