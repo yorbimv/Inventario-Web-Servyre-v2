@@ -498,127 +498,255 @@ const viewAssetDetail = (id) => {
     if (!item) return;
 
     const initials = item.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    const empty = (val) => val && val.trim() ? sanitize(val) : '<span class="empty-field">-</span>';
+    const emptyText = (val) => val && val.trim() ? sanitize(val) : 'Sin registro';
 
     detailModalBody.innerHTML = `
         <div class="asset-passport-premium animate__animated animate__zoomIn">
-            <div class="user-profile-card">
-                <div class="user-avatar-premium">${initials}</div>
-                <h2 style="font-size: 1.8rem;">${sanitize(item.fullName)}</h2>
-                <p style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${sanitize(item.position)}</p>
-                <div style="margin-top: 1.5rem;">
-                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${sanitize(item.status || '-').toUpperCase()}</span>
-                </div>
-                <div style="margin-top: 2rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; font-size: 0.9rem;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
-                        <span style="color:var(--text-dim)">Ubicación / Sede</span>
-                        <span style="font-weight:600">${sanitize(item.location)}</span>
+            <div class="detail-header-section">
+                <div class="user-profile-card">
+                    <div class="user-avatar-premium">${initials}</div>
+                    <h2 style="font-size: 1.8rem;">${sanitize(item.fullName)}</h2>
+                    <p style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${sanitize(item.position)}</p>
+                    <div style="margin-top: 1.5rem;">
+                        <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${sanitize(item.status || '-').toUpperCase()}</span>
                     </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:var(--text-dim)">División / Dirección</span>
-                        <span style="font-weight:600">${sanitize(item.address || '-')}</span>
+                    <div style="margin-top: 2rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; font-size: 0.9rem;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                            <span style="color:var(--text-dim)">Ubicación / Sede</span>
+                            <span style="font-weight:600">${empty(item.location)}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:var(--text-dim)">División / Dirección</span>
+                            <span style="font-weight:600">${empty(item.address)}</span>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <div class="detail-grid-v2" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                <!-- Main Specs -->
-                <div class="info-card"><label>S/N Serial</label><div class="value">${sanitize(item.serialNumber)}</div></div>
-                <div class="info-card"><label>Resguardo N°</label><div class="value">${sanitize(item.resguardo || 'Pendiente')}</div></div>
-                
-                <div class="info-card" style="grid-column: span 2;">
-                    <label>Equipo Principal</label>
-                    <div class="value" style="display: flex; gap: 0.5rem; align-items: center;">
-                        <span style="color: var(--primary)">${sanitize(item.deviceType)}</span>
-                        <span>${sanitize(item.brand)} ${sanitize(item.model)}</span>
+            <div class="detail-categories">
+                <!-- SECCIÓN 1: IDENTIFICACIÓN -->
+                <div class="detail-section">
+                    <h3 class="section-title"><i data-lucide="id-card"></i> Identificación</h3>
+                    <div class="detail-grid">
+                        <div class="info-card highlight-card">
+                            <label>N° Resguardo</label>
+                            <div class="value value-large">${sanitize(item.resguardo || 'PENDIENTE')}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Serie</label>
+                            <div class="value">${empty(item.serialNumber)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Estado</label>
+                            <div class="value"><span class="status-badge" data-value="${item.status}">${empty(item.status)}</span></div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="info-card"><label>Hardware Specs</label><div class="value" style="font-size:0.8rem">${sanitize(item.processor || 'CPU')} / RAM ${sanitize(item.ram)} / ${sanitize(item.storageCapacity)}</div></div>
-                <div class="info-card"><label>Mouse (Serie)</label><div class="value">${sanitize(item.mouseExternal || '-')}</div></div>
-
-                <!-- Configuración de Red -->
-                <div class="info-card" style="grid-column: span 2; border-left: 3px solid var(--primary);">
-                    <label>Configuración de Red</label>
-                    <div class="value" style="font-size: 0.85rem;">
-                        <span>IP: <code>${sanitize(item.ipAddress || '-')}</code></span>
-                        <span style="margin-left: 1rem;">Tipo: <span class="badge badge-blue" style="font-size: 0.65rem;">${sanitize(item.ipType || 'Sin asignar')}</span></span>
+                <!-- SECCIÓN 2: USUARIO -->
+                <div class="detail-section">
+                    <h3 class="section-title"><i data-lucide="users"></i> Usuario Asignado</h3>
+                    <div class="detail-grid">
+                        <div class="info-card">
+                            <label>Nombre Completo</label>
+                            <div class="value">${empty(item.fullName)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Puesto</label>
+                            <div class="value">${empty(item.position)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Correo</label>
+                            <div class="value">${empty(item.email)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Extensión</label>
+                            <div class="value">${empty(item.extension)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Departamento</label>
+                            <div class="value">${empty(item.department)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Ubicación</label>
+                            <div class="value">${empty(item.location)}</div>
+                        </div>
+                        <div class="info-card full-width">
+                            <label>Dirección</label>
+                            <div class="value">${empty(item.address)}</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Peripherals -->
-                <div class="info-card" style="grid-column: span 2; border-left: 3px solid var(--secondary);">
-                    <label>Monitor / Accesorio</label>
-                    <div class="value" style="font-size: 0.85rem;">
-                        ${sanitize(item.periphBrand || '')} ${sanitize(item.periphModel || '')} <code style="margin-left:5px">${sanitize(item.periphSerial || '-')}</code>
+                <!-- SECCIÓN 3: EQUIPO -->
+                <div class="detail-section">
+                    <h3 class="section-title"><i data-lucide="cpu"></i> Especificaciones del Equipo</h3>
+                    <div class="detail-grid">
+                        <div class="info-card">
+                            <label>Tipo de Equipo</label>
+                            <div class="value">${empty(item.deviceType)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Marca</label>
+                            <div class="value">${empty(item.brand)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Modelo</label>
+                            <div class="value">${empty(item.model)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Nombre PC/Host</label>
+                            <div class="value">${empty(item.pcName)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Sistema Operativo</label>
+                            <div class="value">${empty(item.os)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Procesador</label>
+                            <div class="value">${empty(item.processor)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>RAM</label>
+                            <div class="value">${empty(item.ram)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Almacenamiento</label>
+                            <div class="value">${empty(item.storageCapacity)}</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Maintenance & Costs -->
-                <div class="info-card"><label>Costo (Precio U.)</label><div class="value">${sanitize(item.price || '$0.00')}</div></div>
-                <div class="info-card"><label>Fecha Compra</label><div class="value">${sanitize(item.purchaseDate || '-')}</div></div>
-                
-                <div class="info-card"><label>Último Manto.</label><div class="value">${sanitize(item.lastMtto || '-')}</div></div>
-                <div class="info-card"><label>Próximo Manto.</label><div class="value" style="color:var(--primary)">${sanitize(item.nextMtto || '-')}</div></div>
+                <!-- SECCIÓN 4: ACCESORIOS -->
+                <div class="detail-section">
+                    <h3 class="section-title"><i data-lucide="monitor"></i> Accesorios</h3>
+                    <div class="detail-grid">
+                        <div class="info-card">
+                            <label>Mouse</label>
+                            <div class="value">${empty(item.mouseExternal)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Marca Monitor</label>
+                            <div class="value">${empty(item.periphBrand)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Modelo Monitor</label>
+                            <div class="value">${empty(item.periphModel)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Serie Monitor</label>
+                            <div class="value">${empty(item.periphSerial)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Adaptador HDMI</label>
+                            <div class="value">${empty(item.hdmiAdapter)}</div>
+                        </div>
+                        <div class="info-card full-width">
+                            <label>Otro Accesorio</label>
+                            <div class="value">${empty(item.otroAccesorio)}</div>
+                        </div>
+                    </div>
+                </div>
 
-                <!-- Garantía Extendida -->
-                <div class="info-card" style="grid-column: span 2; border-left: 3px solid var(--success);">
-                    <label>Garantía Extendida</label>
-                    <div class="value" style="display: flex; flex-direction: column; gap: 0.5rem;">
-                        <div>
-                            <span style="color: var(--text-muted); font-size: 0.8rem;">Vencimiento: </span>
-                            <span style="font-weight: 600;">${sanitize(item.purchaseDate ? (() => {
+                <!-- SECCIÓN 5: RED -->
+                <div class="detail-section">
+                    <h3 class="section-title"><i data-lucide="wifi"></i> Configuración de Red</h3>
+                    <div class="detail-grid">
+                        <div class="info-card">
+                            <label>Dirección IP</label>
+                            <div class="value"><code>${empty(item.ipAddress)}</code></div>
+                        </div>
+                        <div class="info-card">
+                            <label>Tipo de IP</label>
+                            <div class="value">${empty(item.ipType)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 6: ADMINISTRATIVO -->
+                <div class="detail-section">
+                    <h3 class="section-title"><i data-lucide="dollar-sign"></i> Datos Administrativos</h3>
+                    <div class="detail-grid">
+                        <div class="info-card">
+                            <label>Precio Unitario</label>
+                            <div class="value">${empty(item.price)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Fecha de Compra</label>
+                            <div class="value">${empty(item.purchaseDate)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Garantía (meses)</label>
+                            <div class="value">${empty(item.warranty)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Fecha Fin Garantía</label>
+                            <div class="value">${sanitize(item.purchaseDate ? (() => {
                                 const p = new Date(item.purchaseDate);
                                 const w = parseInt(item.warranty) || 12;
                                 p.setMonth(p.getMonth() + w);
                                 return p.toISOString().split('T')[0];
-                            })() : '-')}</span>
+                            })() : '-')}</div>
                         </div>
-                        ${renderWarrantyBadge(item.purchaseDate, item.warranty)}
                     </div>
                 </div>
 
-                <div class="info-card" style="grid-column: span 2;">
-                    <label>Reporte de Incidentes / Condiciones</label>
-                    <div class="value" style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.4;">
-                        <strong>Condiciones:</strong> ${sanitize(item.conditions || 'Sin reporte')}<br>
-                        <strong>Incidentes:</strong> ${sanitize(item.incidentReport || 'Sin reporte')}
+                <!-- SECCIÓN 7: MANTENIMIENTO -->
+                <div class="detail-section">
+                    <h3 class="section-title"><i data-lucide="wrench"></i> Mantenimiento</h3>
+                    <div class="detail-grid">
+                        <div class="info-card">
+                            <label>Último Mantenimiento</label>
+                            <div class="value">${empty(item.lastMtto)}</div>
+                        </div>
+                        <div class="info-card">
+                            <label>Próximo Mantenimiento</label>
+                            <div class="value" style="color: var(--primary);">${empty(item.nextMtto)}</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="info-card" style="grid-column: span 2;">
-                    <label>Observaciones</label>
-                    <div class="value" style="font-size: 0.8rem; color: var(--text-dim);">${sanitize(item.notes || '-')}</div>
+                <!-- SECCIÓN 8: NOTAS -->
+                <div class="detail-section">
+                    <h3 class="section-title"><i data-lucide="file-text"></i> Notas y Documentación</h3>
+                    <div class="detail-grid">
+                        <div class="info-card full-width">
+                            <label>Condiciones del Equipo</label>
+                            <div class="value value-text">${emptyText(item.conditions)}</div>
+                        </div>
+                        <div class="info-card full-width">
+                            <label>Reporte de Incidentes</label>
+                            <div class="value value-text">${emptyText(item.incidentReport)}</div>
+                        </div>
+                        <div class="info-card full-width">
+                            <label>Observaciones Adicionales</label>
+                            <div class="value value-text">${emptyText(item.notes)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 9: FOTOS -->
+                <div class="detail-section photos-section">
+                    <h3 class="section-title"><i data-lucide="image"></i> Fotos / Documentos</h3>
+                    <div class="photos-grid">
+                        ${(() => {
+                            const photos = item.photos ? item.photos.split(',').map(p => p.trim()).filter(p => p) : [];
+                            if (photos.length === 0) {
+                                return '<div class="no-photos"><i data-lucide="image-off"></i><p>No hay fotos registradas</p></div>';
+                            }
+                            return photos.map((photo, idx) => `
+                                <a href="${photo}" target="_blank" class="photo-thumbnail" title="Abrir en OneDrive">
+                                    <div class="thumbnail-placeholder">
+                                        <i data-lucide="link"></i>
+                                        <span>Foto ${idx + 1}</span>
+                                    </div>
+                                </a>
+                            `).join('');
+                        })()}
+                    </div>
                 </div>
             </div>
-            
-            <!-- Carrusel de Fotos -->
-            ${(() => {
-                const photos = item.photos ? item.photos.split(',').map(p => p.trim()).filter(p => p) : [];
-                if (photos.length === 0) return '';
-                
-                const carouselId = 'photoCarousel_' + item.id;
-                return `
-                    <div class="photo-carousel-container" style="margin-top: 2rem; text-align: center;">
-                        <h3 style="margin-bottom: 1rem; color: var(--text-dim);"><i data-lucide="image"></i> Galería de Fotos</h3>
-                        <div class="photo-carousel" id="${carouselId}" style="position: relative; max-width: 600px; margin: 0 auto; border-radius: 12px; overflow: hidden; background: var(--card-bg);">
-                            ${photos.map((photo, idx) => `
-                                <div class="carousel-slide ${idx === 0 ? 'active' : ''}" data-index="${idx}" style="display: ${idx === 0 ? 'block' : 'none'}; padding: 1rem;">
-                                    <img src="${photo}" alt="Foto ${idx + 1}" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px;" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'padding: 2rem; color: var(--text-dim);\'>No se pudo cargar la imagen</div>';">
-                                </div>
-                            `).join('')}
-                        </div>
-                        ${photos.length > 1 ? `
-                            <button class="carousel-btn prev" onclick="window.moveCarousel('${carouselId}', -1)" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; z-index: 10;">❮</button>
-                            <button class="carousel-btn next" onclick="window.moveCarousel('${carouselId}', 1)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; z-index: 10;">❯</button>
-                            <div class="carousel-dots" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem;">
-                                ${photos.map((_, idx) => `
-                                    <span class="dot ${idx === 0 ? 'active' : ''}" onclick="window.goToSlide('${carouselId}', ${idx})" style="width: 10px; height: 10px; border-radius: 50%; background: var(--text-dim); cursor: pointer; opacity: 0.5; ${idx === 0 ? 'opacity: 1; background: var(--primary);' : ''}"></span>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            })()}
             
             <!-- Historial de Usuarios -->
             ${(() => {
