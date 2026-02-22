@@ -368,6 +368,37 @@ th {
   font-weight: 700;
 }
 
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+th.sortable:hover {
+  background: var(--surface);
+}
+
+th.sortable .sort-icon {
+  display: inline-block;
+  margin-left: 0.25rem;
+  opacity: 0.3;
+}
+
+th.sortable.asc .sort-icon::after {
+  content: "↑";
+  opacity: 1;
+}
+
+th.sortable.desc .sort-icon::after {
+  content: "↓";
+  opacity: 1;
+}
+
+th.sortable.asc, th.sortable.desc {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary);
+}
+
 td {
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--border-light);

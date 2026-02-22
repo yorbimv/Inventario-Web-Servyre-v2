@@ -1709,35 +1709,6 @@ const filterDepartment = document.getElementById('filterLocation');
 const filterDeviceType = document.getElementById('filterDeviceType');
 const clearFiltersBtn = document.getElementById('clearFiltersBtn');
 
-function applyFilters() {
-    const q = searchInput.value.toLowerCase();
-    const statusVal = filterStatus?.value || '';
-    const locationVal = filterLocation?.value || '';
-    const departmentVal = filterDepartment?.value || '';
-    const deviceTypeVal = filterDeviceType?.value || '';
-    
-    const filtered = inventory.filter(i => {
-        const matchSearch = !q || 
-            (i.fullName && i.fullName.toLowerCase().includes(q)) ||
-            (i.serialNumber && i.serialNumber.toLowerCase().includes(q)) ||
-            (i.location && i.location.toLowerCase().includes(q)) ||
-            (i.department && i.department.toLowerCase().includes(q)) ||
-            (i.brand && i.brand.toLowerCase().includes(q)) ||
-            (i.model && i.model.toLowerCase().includes(q)) ||
-            (i.pcName && i.pcName.toLowerCase().includes(q)) ||
-            (i.resguardo && i.resguardo.toLowerCase().includes(q));
-        
-        const matchStatus = !statusVal || i.status === statusVal;
-        const matchLocation = !locationVal || i.location === locationVal;
-        const matchDepartment = !departmentVal || i.department === departmentVal;
-        const matchDeviceType = !deviceTypeVal || i.deviceType === deviceTypeVal;
-        
-        return matchSearch && matchStatus && matchLocation && matchDepartment && matchDeviceType;
-    });
-    
-    renderTable(filtered);
-}
-
 function populateFilterOptions() {
     const locations = [...new Set(inventory.map(i => i.location).filter(Boolean))].sort();
     const departments = [...new Set(inventory.map(i => i.department).filter(Boolean))].sort();
@@ -1769,6 +1740,82 @@ if (clearFiltersBtn) {
 }
 
 populateFilterOptions();
+
+// Sorting functionality
+let currentSort = { column: null, direction: 'asc' };
+
+document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+        const column = th.dataset.sort;
+        
+        if (currentSort.column === column) {
+            if (currentSort.direction === 'asc') {
+                currentSort.direction = 'desc';
+            } else if (currentSort.direction === 'desc') {
+                currentSort.direction = null;
+                currentSort.column = null;
+            } else {
+                currentSort.direction = 'asc';
+            }
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+        
+        document.querySelectorAll('th.sortable').forEach(t => {
+            t.classList.remove('asc', 'desc');
+        });
+        
+        if (currentSort.column) {
+            th.classList.add(currentSort.direction);
+        }
+        
+        applyFilters();
+    });
+});
+
+function applyFilters() {
+    const q = searchInput.value.toLowerCase();
+    const statusVal = filterStatus?.value || '';
+    const locationVal = filterLocation?.value || '';
+    const departmentVal = filterDepartment?.value || '';
+    const deviceTypeVal = filterDeviceType?.value || '';
+    
+    let filtered = inventory.filter(i => {
+        const matchSearch = !q || 
+            (i.fullName && i.fullName.toLowerCase().includes(q)) ||
+            (i.serialNumber && i.serialNumber.toLowerCase().includes(q)) ||
+            (i.location && i.location.toLowerCase().includes(q)) ||
+            (i.department && i.department.toLowerCase().includes(q)) ||
+            (i.brand && i.brand.toLowerCase().includes(q)) ||
+            (i.model && i.model.toLowerCase().includes(q)) ||
+            (i.pcName && i.pcName.toLowerCase().includes(q)) ||
+            (i.resguardo && i.resguardo.toLowerCase().includes(q));
+        
+        const matchStatus = !statusVal || i.status === statusVal;
+        const matchLocation = !locationVal || i.location === locationVal;
+        const matchDepartment = !departmentVal || i.department === departmentVal;
+        const matchDeviceType = !deviceTypeVal || i.deviceType === deviceTypeVal;
+        
+        return matchSearch && matchStatus && matchLocation && matchDepartment && matchDeviceType;
+    });
+    
+    if (currentSort.column && currentSort.direction) {
+        filtered.sort((a, b) => {
+            let valA = a[currentSort.column] || '';
+            let valB = b[currentSort.column] || '';
+            
+            if (typeof valA === 'string') valA = valA.toLowerCase();
+            if (typeof valB === 'string') valB = valB.toLowerCase();
+            
+            if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
+            if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }
+    
+    renderTable(filtered);
+}
 
 // Global Actions - moved to initApp()
 
