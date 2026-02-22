@@ -1378,7 +1378,22 @@ searchInput.oninput = (e) => {
     XLSX.writeFile(wb, "Plantilla_Inventario_Servyre_V2.xlsx");
 };
 
-document.getElementById('importDataBtn').onclick = () => importInput.click();
+document.getElementById('importDataBtn').onclick = () => {
+    const currentCount = inventory.length;
+    const mensaje = `IMPORTAR DATOS
+
+Esta accion importara datos desde un archivo Excel (.xlsx/.xls) o JSON.
+
+- Los registros se AGREGARAN al inventario existente
+- Los datos actuales NO seran eliminados
+- Inventario actual: ${currentCount} registros
+
+¿Desea continuar?`;
+
+    if (confirm(mensaje)) {
+        importInput.click();
+    }
+};
 
 importInput.onchange = (e) => {
     const file = e.target.files[0];
@@ -1389,14 +1404,28 @@ importInput.onchange = (e) => {
         reader.onload = (event) => {
             try {
                 const imported = JSON.parse(event.target.result);
-                if (imported.inventory && imported.catalogs) {
-                    inventory = imported.inventory;
-                    catalogs = imported.catalogs;
+                if (imported.inventory) {
+                    // Agregar registros en lugar de sobreescribir
+                    const beforeCount = inventory.length;
+                    imported.inventory.forEach(item => {
+                        // Verificar si ya existe el registro por ID
+                        const exists = inventory.some(i => i.id === item.id);
+                        if (!exists) {
+                            inventory.push(item);
+                        }
+                    });
+                    const afterCount = inventory.length;
+                    const importedCount = afterCount - beforeCount;
                     saveToStorage();
-                    location.reload();
-                    alert('Base de datos restaurada correctamente.');
+                    renderTable();
+                    updateStats();
+                    showNotification(`Se importaron ${importedCount} registros. Total: ${afterCount}`, 'success');
+                } else {
+                    showNotification('El archivo JSON no contiene inventario valido', 'error');
                 }
-            } catch (err) { alert('Error al procesar el archivo JSON.'); }
+            } catch (err) { 
+                showNotification('Error al procesar el archivo JSON: ' + err.message, 'error'); 
+            }
         };
         reader.readAsText(file);
     } else {
