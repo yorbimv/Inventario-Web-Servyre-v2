@@ -1806,6 +1806,11 @@ textarea {
   color: var(--text);
 }
 
+.info-card .value-email {
+  color: var(--primary);
+  font-weight: 500;
+}
+
 .info-card[style*="grid-column"] {
   border-left: 3px solid var(--primary);
   padding-left: 1rem;

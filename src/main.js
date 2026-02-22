@@ -510,385 +510,110 @@ detailModalBody.innerHTML = `
                 <div class="compact-id-center">
                     <div class="compact-id-name">${sanitize(item.fullName)}</div>
                     <div class="compact-id-position">${sanitize(item.position)}</div>
-                    <div class="compact-id-contact">
-                        <span><i data-lucide="mail"></i> ${item.email ? item.email.toLowerCase() : '-'}</span>
-                        <span><i data-lucide="map-pin"></i> ${empty(item.location)}${item.address ? ' > ' + empty(item.address) : ''}</span>
-                    </div>
                 </div>
                 <div class="compact-id-right">
                     <div class="compact-resguardo">
                         <span class="compact-resguardo-label">RESGUARDO</span>
                         <span class="compact-resguardo-value">${sanitize(item.resguardo || 'PENDIENTE')}</span>
                     </div>
-                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}">${sanitize(item.status || '-').toUpperCase()}</span>
+                    <span class="badge badge-green">${sanitize(item.status || '-').toUpperCase()}</span>
                 </div>
-            </div>
-            
-            <div class="compact-equipo-bar">
-                <i data-lucide="laptop"></i>
-                <span class="compact-equipo-name">${empty(item.deviceType)} ${empty(item.brand)} ${empty(item.model)}</span>
-                <span class="compact-equipo-specs">
-                    <span>SN: ${empty(item.serialNumber)}</span>
-                    <span>|</span>
-                    <span>Host: ${empty(item.pcName)}</span>
-                    <span>|</span>
-                    <span>${empty(item.processor)}</span>
-                    <span>|</span>
-                    <span>${empty(item.ram)}</span>
-                    <span>|</span>
-                    <span>${empty(item.storageCapacity)}</span>
-                    <span>|</span>
-                    <span>IP: ${empty(item.ipAddress)}</span>
-                </span>
             </div>
             
             <div class="section-divider"></div>
-                <div class="summary-contact">
-                    <span>${item.email ? item.email.toLowerCase() : '-'}</span>
-                    <span class="summary-ubicacion">${empty(item.location)}${item.address ? ' > ' + empty(item.address) : ''}</span>
-                </div>
-            </div>
-            
-            <div class="summary-equipo">
-                <i data-lucide="laptop"></i>
-                <span class="equipo-full">${empty(item.deviceType)} ${empty(item.brand)} ${empty(item.model)}</span>
-                <span class="equipo-specs-inline">
-                    <span>SN: ${empty(item.serialNumber)}</span>
-                    <span>|</span>
-                    <span>Host: ${empty(item.pcName)}</span>
-                    <span>|</span>
-                    <span>${empty(item.ram)}</span>
-                    <span>|</span>
-                    <span>${empty(item.storageCapacity)}</span>
-                    <span>|</span>
-                    <span>${empty(item.ipAddress)}</span>
-                </span>
-            </div>
-                            <div class="key-field">
-                                <span class="key-label">División</span>
-                                <span class="key-value">${empty(item.address)}</span>
-                            </div>
-                        </div>
-                        <div class="key-field-row">
-                            <div class="key-field">
-                                <span class="key-label">Correo</span>
-                                <span class="key-value key-email">${item.email ? item.email.toLowerCase() : '-'}</span>
-                            </div>
-                            <div class="key-field key-field-resguardo">
-                                <span class="key-label">Resguardo</span>
-                                <span class="key-value">${sanitize(item.resguardo || 'PENDIENTE')}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 1rem;">
-                        <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${sanitize(item.status || '-').toUpperCase()}</span>
-                    </div>
-                </div>
-            </div>
             
             <div class="detail-categories">
-                <!-- SECCIÓN 1: IDENTIFICACIÓN -->
+                <!-- IDENTIFICACION -->
                 <div class="detail-section">
-                    <h3 class="section-title"><i data-lucide="id-card"></i> Identificación</h3>
+                    <h3 class="section-title"><i data-lucide="id-card"></i> Identificacion</h3>
                     <div class="detail-grid">
-                        <div class="info-card highlight-card">
-                            <label>N° Resguardo</label>
-                            <div class="value value-large">${sanitize(item.resguardo || 'PENDIENTE')}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Serie</label>
-                            <div class="value">${empty(item.serialNumber)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Estado</label>
-                            <div class="value"><span class="status-badge" data-value="${item.status}">${empty(item.status)}</span></div>
-                        </div>
+                        <div class="info-card"><label>Resguardo</label><div class="value">${sanitize(item.resguardo || 'PENDIENTE')}</div></div>
+                        <div class="info-card"><label>Serie</label><div class="value">${empty(item.serialNumber)}</div></div>
+                        <div class="info-card"><label>Estado</label><div class="value">${empty(item.status)}</div></div>
                     </div>
                 </div>
 
-                <!-- SECCIÓN 2: USUARIO -->
+                <!-- USUARIO -->
                 <div class="detail-section">
-                    <h3 class="section-title"><i data-lucide="users"></i> Usuario Asignado</h3>
+                    <h3 class="section-title"><i data-lucide="users"></i> Usuario</h3>
                     <div class="detail-grid">
-                        <div class="info-card">
-                            <label>Nombre Completo</label>
-                            <div class="value">${empty(item.fullName)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Puesto</label>
-                            <div class="value">${empty(item.position)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Correo</label>
-                            <div class="value">${empty(item.email)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Extensión</label>
-                            <div class="value">${empty(item.extension)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Departamento</label>
-                            <div class="value">${empty(item.department)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Ubicación</label>
-                            <div class="value">${empty(item.location)}</div>
-                        </div>
-                        <div class="info-card full-width">
-                            <label>Dirección</label>
-                            <div class="value">${empty(item.address)}</div>
-                        </div>
+                        <div class="info-card"><label>Nombre</label><div class="value">${empty(item.fullName)}</div></div>
+                        <div class="info-card"><label>Cargo</label><div class="value">${empty(item.position)}</div></div>
+                        <div class="info-card"><label>Correo</label><div class="value value-email">${item.email ? item.email.toLowerCase() : '-'}</div></div>
+                        <div class="info-card"><label>Extension</label><div class="value">${empty(item.extension)}</div></div>
+                        <div class="info-card"><label>Departamento</label><div class="value">${empty(item.department)}</div></div>
+                        <div class="info-card"><label>Ubicacion</label><div class="value">${empty(item.location)}</div></div>
+                        <div class="info-card full-width"><label>Division</label><div class="value">${empty(item.address)}</div></div>
                     </div>
                 </div>
 
-                <!-- SECCIÓN 3: EQUIPO -->
+                <!-- EQUIPO -->
                 <div class="detail-section">
-                    <h3 class="section-title"><i data-lucide="cpu"></i> Especificaciones del Equipo</h3>
+                    <h3 class="section-title"><i data-lucide="cpu"></i> Equipo</h3>
                     <div class="detail-grid">
-                        <div class="info-card">
-                            <label>Tipo de Equipo</label>
-                            <div class="value">${empty(item.deviceType)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Marca</label>
-                            <div class="value">${empty(item.brand)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Modelo</label>
-                            <div class="value">${empty(item.model)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Nombre PC/Host</label>
-                            <div class="value">${empty(item.pcName)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Sistema Operativo</label>
-                            <div class="value">${empty(item.os)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Procesador</label>
-                            <div class="value">${empty(item.processor)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>RAM</label>
-                            <div class="value">${empty(item.ram)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Almacenamiento</label>
-                            <div class="value">${empty(item.storageCapacity)}</div>
-                        </div>
+                        <div class="info-card"><label>Tipo</label><div class="value">${empty(item.deviceType)}</div></div>
+                        <div class="info-card"><label>Marca</label><div class="value">${empty(item.brand)}</div></div>
+                        <div class="info-card"><label>Modelo</label><div class="value">${empty(item.model)}</div></div>
+                        <div class="info-card"><label>Nombre PC</label><div class="value">${empty(item.pcName)}</div></div>
+                        <div class="info-card"><label>SO</label><div class="value">${empty(item.os)}</div></div>
+                        <div class="info-card"><label>Procesador</label><div class="value">${empty(item.processor)}</div></div>
+                        <div class="info-card"><label>RAM</label><div class="value">${empty(item.ram)}</div></div>
+                        <div class="info-card"><label>Almacenamiento</label><div class="value">${empty(item.storageCapacity)}</div></div>
+                        <div class="info-card"><label>IP</label><div class="value">${empty(item.ipAddress)}</div></div>
                     </div>
                 </div>
 
-                <!-- SECCIÓN 4: ACCESORIOS -->
+                <!-- ACCESORIOS -->
                 <div class="detail-section">
                     <h3 class="section-title"><i data-lucide="monitor"></i> Accesorios</h3>
                     <div class="detail-grid">
-                        <div class="info-card">
-                            <label>Mouse</label>
-                            <div class="value">${empty(item.mouseExternal)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Marca Monitor</label>
-                            <div class="value">${empty(item.periphBrand)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Modelo Monitor</label>
-                            <div class="value">${empty(item.periphModel)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Serie Monitor</label>
-                            <div class="value">${empty(item.periphSerial)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Adaptador HDMI</label>
-                            <div class="value">${empty(item.hdmiAdapter)}</div>
-                        </div>
-                        <div class="info-card full-width">
-                            <label>Otro Accesorio</label>
-                            <div class="value">${empty(item.otroAccesorio)}</div>
-                        </div>
+                        <div class="info-card"><label>Mouse</label><div class="value">${empty(item.mouseExternal)}</div></div>
+                        <div class="info-card"><label>Marca Monitor</label><div class="value">${empty(item.periphBrand)}</div></div>
+                        <div class="info-card"><label>Modelo Monitor</label><div class="value">${empty(item.periphModel)}</div></div>
+                        <div class="info-card"><label>Serie Monitor</label><div class="value">${empty(item.periphSerial)}</div></div>
+                        <div class="info-card"><label>HDMI</label><div class="value">${empty(item.hdmiAdapter)}</div></div>
+                        <div class="info-card full-width"><label>Otro</label><div class="value">${empty(item.otroAccesorio)}</div></div>
                     </div>
                 </div>
 
-                <!-- SECCIÓN 5: RED -->
+                <!-- ADMINISTRATIVO -->
                 <div class="detail-section">
-                    <h3 class="section-title"><i data-lucide="wifi"></i> Configuración de Red</h3>
+                    <h3 class="section-title"><i data-lucide="dollar-sign"></i> Administrativo</h3>
                     <div class="detail-grid">
-                        <div class="info-card">
-                            <label>Dirección IP</label>
-                            <div class="value"><code>${empty(item.ipAddress)}</code></div>
-                        </div>
-                        <div class="info-card">
-                            <label>Tipo de IP</label>
-                            <div class="value">${empty(item.ipType)}</div>
-                        </div>
+                        <div class="info-card"><label>Precio</label><div class="value">${empty(item.price)}</div></div>
+                        <div class="info-card"><label>Fecha Compra</label><div class="value">${empty(item.purchaseDate)}</div></div>
+                        <div class="info-card"><label>Garantia</label><div class="value">${empty(item.warranty)}</div></div>
+                        <div class="info-card"><label>Fin Garantia</label><div class="value">${sanitize(item.purchaseDate ? (() => { const p = new Date(item.purchaseDate); const w = parseInt(item.warranty) || 12; p.setMonth(p.getMonth() + w); return p.toISOString().split('T')[0]; })() : '-')}</div></div>
                     </div>
                 </div>
 
-                <!-- SECCIÓN 6: ADMINISTRATIVO -->
-                <div class="detail-section">
-                    <h3 class="section-title"><i data-lucide="dollar-sign"></i> Datos Administrativos</h3>
-                    <div class="detail-grid">
-                        <div class="info-card">
-                            <label>Precio Unitario</label>
-                            <div class="value">${empty(item.price)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Fecha de Compra</label>
-                            <div class="value">${empty(item.purchaseDate)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Garantía (meses)</label>
-                            <div class="value">${empty(item.warranty)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Fecha Fin Garantía</label>
-                            <div class="value">${sanitize(item.purchaseDate ? (() => {
-                                const p = new Date(item.purchaseDate);
-                                const w = parseInt(item.warranty) || 12;
-                                p.setMonth(p.getMonth() + w);
-                                return p.toISOString().split('T')[0];
-                            })() : '-')}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECCIÓN 7: MANTENIMIENTO -->
+                <!-- MANTENIMIENTO -->
                 <div class="detail-section">
                     <h3 class="section-title"><i data-lucide="wrench"></i> Mantenimiento</h3>
                     <div class="detail-grid">
-                        <div class="info-card">
-                            <label>Último Mantenimiento</label>
-                            <div class="value">${empty(item.lastMtto)}</div>
-                        </div>
-                        <div class="info-card">
-                            <label>Próximo Mantenimiento</label>
-                            <div class="value" style="color: var(--primary);">${empty(item.nextMtto)}</div>
-                        </div>
+                        <div class="info-card"><label>Ultimo</label><div class="value">${empty(item.lastMtto)}</div></div>
+                        <div class="info-card"><label>Proximo</label><div class="value">${empty(item.nextMtto)}</div></div>
                     </div>
                 </div>
 
-                <!-- SECCIÓN 8: NOTAS -->
+                <!-- NOTAS -->
                 <div class="detail-section">
-                    <h3 class="section-title"><i data-lucide="file-text"></i> Notas y Documentación</h3>
+                    <h3 class="section-title"><i data-lucide="file-text"></i> Notas</h3>
                     <div class="detail-grid">
-                        <div class="info-card full-width">
-                            <label>Condiciones del Equipo</label>
-                            <div class="value value-text">${emptyText(item.conditions)}</div>
-                        </div>
-                        <div class="info-card full-width">
-                            <label>Reporte de Incidentes</label>
-                            <div class="value value-text">${emptyText(item.incidentReport)}</div>
-                        </div>
-                        <div class="info-card full-width">
-                            <label>Observaciones Adicionales</label>
-                            <div class="value value-text">${emptyText(item.notes)}</div>
-                        </div>
+                        <div class="info-card full-width"><label>Condiciones</label><div class="value value-text">${item.conditions && item.conditions.trim() ? sanitize(item.conditions) : 'Sin registro'}</div></div>
+                        <div class="info-card full-width"><label>Incidentes</label><div class="value value-text">${item.incidentReport && item.incidentReport.trim() ? sanitize(item.incidentReport) : 'Sin registro'}</div></div>
+                        <div class="info-card full-width"><label>Observaciones</label><div class="value value-text">${item.notes && item.notes.trim() ? sanitize(item.notes) : 'Sin registro'}</div></div>
                     </div>
                 </div>
 
-                <!-- SECCIÓN 9: FOTOS -->
+                <!-- FOTOS -->
                 <div class="detail-section photos-section">
-                    <h3 class="section-title"><i data-lucide="image"></i> Fotos / Documentos</h3>
+                    <h3 class="section-title"><i data-lucide="image"></i> Fotos</h3>
                     <div class="photos-grid">
-                        ${(() => {
-                            const photos = item.photos ? item.photos.split(',').map(p => p.trim()).filter(p => p) : [];
-                            if (photos.length === 0) {
-                                return '<div class="no-photos"><i data-lucide="image-off"></i><p>No hay fotos registradas</p></div>';
-                            }
-                            return photos.map((photo, idx) => `
-                                <a href="${photo}" target="_blank" class="photo-thumbnail" title="Abrir en OneDrive">
-                                    <div class="thumbnail-placeholder">
-                                        <i data-lucide="link"></i>
-                                        <span>Foto ${idx + 1}</span>
-                                    </div>
-                                </a>
-                            `).join('');
-                        })()}
+                        ${(() => { const photos = item.photos ? item.photos.split(',').map(p => p.trim()).filter(p => p) : []; if (photos.length === 0) { return '<div class="no-photos"><i data-lucide="image-off"></i><p>No hay fotos</p></div>'; } return photos.map((photo, idx) => '<a href="' + photo + '" target="_blank" class="photo-thumbnail"><div class="thumbnail-placeholder"><i data-lucide="link"></i><span>Foto ' + (idx + 1) + '</span></div></a>').join(''); })()}
                     </div>
                 </div>
             </div>
-            
-            <!-- Historial de Usuarios -->
-            ${(() => {
-                const history = item.userHistory || [];
-                if (history.length === 0) return '';
-                
-                return `
-                    <div class="user-history-section" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); grid-column: span 2;">
-                        <h3 style="margin-bottom: 1rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.5rem;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                            Historial de Usuarios
-                        </h3>
-                        <div class="history-table-container" style="overflow-x: auto;">
-                            <table class="history-table" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-                                <thead>
-                                    <tr style="background: var(--card-bg);">
-                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Usuario</th>
-                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Fecha Alta</th>
-                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Fecha Baja</th>
-                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Estado</th>
-                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Modelo</th>
-                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">RAM</th>
-                                        <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim);">Disco</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${history.map(h => `
-                                        <tr style="${h.isCurrent ? 'background: rgba(16, 185, 129, 0.1);' : ''}">
-                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">
-                                                <span style="font-weight: 600;">${sanitize(h.fullName || '-')}</span>
-                                            </td>
-                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">${sanitize(h.startDate || '-')}</td>
-                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">${sanitize(h.endDate || 'Actual')}</td>
-                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">
-                                                <span class="badge ${h.isCurrent ? 'badge-green' : 'badge-gray'}" style="font-size: 0.65rem;">
-                                                    ${h.isCurrent ? 'Actual' : 'Histórico'}
-                                                </span>
-                                            </td>
-                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">${sanitize(h.specs?.model || '-')}</td>
-                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">${sanitize(h.specs?.ram || '-')}</td>
-                                            <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light);">${sanitize(h.specs?.storage || '-')}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `;
-            })()}
-            
-            <!-- Historial de Actividad (Activity Log) -->
-            ${(() => {
-                const activityLog = item.activityLog || [];
-                if (activityLog.length === 0) return '';
-                
-                return `
-                    <div class="activity-log-section">
-                        <h3>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            Historial de Actividad
-                        </h3>
-                        <div class="activity-log-list">
-                            ${activityLog.map(log => {
-                                const display = formatActivityLogForDisplay(log);
-                                return `
-                                    <div class="activity-log-item">
-                                        <div class="activity-log-icon ${display.iconClass}">${display.icon}</div>
-                                        <div class="activity-log-content">
-                                            <div class="activity-log-description">${display.description}</div>
-                                            <div class="activity-log-meta">${display.date} a las ${display.time}</div>
-                                            ${display.fieldLabel ? `<span class="activity-log-field">${display.fieldLabel}</span>` : ''}
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            })()}
         </div>
     `;
 
