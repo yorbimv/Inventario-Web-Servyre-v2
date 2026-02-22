@@ -928,8 +928,24 @@ window.delCatItem = (type, val, parent = null) => {
 
 // Botón Guardar en Disco (Exportar JSON)
 const saveDiskBtn = document.getElementById('saveDiskBtn');
-if (saveDiskBtn) {
-    saveDiskBtn.onclick = () => {
+const saveDropdown = document.getElementById('saveDropdown');
+
+if (saveDiskBtn && saveDropdown) {
+    saveDiskBtn.onclick = (e) => {
+        e.stopPropagation();
+        saveDropdown.classList.toggle('show');
+    };
+    
+    document.addEventListener('click', () => {
+        saveDropdown.classList.remove('show');
+    });
+}
+
+// Exportar JSON
+const exportJsonBtn = document.getElementById('exportJsonBtn');
+if (exportJsonBtn) {
+    exportJsonBtn.onclick = () => {
+        saveDropdown?.classList.remove('show');
         const data = {
             version: "2.0",
             exportDate: new Date().toISOString(),
@@ -944,9 +960,7 @@ if (saveDiskBtn) {
         link.download = `Servyre_Inventario_${new Date().toISOString().split('T')[0]}.json`;
         link.click();
         URL.revokeObjectURL(url);
-        
-        // Mostrar notificación
-        showNotification('Datos guardados en disco correctamente', 'success');
+        showNotification('Exportado a JSON correctamente', 'success');
     };
 }
 
@@ -1886,10 +1900,12 @@ function initApp() {
     
     // Attach all event handlers
     safeOnClick('exportExcelBtn', () => {
+        saveDropdown?.classList.remove('show');
         exportExcel(inventory);
     });
     
     safeOnClick('exportPdfBtn', () => {
+        saveDropdown?.classList.remove('show');
         if (inventory.length === 0) {
             alert('No hay registros para exportar.');
             return;
