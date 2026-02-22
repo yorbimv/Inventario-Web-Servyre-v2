@@ -509,13 +509,11 @@ detailModalBody.innerHTML = `
                 </div>
                 <div class="compact-id-center">
                     <div class="compact-id-name">${sanitize(item.fullName)}</div>
+                    <div class="compact-id-email">${item.email ? item.email.toLowerCase() : '-'}</div>
                     <div class="compact-id-position">${sanitize(item.position)}</div>
                 </div>
                 <div class="compact-id-right">
-                    <div class="compact-resguardo">
-                        <span class="compact-resguardo-label">RESGUARDO</span>
-                        <span class="compact-resguardo-value">${sanitize(item.resguardo || 'PENDIENTE')}</span>
-                    </div>
+                    <span class="compact-resguardo-value">${sanitize(item.resguardo || 'PENDIENTE')}</span>
                     <span class="badge badge-green">${sanitize(item.status || '-').toUpperCase()}</span>
                 </div>
             </div>

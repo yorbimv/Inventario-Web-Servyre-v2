@@ -1537,6 +1537,12 @@ textarea {
   letter-spacing: 0.03em;
 }
 
+.compact-id-email {
+  font-size: 0.75rem;
+  color: var(--primary);
+  font-weight: 500;
+}
+
 .compact-id-position {
   font-size: 0.75rem;
   color: var(--text-dim);
@@ -1575,22 +1581,8 @@ textarea {
   gap: 0.5rem;
 }
 
-.compact-resguardo {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.compact-resguardo-label {
-  font-size: 0.55rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-dim);
-  font-weight: 600;
-}
-
 .compact-resguardo-value {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--primary);
   letter-spacing: 0.03em;
