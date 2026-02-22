@@ -503,34 +503,46 @@ const viewAssetDetail = (id) => {
 
 detailModalBody.innerHTML = `
         <div class="asset-passport-premium animate__animated animate__zoomIn">
-            <div class="id-card">
-                <div class="id-card-left">
-                    <div class="user-avatar-premium user-avatar-lg">${initials}</div>
+            <div class="compact-id-card">
+                <div class="compact-id-left">
+                    <div class="user-avatar-premium user-avatar-sm">${initials}</div>
                 </div>
-                <div class="id-card-right">
-                    <div class="id-card-header">
-                        <span class="id-name">${sanitize(item.fullName)}</span>
-                        <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}">${sanitize(item.status || '-').toUpperCase()}</span>
-                    </div>
-                    <div class="id-position">${sanitize(item.position)}</div>
-                    <div class="id-contact">
-                        <span>${item.email ? item.email.toLowerCase() : '-'}</span>
-                        <span>${empty(item.location)} ${item.address ? ' > ' + empty(item.address) : ''}</span>
+                <div class="compact-id-center">
+                    <div class="compact-id-name">${sanitize(item.fullName)}</div>
+                    <div class="compact-id-position">${sanitize(item.position)}</div>
+                    <div class="compact-id-contact">
+                        <span><i data-lucide="mail"></i> ${item.email ? item.email.toLowerCase() : '-'}</span>
+                        <span><i data-lucide="map-pin"></i> ${empty(item.location)}${item.address ? ' > ' + empty(item.address) : ''}</span>
                     </div>
                 </div>
-                <div class="id-card-resguardo">
-                    <span class="resguardo-label-card">RESGUARDO</span>
-                    <span class="resguardo-value-card">${sanitize(item.resguardo || 'PENDIENTE')}</span>
+                <div class="compact-id-right">
+                    <div class="compact-resguardo">
+                        <span class="compact-resguardo-label">RESGUARDO</span>
+                        <span class="compact-resguardo-value">${sanitize(item.resguardo || 'PENDIENTE')}</span>
+                    </div>
+                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}">${sanitize(item.status || '-').toUpperCase()}</span>
                 </div>
             </div>
             
-            <div class="equipo-bar">
+            <div class="compact-equipo-bar">
                 <i data-lucide="laptop"></i>
-                <span class="equipo-name">${empty(item.deviceType)} ${empty(item.brand)} ${empty(item.model)}</span>
-                <span class="equipo-details">
-                    SN: ${empty(item.serialNumber)} | Host: ${empty(item.pcName)} | ${empty(item.processor)} | ${empty(item.ram)} | ${empty(item.storageCapacity)} | IP: ${empty(item.ipAddress)}
+                <span class="compact-equipo-name">${empty(item.deviceType)} ${empty(item.brand)} ${empty(item.model)}</span>
+                <span class="compact-equipo-specs">
+                    <span>SN: ${empty(item.serialNumber)}</span>
+                    <span>|</span>
+                    <span>Host: ${empty(item.pcName)}</span>
+                    <span>|</span>
+                    <span>${empty(item.processor)}</span>
+                    <span>|</span>
+                    <span>${empty(item.ram)}</span>
+                    <span>|</span>
+                    <span>${empty(item.storageCapacity)}</span>
+                    <span>|</span>
+                    <span>IP: ${empty(item.ipAddress)}</span>
                 </span>
             </div>
+            
+            <div class="section-divider"></div>
                 <div class="summary-contact">
                     <span>${item.email ? item.email.toLowerCase() : '-'}</span>
                     <span class="summary-ubicacion">${empty(item.location)}${item.address ? ' > ' + empty(item.address) : ''}</span>
