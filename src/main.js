@@ -503,51 +503,33 @@ const viewAssetDetail = (id) => {
 
 detailModalBody.innerHTML = `
         <div class="asset-passport-premium animate__animated animate__zoomIn">
-            <div class="detail-header-floating">
-                <div class="header-floating-left">
-                    <div class="user-avatar-premium user-avatar-sm">${initials}</div>
-                    <div class="user-basic-info">
-                        <span class="user-name">${sanitize(item.fullName)}</span>
-                        <span class="user-position">${sanitize(item.position)}</span>
-                    </div>
-                </div>
-                <div class="header-floating-right">
-                    <div class="resguardo-display">
-                        <span class="resguardo-label-top">RESGUARDO</span>
-                        <span class="resguardo-number">${sanitize(item.resguardo || 'PENDIENTE')}</span>
-                    </div>
+            <div class="summary-header">
+                <div class="summary-user">
+                    <span class="summary-name">${sanitize(item.fullName)}</span>
+                    <span class="summary-cargo">${sanitize(item.position)}</span>
+                    <span class="summary-resguardo">[RESGUARDO: ${sanitize(item.resguardo || 'PENDIENTE')}]</span>
                     <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}">${sanitize(item.status || '-').toUpperCase()}</span>
                 </div>
-            </div>
-            
-            <div class="contact-section">
-                <div class="contact-item">
-                    <i data-lucide="mail"></i>
+                <div class="summary-contact">
                     <span>${item.email ? item.email.toLowerCase() : '-'}</span>
-                </div>
-                <div class="contact-item">
-                    <i data-lucide="map-pin"></i>
-                    <span>${empty(item.location)}${item.address ? ' > ' + empty(item.address) : ''}</span>
+                    <span class="summary-ubicacion">${empty(item.location)}${item.address ? ' > ' + empty(item.address) : ''}</span>
                 </div>
             </div>
             
-            <div class="equipo-section">
-                <div class="equipo-header">
-                    <i data-lucide="laptop"></i>
-                    <span>EQUIPO</span>
-                </div>
-                <div class="equipo-main">
-                    <span class="equipo-tipo">${empty(item.deviceType)}</span>
-                    <span class="equipo-marca">${empty(item.brand)} ${empty(item.model)}</span>
-                </div>
-                <div class="equipo-specs">
-                    <div class="spec-item"><span class="spec-label">Serie:</span><span class="spec-value">${empty(item.serialNumber)}</span></div>
-                    <div class="spec-item"><span class="spec-label">Host:</span><span class="spec-value">${empty(item.pcName)}</span></div>
-                    <div class="spec-item"><span class="spec-label">CPU:</span><span class="spec-value">${empty(item.processor)}</span></div>
-                    <div class="spec-item"><span class="spec-label">RAM:</span><span class="spec-value">${empty(item.ram)}</span></div>
-                    <div class="spec-item"><span class="spec-label">Disco:</span><span class="spec-value">${empty(item.storageCapacity)}</span></div>
-                    <div class="spec-item"><span class="spec-label">IP:</span><span class="spec-value">${empty(item.ipAddress)}</span></div>
-                </div>
+            <div class="summary-equipo">
+                <i data-lucide="laptop"></i>
+                <span class="equipo-full">${empty(item.deviceType)} ${empty(item.brand)} ${empty(item.model)}</span>
+                <span class="equipo-specs-inline">
+                    <span>SN: ${empty(item.serialNumber)}</span>
+                    <span>|</span>
+                    <span>Host: ${empty(item.pcName)}</span>
+                    <span>|</span>
+                    <span>${empty(item.ram)}</span>
+                    <span>|</span>
+                    <span>${empty(item.storageCapacity)}</span>
+                    <span>|</span>
+                    <span>${empty(item.ipAddress)}</span>
+                </span>
             </div>
                             <div class="key-field">
                                 <span class="key-label">División</span>
