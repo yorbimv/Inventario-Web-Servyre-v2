@@ -121,8 +121,8 @@ body::-webkit-scrollbar {
   background: var(--surface-glass);
   border: 1px solid var(--border);
   border-radius: 24px;
-  padding: 1.5rem 2rem;
-  margin-bottom: 1rem;
+  padding: 1rem 1.5rem;
+  margin-bottom: 0.5rem;
   box-shadow: var(--shadow);
   transition: all 0.4s ease;
 }
@@ -1742,8 +1742,8 @@ textarea {
 .inventory-toolbar {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .search-actions-row {
@@ -1771,7 +1771,7 @@ textarea {
 }
 
 .table-card {
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
 }
 
 /* Sidebar Menu */
@@ -1873,7 +1873,7 @@ textarea {
 /* Main Content with Sidebar */
 .main-content-with-sidebar {
   margin-left: 60px;
-  padding: 0.5rem 1.5rem 1.5rem;
+  padding: 0.5rem 1rem 1rem;
   min-height: 100vh;
   transition: margin-left 0.3s ease;
 }
