@@ -58,64 +58,64 @@
     <!-- Main Content -->
     <main class="main-content-with-sidebar">
       <div id="dashboardContainer" class="animate__animated animate__fadeIn"></div>
-    </div>
-
-    <section id="inventorySection" class="animate__animated animate__fadeIn" style="display: none;">
-      <div class="inventory-toolbar">
-        <div class="search-actions-row">
-          <div class="search-bar-container glass-container" style="flex: 1; min-width: 300px;">
-            <i data-lucide="search"></i>
-            <input type="text" id="searchInput" placeholder="Buscar por serie, usuario, ubicación o cualquier campo...">
-          </div>
-          <button id="addItemBtn" class="premium-btn primary">
-            <i data-lucide="plus-circle"></i> <span>Nuevo Registro</span>
-          </button>
-        </div>
-        <div class="actions-row">
-          <div class="btn-group-glass" style="margin-left: auto;">
-            <button id="manageCatalogsBtn" class="glass-btn" title="Configuración">
-              <i data-lucide="settings"></i> <span>Ajustes</span>
-            </button>
-            <button id="saveDiskBtn" class="glass-btn" style="color: var(--success);" title="Guardar">
-              <i data-lucide="save"></i> <span>Guardar</span>
-            </button>
-            <button id="importDataBtn" class="glass-btn" title="Importar">
-              <i data-lucide="upload-cloud"></i> <span>Importar</span>
-            </button>
-            <button id="exportExcelBtn" class="glass-btn">
-              <i data-lucide="file-spreadsheet"></i> <span>Excel</span>
-            </button>
-            <button id="exportPdfBtn" class="glass-btn">
-              <i data-lucide="file-text"></i> <span>PDF</span>
-            </button>
-          </div>
-        </div>
-      </div>
       
-      <main class="table-card glass-table-container animate__animated animate__fadeInUp" style="margin-top: 1.5rem;">
-        <div class="table-responsive">
-          <table id="inventoryTable">
-            <thead>
-              <tr>
-                <th>Resguardo</th>
-                <th>Usuario</th>
-                <th>Equipo</th>
-                <th>Marca / Modelo</th>
-                <th>Nombre PC</th>
-                <th>Serie</th>
-                <th>Ubicación</th>
-                <th>Estado</th>
-                <th>IP</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="inventoryBody">
-              <!-- Content Injected via JS -->
-            </tbody>
-          </table>
+      <section id="inventorySection" class="animate__animated animate__fadeIn" style="display: none;">
+        <div class="inventory-toolbar">
+          <div class="search-actions-row">
+            <div class="search-bar-container glass-container" style="flex: 1; min-width: 300px;">
+              <i data-lucide="search"></i>
+              <input type="text" id="searchInput" placeholder="Buscar por serie, usuario, ubicacion o cualquier campo...">
+            </div>
+            <button id="addItemBtn" class="premium-btn primary">
+              <i data-lucide="plus-circle"></i> <span>Nuevo Registro</span>
+            </button>
+          </div>
+          <div class="actions-row">
+            <div class="btn-group-glass" style="margin-left: auto;">
+              <button id="manageCatalogsBtn" class="glass-btn" title="Configuracion">
+                <i data-lucide="settings"></i> <span>Ajustes</span>
+              </button>
+              <button id="saveDiskBtn" class="glass-btn" style="color: var(--success);" title="Guardar">
+                <i data-lucide="save"></i> <span>Guardar</span>
+              </button>
+              <button id="importDataBtn" class="glass-btn" title="Importar">
+                <i data-lucide="upload-cloud"></i> <span>Importar</span>
+              </button>
+              <button id="exportExcelBtn" class="glass-btn">
+                <i data-lucide="file-spreadsheet"></i> <span>Excel</span>
+              </button>
+              <button id="exportPdfBtn" class="glass-btn">
+                <i data-lucide="file-text"></i> <span>PDF</span>
+              </button>
+            </div>
+          </div>
         </div>
-      </main>
-    </section>
+        
+        <main class="table-card glass-table-container animate__animated animate__fadeInUp">
+          <div class="table-responsive">
+            <table id="inventoryTable">
+              <thead>
+                <tr>
+                  <th>Resguardo</th>
+                  <th>Usuario</th>
+                  <th>Equipo</th>
+                  <th>Marca / Modelo</th>
+                  <th>Nombre PC</th>
+                  <th>Serie</th>
+                  <th>Ubicacion</th>
+                  <th>Estado</th>
+                  <th>IP</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="inventoryBody">
+                <!-- Content Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </section>
+    </main>
 
     <input type="file" id="importInput" style="display: none;" accept=".json,.xlsx,.xls">
 
