@@ -503,47 +503,31 @@ const viewAssetDetail = (id) => {
 
 detailModalBody.innerHTML = `
         <div class="asset-passport-premium animate__animated animate__zoomIn">
-            <div class="detail-header-section">
-                <div class="user-profile-card">
-                    <div class="profile-header-row">
-                        <div class="user-avatar-premium">${initials}</div>
-                        <div class="profile-header-info">
-                            <div class="profile-resguardo-row">
-                                <span class="resguardo-label">Resguardo:</span>
-                                <span class="resguardo-value">${sanitize(item.resguardo || 'PENDIENTE')}</span>
-                                <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}">${sanitize(item.status || '-').toUpperCase()}</span>
-                            </div>
-                        </div>
+            <div class="detail-header-compact">
+                <div class="detail-header-left">
+                    <div class="user-avatar-premium">${initials}</div>
+                </div>
+                <div class="detail-header-right">
+                    <div class="compact-row">
+                        <span class="compact-label">Nombre:</span>
+                        <span class="compact-value">${sanitize(item.fullName)}</span>
                     </div>
-                    
-                    <div class="profile-section">
-                        <div class="profile-section-title"><i data-lucide="user"></i> Datos Personales</div>
-                        <div class="profile-section-content">
-                            <span class="profile-main-name">${sanitize(item.fullName)}</span>
-                            <span class="profile-main-position">${sanitize(item.position)}</span>
-                            <span class="profile-main-email">${item.email ? item.email.toLowerCase() : '-'}</span>
-                        </div>
+                    <div class="compact-row">
+                        <span class="compact-label">Cargo:</span>
+                        <span class="compact-value">${sanitize(item.position)}</span>
                     </div>
-                    
-                    <div class="profile-section">
-                        <div class="profile-section-title"><i data-lucide="map-pin"></i> Ubicación</div>
-                        <div class="profile-section-content">
-                            <span>${empty(item.location)} ${item.address ? ' > ' + empty(item.address) : ''}</span>
-                        </div>
+                    <div class="compact-row">
+                        <span class="compact-label">Correo:</span>
+                        <span class="compact-value compact-email">${item.email ? item.email.toLowerCase() : '-'}</span>
                     </div>
-                    
-                    <div class="profile-section">
-                        <div class="profile-section-title"><i data-lucide="laptop"></i> Equipo</div>
-                        <div class="profile-section-content profile-equipo-grid">
-                            <div class="equipo-item"><span class="equipo-label">Tipo:</span><span class="equipo-value">${empty(item.deviceType)}</span></div>
-                            <div class="equipo-item"><span class="equipo-label">Marca/Modelo:</span><span class="equipo-value">${empty(item.brand)} ${empty(item.model)}</span></div>
-                            <div class="equipo-item"><span class="equipo-label">Serie:</span><span class="equipo-value">${empty(item.serialNumber)}</span></div>
-                            <div class="equipo-item"><span class="equipo-label">Host:</span><span class="equipo-value">${empty(item.pcName)}</span></div>
-                            <div class="equipo-item"><span class="equipo-label">CPU:</span><span class="equipo-value">${empty(item.processor)}</span></div>
-                            <div class="equipo-item"><span class="equipo-label">RAM:</span><span class="equipo-value">${empty(item.ram)}</span></div>
-                            <div class="equipo-item"><span class="equipo-label">Disco:</span><span class="equipo-value">${empty(item.storageCapacity)}</span></div>
-                            <div class="equipo-item"><span class="equipo-label">IP:</span><span class="equipo-value">${empty(item.ipAddress)}</span></div>
-                        </div>
+                    <div class="compact-row">
+                        <span class="compact-label">Ubicación:</span>
+                        <span class="compact-value">${empty(item.location)} ${item.address ? ' > ' + empty(item.address) : ''}</span>
+                    </div>
+                    <div class="compact-row">
+                        <span class="compact-label">Resguardo:</span>
+                        <span class="compact-value compact-resguardo">${sanitize(item.resguardo || 'PENDIENTE')}</span>
+                        <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}">${sanitize(item.status || '-').toUpperCase()}</span>
                     </div>
                 </div>
             </div>
