@@ -1503,6 +1503,120 @@ textarea {
   word-break: break-all;
 }
 
+/* New Option C Styles - Secciones Visuales */
+.profile-header-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.profile-header-row .user-avatar-premium {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.profile-header-info {
+  flex: 1;
+}
+
+.profile-resguardo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.resguardo-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.resguardo-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.03em;
+}
+
+.profile-section {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.profile-section:last-child {
+  margin-bottom: 0;
+}
+
+.profile-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.profile-section-title i {
+  width: 14px;
+  height: 14px;
+}
+
+.profile-section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.profile-main-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profile-main-position {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.profile-main-email {
+  font-size: 0.8rem;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.profile-equipo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.equipo-item {
+  display: flex;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.equipo-label {
+  color: var(--text-dim);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.equipo-value {
+  color: var(--text);
+  font-weight: 600;
+}
+
 [data-theme="light"] .user-profile-card {
   background: linear-gradient(180deg, #FFF9F0 0%, #FEF3D9 100%);
   box-shadow: 0 4px 16px rgba(139, 90, 43, 0.1);
