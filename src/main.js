@@ -514,7 +514,7 @@ detailModalBody.innerHTML = `
                 </div>
                 <div class="compact-id-right">
                     <span class="compact-resguardo-value">${sanitize(item.resguardo || 'PENDIENTE')}</span>
-                    <span class="badge badge-green">${sanitize(item.status || '-').toUpperCase()}</span>
+                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}">${sanitize(item.status || '-').toUpperCase()}</span>
                 </div>
             </div>
             
@@ -750,6 +750,13 @@ const openEditForm = (id = null) => {
             document.getElementById('ram').value = i.ram;
             document.getElementById('storageCapacity').value = i.storageCapacity;
             document.getElementById('status').value = i.status;
+            // Actualizar el badge del custom-select
+            const statusTrigger = document.getElementById('statusTrigger');
+            const statusBadge = statusTrigger?.querySelector('.status-badge');
+            if (statusBadge && i.status) {
+                statusBadge.textContent = i.status;
+                statusBadge.dataset.value = i.status;
+            }
             document.getElementById('mouseExternal').value = i.mouseExternal || '';
 
             // New Fields
