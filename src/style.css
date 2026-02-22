@@ -1442,9 +1442,9 @@ textarea {
 }
 
 .asset-passport-premium {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .user-profile-card {
@@ -1659,11 +1659,6 @@ textarea {
 
 /* Responsive Detail View */
 @media (max-width: 768px) {
-  .asset-passport-premium {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
   .detail-grid {
     grid-template-columns: repeat(2, 1fr);
   }
