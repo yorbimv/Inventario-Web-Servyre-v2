@@ -384,8 +384,16 @@ const switchToDashboard = () => {
     currentView = 'dashboard';
     document.getElementById('dashboardContainer').style.display = 'block';
     document.getElementById('inventorySection').style.display = 'none';
-    document.getElementById('tabDashboard').classList.add('active');
-    document.getElementById('tabInventory').classList.remove('active');
+    
+    // Update sidebar active state
+    const sidebarItems = document.querySelectorAll('.sidebar-item');
+    sidebarItems.forEach(item => item.classList.remove('active'));
+    document.getElementById('tabDashboard')?.classList.add('active');
+    
+    // Update old nav-tabs (fallback)
+    document.getElementById('tabDashboard')?.classList.add('active');
+    document.getElementById('tabInventory')?.classList.remove('active');
+    
     initDashboardPersonalizado(inventory, 'dashboardContainer');
 };
 
@@ -393,8 +401,15 @@ const switchToInventory = () => {
     currentView = 'inventory';
     document.getElementById('dashboardContainer').style.display = 'none';
     document.getElementById('inventorySection').style.display = 'block';
-    document.getElementById('tabInventory').classList.add('active');
-    document.getElementById('tabDashboard').classList.remove('active');
+    
+    // Update sidebar active state
+    const sidebarItems = document.querySelectorAll('.sidebar-item');
+    sidebarItems.forEach(item => item.classList.remove('active'));
+    document.getElementById('tabInventory')?.classList.add('active');
+    
+    // Update old nav-tabs (fallback)
+    document.getElementById('tabInventory')?.classList.add('active');
+    document.getElementById('tabDashboard')?.classList.remove('active');
 };
 
 document.getElementById('tabDashboard')?.addEventListener('click', switchToDashboard);
@@ -402,6 +417,9 @@ document.getElementById('tabInventory')?.addEventListener('click', switchToInven
 
 // Initialize
 switchToDashboard();
+
+// Ensure sidebar button has active class on load
+document.getElementById('tabDashboard')?.classList.add('active');
 
 const updateStats = () => {
     totalAssetsEl.textContent = inventory.length;
@@ -1977,6 +1995,7 @@ function initApp() {
     
     safeOnClick('importDataBtn', () => importInput.click());
     safeOnClick('addItemBtn', () => openEditForm());
+    safeOnClick('sidebarNewBtn', () => openEditForm());
     safeOnClick('manageCatalogsBtn', () => { syncFormSelects(); catalogModalOverlay.classList.add('active'); });
     safeOnClick('closeModal', () => modalOverlay.classList.remove('active'));
     // cancelBtn eliminado - el modal se cierra con el botón X o haciendo clic fuera

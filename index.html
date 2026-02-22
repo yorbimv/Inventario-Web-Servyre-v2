@@ -26,7 +26,7 @@
       <div class="header-content">
         <div class="logo-area">
           <h1>Servyre <span>IT</span></h1>
-          <p class="subtitle">Gestión de Activos v2.0</p>
+          <p class="subtitle">Gestion de Activos</p>
         </div>
         <div class="system-stats">
           <div class="stat-item">
@@ -42,16 +42,26 @@
       </div>
     </header>
 
-    <nav class="nav-tabs">
-      <button class="nav-tab active" id="tabDashboard">
-        <i data-lucide="layout-dashboard"></i> Dashboard
+    <!-- Sidebar Menu -->
+    <nav class="sidebar-nav">
+      <button class="sidebar-item active" id="tabDashboard" title="Dashboard">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
       </button>
-      <button class="nav-tab" id="tabInventory">
-        <i data-lucide="database"></i> Inventario
+      <button class="sidebar-item" id="tabInventory" title="Inventario">
+        <i data-lucide="database"></i>
+        <span>Inventario</span>
+      </button>
+      <div class="sidebar-spacer"></div>
+      <button class="sidebar-item" id="sidebarNewBtn" title="Nuevo Registro">
+        <i data-lucide="plus-circle"></i>
+        <span>Nuevo</span>
       </button>
     </nav>
 
-    <div id="dashboardContainer" class="animate__animated animate__fadeIn">
+    <!-- Main Content -->
+    <main class="main-content-with-sidebar">
+      <div id="dashboardContainer" class="animate__animated animate__fadeIn"></div>
     </div>
 
     <section id="inventorySection" class="animate__animated animate__fadeIn" style="display: none;">
