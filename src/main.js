@@ -1246,60 +1246,7 @@ function renderWarrantyBadge(purchaseDate, warrantyMonths) {
 // CÓDIGO PRINCIPAL - Se ejecuta después de DOMContentLoaded
 // ============================================================================
 
-searchInput.oninput = (e) => {
-    const headers = [
-        "Nombre Completo", "Ubicación", "Direccion", "Departamento", "Puesto",
-        "Extension", "Correo", "Resguardo", "Equipo", "Marca", "Modelo", "Serie",
-        "Mouse externo (Laptop)", "Sistema Operativo", "Nombre PC", "Procesador",
-        "RAM", "Disco duro", "Precio unitario", "Fecha de Compra",
-        "Marca (Monitor/Accesorio)", "Modelo (Monitor/Accesorio)", "Serie (Monitor/Accesorio)",
-        "Reporte (Incidentes)", "Ultima Fecha de Mtto.", "Proxima Fecha de Mtto.",
-        "Condiciones", "Fotos"
-    ];
-
-    const exampleRow = [
-        "Carlos Daniel Velez Ramirez", "Corporativo", "Direccion de Administracion y Finanzas",
-        "Inteligencia de Operaciones", "Jefe de Inteligencia de Operaciones", "433",
-        "carlos.velez@servyre.com", "Serv-068", "Laptop", "Dell", "Latitude 3500", "JVSRMT2",
-        "1305HS0IL448", "Windows 10/64 bits", "CarlosV-LT", "Intel Core i5-8265U CPU 1.60 GHz",
-        "8 GB", "480 GB SSD", "$16,340.92", "2020-03-12", "Dell", "E1916HV",
-        "CN-0HN22V-72872-72P-DGKB-A00", "", "2025-12-17", "2026-06-17", "", "JVSRMT2"
-    ];
-
-    const instructions = [
-        ["INSTRUCCIONES DE CARGA - SERVYRE IT"],
-        [""],
-        ["1. LLENADO DE DATOS:"],
-        ["   - Respete el orden de las columnas de la hoja 'Inventario'."],
-        ["   - No elimine ni cambie el nombre de los encabezados (Fila 1)."],
-        [""],
-        ["2. FORMATOS ESPECIALES:"],
-        ["   - Fechas: Use el formato AAAA-MM-DD (Ej: 2025-12-31) para mejor compatibilidad."],
-        ["   - RAM/Disco: Puede poner el número seguido de la unidad (Ej: 16 GB)."],
-        [""],
-        ["3. CÓMO SUBIR:"],
-        ["   - Una vez lleno, guarde el archivo."],
-        ["   - En el sistema web, haga clic en el botón 'Importar'."],
-        ["   - Seleccione su archivo Excel y confirme la importación."],
-        [""],
-        ["4. RECOMENDACIÓN:"],
-        ["   - Use la 'Ubicación' tal cual aparece en el sistema (ej. Corporativo) para que los filtros funcionen bien."]
-    ];
-
-    const wsData = [headers, exampleRow];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wsInstr = XLSX.utils.aoa_to_sheet(instructions);
-
-    ws['!cols'] = headers.map(() => ({ wch: 20 }));
-    wsInstr['!cols'] = [{ wch: 80 }];
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Inventario");
-    XLSX.utils.book_append_sheet(wb, wsInstr, "COMO_SUBIR");
-
-    XLSX.writeFile(wb, "Plantilla_Inventario_Servyre_V2.xlsx");
-};
-
+// Create Excel Template
 document.getElementById('importDataBtn').onclick = () => {
     const currentCount = inventory.length;
     const mensaje = `IMPORTAR DATOS
@@ -1700,46 +1647,8 @@ function showNewRecordAlert(serialNumber) {
 }
 
 searchInput.oninput = (e) => {
-    applyFilters();
+    applyFiltersAndSort();
 };
-
-const filterStatus = document.getElementById('filterStatus');
-const filterLocation = document.getElementById('filterDepartment');
-const filterDepartment = document.getElementById('filterLocation');
-const filterDeviceType = document.getElementById('filterDeviceType');
-const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-
-function populateFilterOptions() {
-    const locations = [...new Set(inventory.map(i => i.location).filter(Boolean))].sort();
-    const departments = [...new Set(inventory.map(i => i.department).filter(Boolean))].sort();
-    
-    if (filterLocation) {
-        filterLocation.innerHTML = '<option value="">Todas las Ubicaciones</option>' + 
-            locations.map(l => `<option value="${l}">${l}</option>`).join('');
-    }
-    if (filterDepartment) {
-        filterDepartment.innerHTML = '<option value="">Todos los Departamentos</option>' + 
-            departments.map(d => `<option value="${d}">${d}</option>`).join('');
-    }
-}
-
-if (filterStatus) filterStatus.onchange = applyFilters;
-if (filterLocation) filterLocation.onchange = applyFilters;
-if (filterDepartment) filterDepartment.onchange = applyFilters;
-if (filterDeviceType) filterDeviceType.onchange = applyFilters;
-
-if (clearFiltersBtn) {
-    clearFiltersBtn.onclick = () => {
-        searchInput.value = '';
-        if (filterStatus) filterStatus.value = '';
-        if (filterLocation) filterLocation.value = '';
-        if (filterDepartment) filterDepartment.value = '';
-        if (filterDeviceType) filterDeviceType.value = '';
-        applyFilters();
-    };
-}
-
-populateFilterOptions();
 
 // Sorting functionality
 let currentSort = { column: null, direction: 'asc' };
@@ -1770,19 +1679,15 @@ document.querySelectorAll('th.sortable').forEach(th => {
             th.classList.add(currentSort.direction);
         }
         
-        applyFilters();
+        applyFiltersAndSort();
     });
 });
 
-function applyFilters() {
+function applyFiltersAndSort() {
     const q = searchInput.value.toLowerCase();
-    const statusVal = filterStatus?.value || '';
-    const locationVal = filterLocation?.value || '';
-    const departmentVal = filterDepartment?.value || '';
-    const deviceTypeVal = filterDeviceType?.value || '';
     
     let filtered = inventory.filter(i => {
-        const matchSearch = !q || 
+        return !q || 
             (i.fullName && i.fullName.toLowerCase().includes(q)) ||
             (i.serialNumber && i.serialNumber.toLowerCase().includes(q)) ||
             (i.location && i.location.toLowerCase().includes(q)) ||
@@ -1791,13 +1696,6 @@ function applyFilters() {
             (i.model && i.model.toLowerCase().includes(q)) ||
             (i.pcName && i.pcName.toLowerCase().includes(q)) ||
             (i.resguardo && i.resguardo.toLowerCase().includes(q));
-        
-        const matchStatus = !statusVal || i.status === statusVal;
-        const matchLocation = !locationVal || i.location === locationVal;
-        const matchDepartment = !departmentVal || i.department === departmentVal;
-        const matchDeviceType = !deviceTypeVal || i.deviceType === deviceTypeVal;
-        
-        return matchSearch && matchStatus && matchLocation && matchDepartment && matchDeviceType;
     });
     
     if (currentSort.column && currentSort.direction) {
