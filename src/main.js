@@ -528,9 +528,9 @@ detailModalBody.innerHTML = `
                         <div class="info-card"><label>Nombre</label><div class="value">${empty(item.fullName)}</div></div>
                         <div class="info-card"><label>Cargo</label><div class="value">${empty(item.position)}</div></div>
                         <div class="info-card"><label>Correo</label><div class="value value-email">${item.email ? item.email.toLowerCase() : '-'}</div></div>
-                        <div class="info-card"><label>Extension</label><div class="value">${empty(item.extension)}</div></div>
                         <div class="info-card"><label>Departamento</label><div class="value">${empty(item.department)}</div></div>
                         <div class="info-card"><label>Ubicacion</label><div class="value">${empty(item.location)}</div></div>
+                        <div class="info-card"><label>Extension</label><div class="value">${empty(item.extension)}</div></div>
                         <div class="info-card full-width"><label>Division</label><div class="value">${empty(item.address)}</div></div>
                     </div>
                 </div>
