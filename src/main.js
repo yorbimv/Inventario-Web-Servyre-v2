@@ -521,16 +521,6 @@ detailModalBody.innerHTML = `
             <div class="section-divider"></div>
             
             <div class="detail-categories">
-                <!-- IDENTIFICACION -->
-                <div class="detail-section">
-                    <h3 class="section-title"><i data-lucide="id-card"></i> Identificacion</h3>
-                    <div class="detail-grid">
-                        <div class="info-card"><label>Resguardo</label><div class="value">${sanitize(item.resguardo || 'PENDIENTE')}</div></div>
-                        <div class="info-card"><label>Serie</label><div class="value">${empty(item.serialNumber)}</div></div>
-                        <div class="info-card"><label>Estado</label><div class="value">${empty(item.status)}</div></div>
-                    </div>
-                </div>
-
                 <!-- USUARIO -->
                 <div class="detail-section">
                     <h3 class="section-title"><i data-lucide="users"></i> Usuario</h3>
