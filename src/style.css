@@ -1526,6 +1526,47 @@ textarea {
   color: var(--text);
 }
 
+.system-footer .footer-contact {
+  margin-top: 0.5rem;
+}
+
+.system-footer .footer-contact a {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.system-footer .footer-contact a:hover {
+  opacity: 0.8;
+}
+
+.system-footer .footer-version {
+  opacity: 0.6;
+}
+
+.system-footer p {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+}
+
+.system-footer .footer-brand {
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.system-footer .footer-developer {
+  font-weight: 600;
+  color: var(--text);
+}
+
 .system-footer .footer-contact a {
   color: var(--primary);
   text-decoration: none;
