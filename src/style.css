@@ -1455,6 +1455,37 @@ textarea {
   border: 1px solid var(--border);
 }
 
+.profile-highlight-info {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.highlight-item {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.08) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.highlight-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.highlight-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
 [data-theme="light"] .user-profile-card {
   background: linear-gradient(180deg, #FFF9F0 0%, #FEF3D9 100%);
   box-shadow: 0 4px 16px rgba(139, 90, 43, 0.1);

@@ -508,18 +508,18 @@ const viewAssetDetail = (id) => {
                     <div class="user-avatar-premium">${initials}</div>
                     <h2 style="font-size: 1.8rem;">${sanitize(item.fullName)}</h2>
                     <p style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${sanitize(item.position)}</p>
+                    <div class="profile-highlight-info">
+                        <div class="highlight-item">
+                            <span class="highlight-label">Ubicación / Sede</span>
+                            <span class="highlight-value">${empty(item.location)}</span>
+                        </div>
+                        <div class="highlight-item">
+                            <span class="highlight-label">División / Dirección</span>
+                            <span class="highlight-value">${empty(item.address)}</span>
+                        </div>
+                    </div>
                     <div style="margin-top: 1.5rem;">
                         <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${sanitize(item.status || '-').toUpperCase()}</span>
-                    </div>
-                    <div style="margin-top: 2rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; font-size: 0.9rem;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
-                            <span style="color:var(--text-dim)">Ubicación / Sede</span>
-                            <span style="font-weight:600">${empty(item.location)}</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="color:var(--text-dim)">División / Dirección</span>
-                            <span style="font-weight:600">${empty(item.address)}</span>
-                        </div>
                     </div>
                 </div>
             </div>
