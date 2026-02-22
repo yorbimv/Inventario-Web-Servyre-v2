@@ -423,7 +423,7 @@ const renderTable = (data = inventory) => {
             : 'badge-danger';
 
         tr.innerHTML = `
-            <td><code>${sanitize(item.resguardo || '-')}</code></td>
+            <td><code style="white-space: nowrap; font-size: 0.75rem; background: var(--card-bg); padding: 2px 6px; border-radius: 4px; color: var(--primary);">${sanitize(item.resguardo || '-')}</code></td>
             <td>
                 <div style="font-weight: 700; color: var(--text);">${sanitize(item.fullName)}</div>
                 <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">${sanitize(item.position || '-')}</div>
