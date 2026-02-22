@@ -507,18 +507,32 @@ const viewAssetDetail = (id) => {
                 <div class="user-profile-card">
                     <div class="user-avatar-premium">${initials}</div>
                     <h2 style="font-size: 1.8rem;">${sanitize(item.fullName)}</h2>
-                    <p style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${sanitize(item.position)}</p>
-                    <div class="profile-highlight-info">
-                        <div class="highlight-item">
-                            <span class="highlight-label">Ubicación / Sede</span>
-                            <span class="highlight-value">${empty(item.location)}</span>
+                    <p style="color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: -0.5rem;">${sanitize(item.position)}</p>
+                    
+                    <div class="profile-key-fields">
+                        <div class="key-field-row">
+                            <div class="key-field">
+                                <span class="key-label">Ubicación</span>
+                                <span class="key-value">${empty(item.location)}</span>
+                            </div>
+                            <div class="key-field">
+                                <span class="key-label">División</span>
+                                <span class="key-value">${empty(item.address)}</span>
+                            </div>
                         </div>
-                        <div class="highlight-item">
-                            <span class="highlight-label">División / Dirección</span>
-                            <span class="highlight-value">${empty(item.address)}</span>
+                        <div class="key-field-row">
+                            <div class="key-field">
+                                <span class="key-label">Correo</span>
+                                <span class="key-value key-email">${item.email ? item.email.toLowerCase() : '-'}</span>
+                            </div>
+                            <div class="key-field key-field-resguardo">
+                                <span class="key-label">Resguardo</span>
+                                <span class="key-value">${sanitize(item.resguardo || 'PENDIENTE')}</span>
+                            </div>
                         </div>
                     </div>
-                    <div style="margin-top: 1.5rem;">
+                    
+                    <div style="margin-top: 1rem;">
                         <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}" style="font-size: 0.9rem; padding: 0.5rem 1.5rem;">${sanitize(item.status || '-').toUpperCase()}</span>
                     </div>
                 </div>

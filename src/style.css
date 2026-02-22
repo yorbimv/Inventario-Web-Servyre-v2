@@ -1455,35 +1455,52 @@ textarea {
   border: 1px solid var(--border);
 }
 
-.profile-highlight-info {
+.profile-key-fields {
   margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.highlight-item {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.08) 100%);
-  border: 1px solid rgba(59, 130, 246, 0.25);
+.key-field-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.key-field {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
   border-radius: 10px;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.highlight-label {
-  font-size: 0.65rem;
+.key-field-resguardo {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.08) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.key-label {
+  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--primary);
+  color: var(--text-dim);
   font-weight: 600;
 }
 
-.highlight-value {
-  font-size: 0.95rem;
-  font-weight: 700;
+.key-value {
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--text);
+}
+
+.key-email {
+  font-size: 0.75rem;
+  color: var(--primary);
+  word-break: break-all;
 }
 
 [data-theme="light"] .user-profile-card {
