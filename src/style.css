@@ -1526,21 +1526,29 @@ textarea {
   color: var(--text);
 }
 
-.system-footer .footer-contact {
+.system-footer .footer-dev {
   margin-top: 0.5rem;
+  font-size: 0.8rem;
 }
 
 .system-footer .footer-contact a {
   color: var(--primary);
   text-decoration: none;
-  font-size: 0.8rem;
 }
 
 .system-footer .footer-contact a:hover {
   opacity: 0.8;
+  text-decoration: underline;
 }
 
 .system-footer .footer-version {
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+.system-footer .footer-copyright {
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
   opacity: 0.6;
 }
 
