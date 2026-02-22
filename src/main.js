@@ -503,13 +503,34 @@ const viewAssetDetail = (id) => {
 
 detailModalBody.innerHTML = `
         <div class="asset-passport-premium animate__animated animate__zoomIn">
-            <div class="summary-header">
-                <div class="summary-user">
-                    <span class="summary-name">${sanitize(item.fullName)}</span>
-                    <span class="summary-cargo">${sanitize(item.position)}</span>
-                    <span class="summary-resguardo">[RESGUARDO: ${sanitize(item.resguardo || 'PENDIENTE')}]</span>
-                    <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}">${sanitize(item.status || '-').toUpperCase()}</span>
+            <div class="id-card">
+                <div class="id-card-left">
+                    <div class="user-avatar-premium user-avatar-lg">${initials}</div>
                 </div>
+                <div class="id-card-right">
+                    <div class="id-card-header">
+                        <span class="id-name">${sanitize(item.fullName)}</span>
+                        <span class="badge ${item.status === 'Activo' ? 'badge-green' : item.status === 'Mantenimiento' ? 'badge-orange' : item.status === 'Cancelado' ? 'badge-gray' : item.status === 'Para piezas' ? 'badge-orange' : 'badge-danger'}">${sanitize(item.status || '-').toUpperCase()}</span>
+                    </div>
+                    <div class="id-position">${sanitize(item.position)}</div>
+                    <div class="id-contact">
+                        <span>${item.email ? item.email.toLowerCase() : '-'}</span>
+                        <span>${empty(item.location)} ${item.address ? ' > ' + empty(item.address) : ''}</span>
+                    </div>
+                </div>
+                <div class="id-card-resguardo">
+                    <span class="resguardo-label-card">RESGUARDO</span>
+                    <span class="resguardo-value-card">${sanitize(item.resguardo || 'PENDIENTE')}</span>
+                </div>
+            </div>
+            
+            <div class="equipo-bar">
+                <i data-lucide="laptop"></i>
+                <span class="equipo-name">${empty(item.deviceType)} ${empty(item.brand)} ${empty(item.model)}</span>
+                <span class="equipo-details">
+                    SN: ${empty(item.serialNumber)} | Host: ${empty(item.pcName)} | ${empty(item.processor)} | ${empty(item.ram)} | ${empty(item.storageCapacity)} | IP: ${empty(item.ipAddress)}
+                </span>
+            </div>
                 <div class="summary-contact">
                     <span>${item.email ? item.email.toLowerCase() : '-'}</span>
                     <span class="summary-ubicacion">${empty(item.location)}${item.address ? ' > ' + empty(item.address) : ''}</span>

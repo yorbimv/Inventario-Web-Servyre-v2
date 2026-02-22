@@ -1503,59 +1503,91 @@ textarea {
   word-break: break-all;
 }
 
-/* Option C - Minimalista con Tags */
-.summary-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem 1.25rem;
+/* Option A - Tarjeta de Identificación */
+.id-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1rem;
+  padding: 1.25rem;
   background: linear-gradient(135deg, var(--surface), var(--card-bg));
   border: 1px solid var(--border-light);
   border-radius: 12px;
+  align-items: center;
 }
 
-.summary-user {
+.id-card-left {
+  grid-row: span 2;
+}
+
+.user-avatar-lg {
+  width: 80px;
+  height: 80px;
+  font-size: 2rem;
+}
+
+.id-card-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.id-card-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex-wrap: wrap;
 }
 
-.summary-name {
-  font-size: 1.3rem;
+.id-name {
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
-.summary-cargo {
+.id-position {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.id-contact {
+  display: flex;
+  gap: 1rem;
   font-size: 0.85rem;
   color: var(--text-dim);
+  margin-top: 0.25rem;
 }
 
-.summary-resguardo {
-  font-size: 0.85rem;
+.id-contact span:first-child {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.id-card-resguardo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.resguardo-label-card {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.resguardo-value-card {
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--primary);
   letter-spacing: 0.03em;
 }
 
-.summary-contact {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.85rem;
-  color: var(--text-dim);
-}
-
-.summary-contact span:first-child {
-  color: var(--primary);
-  font-weight: 500;
-}
-
-.summary-ubicacion {
-  color: var(--text);
-}
-
-.summary-equipo {
+.equipo-bar {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1567,30 +1599,24 @@ textarea {
   flex-wrap: wrap;
 }
 
-.summary-equipo i {
+.equipo-bar i {
   width: 18px;
   height: 18px;
   color: var(--primary);
   flex-shrink: 0;
 }
 
-.equipo-full {
+.equipo-name {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text);
   text-transform: uppercase;
 }
 
-.equipo-specs-inline {
-  display: flex;
-  gap: 0.5rem;
+.equipo-details {
   font-size: 0.8rem;
   color: var(--text-dim);
-  flex-wrap: wrap;
-}
-
-.equipo-specs-inline span:nth-child(even) {
-  color: var(--border-light);
+  flex: 1;
 }
 
 /* Profile Sections */
@@ -1673,24 +1699,37 @@ textarea {
 
 /* Responsive */
 @media (max-width: 600px) {
-  .summary-user {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+  .id-card {
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem;
   }
   
-  .summary-contact {
+  .id-card-left {
+    grid-row: span 1;
+  }
+  
+  .id-card-resguardo {
+    grid-column: span 2;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-light);
+    margin-top: 0.5rem;
+  }
+  
+  .id-contact {
     flex-direction: column;
     gap: 0.25rem;
   }
   
-  .summary-equipo {
+  .equipo-bar {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
   
-  .equipo-specs-inline {
+  .equipo-details {
     font-size: 0.75rem;
   }
 }
