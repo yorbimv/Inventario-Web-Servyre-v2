@@ -1405,21 +1405,31 @@ importInput.onchange = (e) => {
             try {
                 const imported = JSON.parse(event.target.result);
                 if (imported.inventory) {
-                    // Agregar registros en lugar de sobreescribir
+                    // Agregar o actualizar registros
                     const beforeCount = inventory.length;
+                    let newCount = 0;
+                    let updateCount = 0;
+                    
                     imported.inventory.forEach(item => {
-                        // Verificar si ya existe el registro por ID
-                        const exists = inventory.some(i => i.id === item.id);
-                        if (!exists) {
+                        const index = inventory.findIndex(i => i.id === item.id);
+                        if (index >= 0) {
+                            // Actualizar registro existente (no hacer nada)
+                            updateCount++;
+                        } else {
+                            // Agregar nuevo registro
                             inventory.push(item);
+                            newCount++;
                         }
                     });
                     const afterCount = inventory.length;
-                    const importedCount = afterCount - beforeCount;
                     saveToStorage();
                     renderTable();
                     updateStats();
-                    showNotification(`Se importaron ${importedCount} registros. Total: ${afterCount}`, 'success');
+                    
+                    let msg = '';
+                    if (newCount > 0) msg += `${newCount} nuevo(s) `;
+                    if (updateCount > 0) msg += `${updateCount} existente(s) no modificado(s)`;
+                    showNotification(`Importacion completada. ${msg}. Total: ${afterCount}`, 'success');
                 } else {
                     showNotification('El archivo JSON no contiene inventario valido', 'error');
                 }
