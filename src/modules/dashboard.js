@@ -1,6 +1,7 @@
 import Chart from 'chart.js/auto';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { toast } from './toast.js';
 
 const chartInstances = {};
 
@@ -1502,7 +1503,7 @@ export const exportDashboardPdf = async () => {
         pdf.save(`Dashboard_Servyre_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (error) {
         console.error('Error exporting PDF:', error);
-        alert('Error al generar el PDF. Por favor intenta de nuevo.');
+        toast.error('Error al generar el PDF. Por favor intenta de nuevo.');
     } finally {
         if (btn) {
             btn.disabled = false;

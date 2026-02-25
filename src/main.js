@@ -9,6 +9,9 @@ import { initPremiumDashboard } from './modules/dashboard-premium.js';
 import { initDashboardPersonalizado } from './modules/dashboard-personalizado.js';
 import { elements } from './modules/ui.js';
 import { exportExcel, exportJSON, exportCSV, exportPDF, generateDetailPdf, downloadTemplate, importData } from './modules/export.js';
+import { toast } from './modules/toast.js';
+import { LoadingState } from './modules/loading.js';
+import { initFieldValidation, validateForm } from './modules/validation.js';
 
 // ============================================
 // RIPPLE EFFECT - Premium Button Interactions
@@ -366,7 +369,7 @@ function loadExample(exampleId) {
     if (modal) modal.remove();
     
     // Guardar directamente en localStorage con los datos generados
-    alert(`Ejemplo #${exampleId} cargado con ${inventory.length} equipos`);
+    toast.success(`Ejemplo #${exampleId} cargado con ${inventory.length} equipos`);
     const dataToSave = {
         version: "2.0",
         lastModified: new Date().toISOString(),
@@ -2080,6 +2083,16 @@ window.onclick = (e) => {
 function initApp() {
     loadData();
     
+    // Form Validation
+    initFieldValidation('inventoryForm', {
+        resguardo: ['required'],
+        serialNumber: ['required', 'serialNumber'],
+        fullName: ['required'],
+        email: ['email'],
+        extension: ['extension'],
+        ipAddress: ['ipAddress']
+    });
+    
     // Theme Toggle
     const themeToggle = document.getElementById('themeToggle');
     const savedTheme = localStorage.getItem('servyre-theme') || 'dark';
@@ -2144,7 +2157,7 @@ function initApp() {
     safeOnClick('exportPdfBtn', () => {
         saveDropdown?.classList.remove('show');
         if (inventory.length === 0) {
-            alert('No hay registros para exportar.');
+            toast.warning('No hay registros para exportar.');
             return;
         }
         pdfColumnModal.classList.add('active');

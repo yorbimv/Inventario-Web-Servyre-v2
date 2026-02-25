@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { toast } from './toast.js';
 
 // Field mappings for exports
 const EXPORT_FIELDS = [
@@ -64,7 +65,7 @@ export const exportJSON = (inventory, catalogs) => {
 // ============================================
 export const exportExcel = (inventory) => {
     if (inventory.length === 0) {
-        alert('No hay registros para exportar.');
+        toast.warning('No hay registros para exportar.');
         return;
     }
 
@@ -97,7 +98,7 @@ export const exportExcel = (inventory) => {
 // ============================================
 export const exportCSV = (inventory) => {
     if (inventory.length === 0) {
-        alert('No hay registros para exportar.');
+        toast.warning('No hay registros para exportar.');
         return;
     }
 
@@ -129,7 +130,7 @@ export const exportCSV = (inventory) => {
 // ============================================
 export const exportPDF = (inventory, options = {}) => {
     if (inventory.length === 0) {
-        alert('No hay registros para exportar.');
+        toast.warning('No hay registros para exportar.');
         return;
     }
 
@@ -211,7 +212,7 @@ export const exportPDF = (inventory, options = {}) => {
         
     } catch (error) {
         console.error('Error generando PDF:', error);
-        alert('Error al generar PDF: ' + error.message);
+        toast.error('Error al generar PDF: ' + error.message);
     }
 };
 
@@ -385,7 +386,7 @@ export const generateDetailPdf = (item) => {
         
     } catch (error) {
         console.error('Error generando PDF individual:', error);
-        alert('Error al generar PDF: ' + error.message);
+        toast.error('Error al generar PDF: ' + error.message);
     }
 };
 
