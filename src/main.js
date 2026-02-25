@@ -291,6 +291,26 @@ function loadExample(exampleId) {
     };
     
     let inventory = [];
+    
+    // Si exampleId es 0, comenzar en blanco (sin datos de ejemplo)
+    if (exampleId === 0) {
+        const modal = document.getElementById('exampleModal');
+        if (modal) modal.remove();
+        
+        catalogs = {
+            departments: [],
+            locations: { sedes: [], externo: [] },
+            brands: [],
+            modelsByBrand: {}
+        };
+        saveToStorage();
+        renderTable();
+        updateStats();
+        syncFormSelects();
+        initDashboardPersonalizado(inventory, 'dashboardContainer');
+        return;
+    }
+    
     const cfg = config[exampleId] || config[1];
     
     for (let i = 1; i <= cfg.count; i++) {
@@ -334,7 +354,7 @@ function loadExample(exampleId) {
             nextMtto: estado === "Activo" ? randomDate(2024, 2025) : "",
             conditions: estado === "Baja" ? "Equipo dado de baja por obsolescencia" : (estado === "Mantenimiento" ? "Equipo en taller para mantenimiento preventivo" : "Equipo en buenas condiciones de operación"),
             incidentReport: estado === "Mantenimiento" ? `Reporte #${Math.floor(Math.random() * 9999)} - Requiere servicio` : "",
-            notes: `Ejemplo ${exampleId === 0 ? 'vacío' : 'predefinido #'+exampleId}`,
+            notes: `Ejemplo predefinido #${exampleId}`,
             photos: "",
             ipAddress: Math.random() > 0.3 ? `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}` : '',
             ipType: Math.random() > 0.5 ? 'DHCP' : 'IP Fija'
