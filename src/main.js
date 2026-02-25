@@ -821,6 +821,7 @@ const openEditForm = (id = null) => {
 };
 
 window.openEditForm = openEditForm;
+window.downloadTemplate = downloadTemplate;
 
 const updateModelsDropdown = () => {
     const brand = brandInput.value;
